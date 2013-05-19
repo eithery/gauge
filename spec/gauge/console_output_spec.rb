@@ -6,6 +6,15 @@ module Gauge
 	describe ConsoleOutput do
 		let (:output) { double('output').as_null_object }
 		let (:console) { ConsoleOutput.new(:out => output) }
+		let (:colors) do
+			{
+				:cyan => "\e[36m",
+				:yellow => "\e[33m",
+				:red => "\e[31m",
+				:green => "\e[32m"
+			}
+		end
+
 
 		describe "#initialize" do
 			it "should have STDOUT as a default output" do
@@ -20,11 +29,48 @@ module Gauge
 
 
 		describe "#info" do
-			it "should display the specified message to STDOUT" do
-				text = "Some text to out to console."
-				output.should_receive(:puts).with(text)
-				console.info(text)
+			it "should display the specified message in cyan color" do
+				output.should_receive(:puts).with(colored_message(:cyan))
+				console.info(test_message)
 			end
+		end
+
+
+		describe "#warning" do
+			it "should display the specified message in yellow color" do
+				output.should_receive(:puts).with(colored_message(:yellow))
+				console.warning(test_message)
+			end
+		end
+
+
+		describe "#error" do
+			it "should display the specified message in red color" do
+				output.should_receive(:puts).with(colored_message(:red))
+				console.error(test_message)
+			end
+		end
+
+
+		describe "#ok" do
+			it "should display the specified message in green color" do
+				output.should_receive(:puts).with(colored_message(:green))
+				console.ok(test_message)
+			end
+		end
+
+
+private
+		def end_color_tag
+			"\e[0m"
+		end
+
+		def test_message
+			"Some text to be displayed to console."
+		end
+
+		def colored_message(color)
+			colors[color] + test_message + end_color_tag
 		end
 	end
 end

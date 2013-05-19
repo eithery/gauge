@@ -13,9 +13,27 @@ module Gauge
 		end
 
 
-		# Displays the specified string to console in cyan color.
-		def info(string)
-			@out.puts string
+		# Displays the informational message to console (in cyan color).
+		def info(message)
+			@out.puts message.color(:cyan)
+		end
+
+
+		# Displays the warning message to console (in yellow color).
+		def warning(message)
+			@out.puts message.color(:yellow)
+		end
+
+
+		# Displays the error message to console (in red color).
+		def error(message)
+			@out.puts message.color(:red)
+		end
+
+
+		# Displays the ok message to console (in green color).
+		def ok(message)
+			@out.puts message.color(:green)
 		end
 	end
 end
