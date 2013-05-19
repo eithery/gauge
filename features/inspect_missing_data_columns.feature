@@ -1,0 +1,1 @@
+Feature: Inspect missing data columns.
