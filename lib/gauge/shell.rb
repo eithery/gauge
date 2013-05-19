@@ -7,7 +7,7 @@ module Gauge
 
 		# Creates the new instance of Shell class.
 		def initialize(global_options={})
-			@out = global_options[:out] || STDOUT
+			@out = global_options[:out] || ConsoleOutput.new
 		end
 
 
