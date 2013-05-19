@@ -1,6 +1,6 @@
 # Eithery Lab., 2013.
 # Class Gauge::ShellSpec
-# Represents the spec for Gauge Shell class.
+# Represents the spec for Gauge::Shell class.
 require 'spec_helper'
 
 module Gauge

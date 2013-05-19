@@ -1,3 +1,6 @@
+# Eithery Lab., 2013.
+# Class Gauge::Shell
+# Executes application commands.
 module Gauge
 	class Shell
 		attr_accessor :out
