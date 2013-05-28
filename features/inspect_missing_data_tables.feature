@@ -1,14 +1,15 @@
+@wip
 Feature: Inspect missing data tables.
 
 	In order to synchronize the target database schema
 	As a gauge user
 	I need to know the list of missing data tables in my database.
 
-	@wip
 	Scenario: No missing data tables.
 		Given gauge application
 		When I run "check" command with "gauge_db_green" argument
 		Then the app should display "Inspecting 'gauge_db_green' database..." in "cyan"
+		And the app should display "Inspecting 'gauge_db_green' database... OK" in "green"
 
 	Scenario: One missing data table.
 		Given gauge application

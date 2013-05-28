@@ -8,13 +8,19 @@ module Gauge
 
 		# Creates the new instance of ConsoleListenerMock class.
 		def initialize
-			@messages = { :cyan => [] }
+			@messages = { :cyan => [], :green => [] }
 		end
 
 
 		# Stubs ConsoleListener#info method.
 		def info(message)
 			messages[:cyan] << message
+		end
+
+
+		# Stubs ConsoleListener#ok method.
+		def ok(message)
+			messages[:green] << message
 		end
 
 
