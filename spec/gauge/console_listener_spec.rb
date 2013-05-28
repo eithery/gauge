@@ -1,25 +1,25 @@
 # Eithery Lab., 2013.
-# Defines the spec for Gauge::ConsoleOutput class.
+# Defines the spec for Gauge::ConsoleListener class.
 require 'spec_helper'
 
 module Gauge
-	describe ConsoleOutput do
+	describe ConsoleListener do
 		let (:output) { double('output').as_null_object }
-		let (:console) { ConsoleOutput.new(:out => output) }
+		let (:console) { ConsoleListener.new(:out => output) }
 		let (:colors) do
 			{
-				:cyan => "\e[36m",
-				:yellow => "\e[33m",
 				:red => "\e[31m",
-				:green => "\e[32m"
+				:green => "\e[32m",
+				:yellow => "\e[33m",
+				:cyan => "\e[36m"
 			}
 		end
 
 
 		describe "#initialize" do
 			it "should have STDOUT as a default output" do
-				default_console = ConsoleOutput.new
-				default_console.out.should == STDOUT
+				console = ConsoleListener.new
+				console.out.should == STDOUT
 			end
 
 			it "should have ability to set an external output object" do

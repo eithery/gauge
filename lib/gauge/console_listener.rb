@@ -1,10 +1,10 @@
 # Eithery Lab., 2013.
-# Class Gauge::ConsoleOutput
-# Encapsulates the set of colored output to console operations.
+# Class Gauge::ConsoleListener
+# Encapsulates the set of colored output for console-wise operations.
 require 'gauge'
 
 module Gauge
-	class ConsoleOutput
+	class ConsoleListener
 		attr_accessor :out
 
 		# Creates the new instance of Gauge::ConsoleOutput class.
