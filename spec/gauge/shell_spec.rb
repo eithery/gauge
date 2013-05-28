@@ -37,17 +37,52 @@ module Gauge
 
 		describe "#check" do
 			it "should display the name of database being checked" do
-				listener.should_receive(:info).with("Inspecting 'gauge_db_green' database...")
-				shell.check 'gauge_db_green'
+				check_database :info, 'gauge_db_green'
 			end
 
 			it "should display names for all being checked databases if more than one passed as arguments" do
-				databases = ['gauge_db_green', 'gauge_db_yellow', 'gauge_db_red']
-				databases.each do |db_name|
-					listener.should_receive(:info).with("Inspecting '#{db_name}' database...")
-				end
-				shell.check databases
+				check_databases :info, few_databases
 			end
+
+			context "when no missing data tables" do
+				it "should display OK message with the name of database being checked" do
+					check_database :ok, 'gauge_db_green'
+				end
+
+				it "should display OK messages for all being checked databases if more than one passed as arguments" do
+					check_databases :ok, good_databases
+				end
+			end
+		end
+
+
+private
+		def good_databases
+			['gauge_db_green', 'gauge_db_green2']
+		end
+
+		def few_databases
+			['gauge_db_green', 'gauge_db_yellow', 'gauge_db_red']
+		end
+
+
+		def check_database(message_type, db_name)
+			listener.should_receive(message_type).with(composed_message(message_type, db_name))
+			shell.check db_name
+		end
+
+
+		def check_databases(message_type, databases)
+			databases.each do |db_name|
+				listener.should_receive(message_type).with(composed_message(message_type, db_name))
+			end
+			shell.check databases
+		end
+
+
+		def composed_message(message_type, db_name)
+			ok = message_type == :ok ? ' OK' : ''
+			"Inspecting '#{db_name}' database..." + ok
 		end
 	end
 end
