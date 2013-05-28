@@ -3,22 +3,15 @@ end
 
 
 When(/^I run "(.*?)" command with "(.*?)" argument$/) do |command, arg|
-	@shell = Gauge::Shell.new(:out => OutputMock.new)
-	@shell.check([arg]) if command == 'check'
+	@shell = Gauge::Shell.new
+	@listener = Gauge::ConsoleListenerMock.new
+
+	@shell.listeners.clear
+	@shell.listeners << @listener
+	@shell.check(arg) if command == 'check'
 end
 
 
 Then(/^the app should display "(.*?)" in "(.*?)"$/) do |message, color|
-	output = @shell.out
-	output.receive_message?(message, color).should be_true
-end
-
-
-class OutputMock
-	def receive_message?(message, color)
-	end
-
-
-	def info(message)
-	end
+	@listener.should be_received(message, color)
 end
