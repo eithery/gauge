@@ -18,7 +18,7 @@ module Gauge
 			dbo_names.each do |dbo_name|
 				@listeners.each do |listener|
 					listener.info("Inspecting '#{dbo_name}' database...")
-					listener.ok("Inspecting '#{dbo_name}' database... OK")
+					listener.ok("Inspecting '#{dbo_name}' database - ok")
 				end
 			end
 		end

@@ -13,4 +13,9 @@ Feature: Inspect statistics.
 	Scenario: Successfull inspection result
 		Given gauge application
 		When I run "check" command passing "gauge_db_green" argument as the database name
-		And the app should display "Inspecting 'gauge_db_green' database... OK" in "green" color
+		Then the app should display "Inspecting 'gauge_db_green' database - ok" in "green" color
+
+	Scenario: Failed inspection result
+		Given gauge application
+		When I run "check" command passing "gauge_db_red" argument as the database name
+		Then the app should display "Inspecting 'gauge_db_red' database - failed" in "red" color

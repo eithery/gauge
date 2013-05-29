@@ -81,8 +81,9 @@ private
 
 
 		def composed_message(message_type, db_name)
-			ok = message_type == :ok ? ' OK' : ''
-			"Inspecting '#{db_name}' database..." + ok
+			msg = "Inspecting '#{db_name}' database"
+			return msg + " - ok" if message_type == :ok
+			msg + "..."
 		end
 	end
 end
