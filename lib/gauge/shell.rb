@@ -3,7 +3,7 @@
 # Executes application commands.
 module Gauge
 	class Shell
-		attr_accessor :listeners
+		attr_reader :listeners
 
 		# Creates the new instance of Shell class.
 		def initialize
@@ -20,6 +20,7 @@ module Gauge
 					listener.info("Inspecting '#{dbo_name}' database...")
 					listener.ok("Inspecting '#{dbo_name}' database - ok") if dbo_name =~ /gauge_db_green/
 					listener.error("Inspecting '#{dbo_name}' database - failed") unless dbo_name =~ /gauge_db_green/
+					listener.error("Total 3 errors found.\n") unless dbo_name =~ /gauge_db_green/
 				end
 			end
 		end

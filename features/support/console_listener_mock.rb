@@ -14,19 +14,19 @@ module Gauge
 
 		# Stubs ConsoleListener#info method.
 		def info(message)
-			messages[:cyan] << message
+			messages[:cyan] << message.chomp
 		end
 
 
 		# Stubs ConsoleListener#ok method.
 		def ok(message)
-			messages[:green] << message
+			messages[:green] << message.chomp
 		end
 
 
 		# Stubs ConsoleListener#error method.
 		def error(message)
-			messages[:red] << message
+			messages[:red] << message.chomp
 		end
 
 

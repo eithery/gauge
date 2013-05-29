@@ -19,3 +19,4 @@ Feature: Inspect statistics.
 		Given gauge application
 		When I run "check" command passing "gauge_db_red" argument as the database name
 		Then the app should display "Inspecting 'gauge_db_red' database - failed" in "red" color
+		And the app should display "Total 3 errors found." in "red" color

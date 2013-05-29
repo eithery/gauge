@@ -71,6 +71,11 @@ module Gauge
 					should_not_receive :error, 'gauge_db_green'
 					shell.check few_databases
 				end
+
+				it "should display the total number of found errors" do
+					listener.should_receive(:error).with(/Total (\d*) errors found.\n/)
+					shell.check 'gauge_db_red'
+				end
 			end
 		end
 
