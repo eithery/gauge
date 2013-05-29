@@ -18,7 +18,8 @@ module Gauge
 			dbo_names.each do |dbo_name|
 				@listeners.each do |listener|
 					listener.info("Inspecting '#{dbo_name}' database...")
-					listener.ok("Inspecting '#{dbo_name}' database - ok")
+					listener.ok("Inspecting '#{dbo_name}' database - ok") if dbo_name =~ /gauge_db_green/
+					listener.error("Inspecting '#{dbo_name}' database - failed") unless dbo_name =~ /gauge_db_green/
 				end
 			end
 		end

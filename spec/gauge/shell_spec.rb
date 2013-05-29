@@ -44,13 +44,32 @@ module Gauge
 				check_databases :info, few_databases
 			end
 
-			context "when no missing data tables" do
-				it "should display OK message with the name of database being checked" do
+
+			context "when no errors found during inspection" do
+				it "should display 'ok' message with the name of the checked database" do
 					check_database :ok, 'gauge_db_green'
 				end
 
-				it "should display OK messages for all being checked databases if more than one passed as arguments" do
+				it "should display 'ok' messages for all checked databases if more than one passed as arguments" do
 					check_databases :ok, good_databases
+				end
+			end
+
+
+			context "when errors found during inspection" do
+				it "should display 'failed' message with the name of the checked database" do
+					check_database :error, 'gauge_db_red'
+				end
+
+				it "should display 'failed' messages for all checked databases with errors" do
+					should_receive :error, 'gauge_db_yellow'
+					should_receive :error, 'gauge_db_red'
+					shell.check few_databases
+				end
+
+				it "should not display 'failed' messages for all checked databases without errors" do
+					should_not_receive :error, 'gauge_db_green'
+					shell.check few_databases
 				end
 			end
 		end
@@ -67,14 +86,14 @@ private
 
 
 		def check_database(message_type, db_name)
-			listener.should_receive(message_type).with(composed_message(message_type, db_name))
+			should_receive(message_type, db_name)
 			shell.check db_name
 		end
 
 
 		def check_databases(message_type, databases)
 			databases.each do |db_name|
-				listener.should_receive(message_type).with(composed_message(message_type, db_name))
+				should_receive(message_type, db_name)
 			end
 			shell.check databases
 		end
@@ -83,7 +102,18 @@ private
 		def composed_message(message_type, db_name)
 			msg = "Inspecting '#{db_name}' database"
 			return msg + " - ok" if message_type == :ok
+			return msg + " - failed" if message_type == :error
 			msg + "..."
+		end
+
+
+		def should_receive(message_type, db_name)
+			listener.should_receive(message_type).with(composed_message(message_type, db_name))
+		end
+
+
+		def should_not_receive(message_type, db_name)
+			listener.should_not_receive(message_type).with(composed_message(message_type, db_name))
 		end
 	end
 end
