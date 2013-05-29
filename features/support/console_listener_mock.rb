@@ -24,6 +24,12 @@ module Gauge
 		end
 
 
+		# Stubs ConsoleListener#error method.
+		def error(message)
+			messages[:red] << message
+		end
+
+
 		# Determines whether the colored message is received.
 		def received?(message, color)
 			messages[color.to_sym].include?(message)
