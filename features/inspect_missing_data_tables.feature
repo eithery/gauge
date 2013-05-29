@@ -7,16 +7,16 @@ Feature: Inspect missing data tables.
 
 	Scenario: No missing data tables.
 		Given gauge application
-		When I run "check" command with "gauge_db_green" argument
-		Then the app should display "Inspecting 'gauge_db_green' database..." in "cyan"
-		And the app should display "Inspecting 'gauge_db_green' database... OK" in "green"
+		When I run "check" command passing "gauge_db_green" argument as the database name
+		Then the app should display "Inspecting 'gauge_db_green' database..." in "cyan" color
+		And the app should display "Inspecting 'gauge_db_green' database... OK" in "green" color
 
 	Scenario: One missing data table.
 		Given gauge application
-		When I run "check" command with "gauge_db_yellow" argument
-		Then the app should display "Inspecting 'gauge_db_yellow' database..." in "cyan"
+		When I run "check" command passing "gauge_db_yellow" argument as the database name
+		Then the app should display "Inspecting 'gauge_db_yellow' database..." in "cyan" color
 
 	Scenario: Few missing data tables.
 		Given gauge application
-		When I run "check" command with "gauge_db_red" argument
-		Then the app should display "Inspecting 'gauge_db_red' database..." in "cyan"
+		When I run "check" command passing "gauge_db_red" argument as the database name
+		Then the app should display "Inspecting 'gauge_db_red' database..." in "cyan" color

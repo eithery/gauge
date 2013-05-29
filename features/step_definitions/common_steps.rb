@@ -2,7 +2,7 @@ Given(/^gauge application$/) do
 end
 
 
-When(/^I run "(.*?)" command with "(.*?)" argument$/) do |command, arg|
+When(/^I run "(.*?)" command passing "(.*?)" argument as the database name$/) do |command, arg|
 	@shell = Gauge::Shell.new
 	@listener = Gauge::ConsoleListenerMock.new
 
@@ -12,6 +12,6 @@ When(/^I run "(.*?)" command with "(.*?)" argument$/) do |command, arg|
 end
 
 
-Then(/^the app should display "(.*?)" in "(.*?)"$/) do |message, color|
+Then(/^the app should display "(.*?)" in "(.*?)" color$/) do |message, color|
 	@listener.should be_received(message, color)
 end
