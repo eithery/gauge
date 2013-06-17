@@ -37,7 +37,7 @@ module Gauge
 		end
 
 
-		# Displays the initial message and all errors if any.
+		# Displays the initial message and errors statistics if any.
 		def log(message)
 			@out.print "#{message} ...".color(:cyan)
 			return unless block_given?
