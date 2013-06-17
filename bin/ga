@@ -1,5 +1,23 @@
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'gauge'
+include GLI::App
 
-shell = Gauge::Shell.new
-shell.check(ARGV)
+
+# Check command.
+# Compares the structure of the specified database objects against the predefined metadata.
+command [:c, :check] do |c|
+	c.action do |global_options, options, args|
+		shell = Gauge::Shell.new
+		shell.check(args)
+	end
+end
+
+
+# Called before any command execution.
+pre do |global, command, options, args|
+	true
+end
+
+
+# Runs GLI.
+exit run(ARGV)
