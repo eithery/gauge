@@ -35,5 +35,22 @@ module Gauge
 		def ok(message)
 			@out.puts message.color(:green)
 		end
+
+
+		# Displays the initial message and all errors if any.
+		def log(message)
+			@out.print "#{message} ...".color(:cyan)
+			return unless block_given?
+
+			errors = yield
+			if errors.empty?
+				@out.puts "\r#{message} - ok".color(:green)
+			else
+				@out.puts "\r#{message} - failed".color(:red).bright
+				@out.puts "Errors:".color(:red)
+				errors.each { |error| @out.puts "- #{error}".color(:red) }
+				@out.puts "Total #{errors.count} errors found.\n".color(:red)
+			end
+		end
 	end
 end

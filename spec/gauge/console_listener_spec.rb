@@ -9,6 +9,7 @@ module Gauge
 		let (:colors) do
 			{
 				:red => "\e[31m",
+				:light_red => "\e[31m\e[1m",
 				:green => "\e[32m",
 				:yellow => "\e[33m",
 				:cyan => "\e[36m"
@@ -30,7 +31,7 @@ module Gauge
 
 		describe "#info" do
 			it "should display the specified message in cyan color" do
-				output.should_receive(:puts).with(colored_message(:cyan))
+				should_display test_message, :cyan
 				console.info(test_message)
 			end
 		end
@@ -38,7 +39,7 @@ module Gauge
 
 		describe "#warning" do
 			it "should display the specified message in yellow color" do
-				output.should_receive(:puts).with(colored_message(:yellow))
+				should_display test_message, :yellow
 				console.warning(test_message)
 			end
 		end
@@ -46,7 +47,7 @@ module Gauge
 
 		describe "#error" do
 			it "should display the specified message in red color" do
-				output.should_receive(:puts).with(colored_message(:red))
+				should_display test_message, :red
 				console.error(test_message)
 			end
 		end
@@ -54,8 +55,47 @@ module Gauge
 
 		describe "#ok" do
 			it "should display the specified message in green color" do
-				output.should_receive(:puts).with(colored_message(:green))
+				should_display test_message, :green
 				console.ok(test_message)
+			end
+		end
+
+
+		describe "#log" do
+			it "should display the initial message in cyan color" do
+				output.should_receive(:print).with(colored "#{test_message} ...", :cyan)
+				console.log(test_message)
+			end
+
+
+			context "if no error detected" do
+				it "should add the suffix 'ok' to the end of the initial message in green color" do
+					should_display "\r#{test_message} - ok", :green
+					console.log(test_message) { mock_with_no_errors }
+				end
+			end
+
+
+			context "if errors detected" do
+				it "should add the suffix 'failed' to the end of the initial message in bright red color" do
+					should_display "\r#{test_message} - failed", :light_red
+					console.log(test_message) { mock_with_four_errors }
+				end
+
+
+				it "should display each error message in red color" do
+					should_display "Errors:", :red
+					mock_with_four_errors.each do |error|
+						should_display "- #{error}", :red
+					end
+					console.log(test_message) { mock_with_four_errors }
+				end
+
+
+				it "should display the total number of found errors in red color" do
+					should_display "Total 4 errors found.\n", :red
+					console.log(test_message) { mock_with_four_errors }
+				end
 			end
 		end
 
@@ -66,11 +106,32 @@ private
 		end
 
 		def test_message
-			"Some text to be displayed to console."
+			"Inspecting 'PackageMe' database"
 		end
 
 		def colored_message(color)
-			colors[color] + test_message + end_color_tag
+			colored(test_message, color)
+		end
+
+		def colored(text, color)
+			colors[color] + text + end_color_tag
+		end
+
+		def mock_with_no_errors
+			[]
+		end
+
+		def mock_with_four_errors
+			[
+				'Missing [test].[customers] data table.',
+				'Missing [id] data column.',
+				'Invalid type of [name] data column.',
+				'Missing [test].[accounts] data table.'
+			]
+		end
+
+		def should_display(message, color)
+				output.should_receive(:puts).with(colored message, color)
 		end
 	end
 end
