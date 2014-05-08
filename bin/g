@@ -3,19 +3,57 @@ require 'gauge'
 include GLI::App
 
 
-# Check command.
+# Global command suite options:
+desc 'Displays the version of the application.'
+switch [:v, :version]
+
+desc 'Displays help information.'
+switch [:h, :help]
+
+desc 'Database server name'
+flag [:s, :server]
+
+desc 'User name used to connect to db server.'
+flag [:u, :user]
+
+desc 'Password used to connect to db server.'
+flag [:p, :password]
+
+
+
+# Available commands.
+
+# Help.
+command [:h, :help] do |c|
+  c.action do |global_opts, options, args|
+    shell = Gauge::Shell.new(global_opts, options)
+    shell.help
+  end
+end
+
+
+# Check.
 # Compares the structure of the specified database objects against the predefined metadata.
 command [:c, :check] do |c|
-	c.action do |global_options, options, args|
-		shell = Gauge::Shell.new
-		shell.check(args)
-	end
+  c.action do |global_opts, options, args|
+    shell = Gauge::Shell.new(global_opts, options)
+    shell.check(args)
+  end
+end
+
+
+# Sync.
+command :sync do |c|
+  c.action do |global_opts, options, args|
+    shell = Gauge::Shell.new(global_opts, options)
+    shell.sync(args)
+  end
 end
 
 
 # Called before any command execution.
-pre do |global, command, options, args|
-	true
+pre do |global_opts, command, options, args|
+  true
 end
 
 
