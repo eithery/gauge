@@ -1,1 +1,0 @@
-Feature: Inspect foreign keys.
