@@ -1,12 +1,12 @@
-# Eithery Lab., 2013.
+# Eithery Lab., 2014.
 # Class Gauge::Shell
 # Executes application commands.
 module Gauge
 	class Shell
 		attr_reader :listeners
 
-		# Creates the new instance of Shell class.
 		def initialize
+			Rainbow.enabled = true
 			@listeners = [ConsoleListener.new]
 		end
 

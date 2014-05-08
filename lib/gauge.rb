@@ -3,4 +3,5 @@ require 'gauge/shell'
 require 'gauge/console_listener'
 
 require 'rainbow'
+require 'rainbow/ext/string'
 require 'gli'

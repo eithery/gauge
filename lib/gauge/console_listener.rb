@@ -1,4 +1,4 @@
-# Eithery Lab., 2013.
+# Eithery Lab., 2014.
 # Class Gauge::ConsoleListener
 # Encapsulates the set of colored output for console-wise operations.
 require 'gauge'
@@ -7,7 +7,6 @@ module Gauge
 	class ConsoleListener
 		attr_accessor :out
 
-		# Creates the new instance of Gauge::ConsoleOutput class.
 		def initialize(options={})
 			@out = options[:out] || STDOUT
 		end
