@@ -1,0 +1,12 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    gli (2.10.0)
+    rainbow (2.0.0)
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  gli
+  rainbow (= 2.0.0)
