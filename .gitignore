@@ -1,1 +1,15 @@
-*.sublime*
+# Ignore bundler config.
+/.bundle
+
+# Ignore the default SQLite database.
+/db/*.sqlite3
+/db/*.sqlite3-journal
+
+# Ignore all logfiles and tempfiles.
+/log/*.log
+/tmp
+/data
+
+# Ignore all RubyMine and Sublime Text related files.
+/.idea
+/*.sublime*
