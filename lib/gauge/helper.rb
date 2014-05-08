@@ -7,12 +7,23 @@ module Gauge
   class Helper
     include ConsoleListener
 
+    def initialize(global_opts, options, args)
+      @global_opts = global_opts
+    end
+
+
+    def application_info
+      @global_opts[:v] ? version : full_info(@global_opts[:h])
+    end
+
+
+  private
     def version
       info "Database Gauge #{VERSION}"
     end
 
 
-    def application_info(extended)
+    def full_info(extended)
       info "Database Gauge. Version #{VERSION}"
       info "Copyright (C) M&O Systems, Inc., 2014.\n"
       info "usage: g [--version|-v] [--help|-h] <command> [<args>]"

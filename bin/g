@@ -26,8 +26,7 @@ flag [:p, :password]
 # Help.
 command [:h, :help] do |c|
   c.action do |global_opts, options, args|
-    shell = Gauge::Shell.new(global_opts, options)
-    shell.help
+    Gauge::Shell.new.help global_opts, options, args
   end
 end
 
@@ -36,8 +35,7 @@ end
 # Compares the structure of the specified database objects against the predefined metadata.
 command [:c, :check] do |c|
   c.action do |global_opts, options, args|
-    shell = Gauge::Shell.new(global_opts, options)
-    shell.check(args)
+    Gauge::Shell.new.check global_opts, options, args
   end
 end
 
@@ -45,8 +43,7 @@ end
 # Sync.
 command :sync do |c|
   c.action do |global_opts, options, args|
-    shell = Gauge::Shell.new(global_opts, options)
-    shell.sync(args)
+    Gauge::Shell.new.sync global_opts, options, args
   end
 end
 
