@@ -3,10 +3,12 @@ GEM
   specs:
     gli (2.10.0)
     rainbow (2.0.0)
+    sequel (4.10.0)
 
 PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
-  gli
+  gli (= 2.10.0)
   rainbow (= 2.0.0)
+  sequel (= 4.10.0)
