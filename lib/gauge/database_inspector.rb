@@ -20,9 +20,9 @@ module Gauge
 
       @args.each do |dbo|
         if @repo.database? dbo
-          DatabaseValidator.new.check(dbo)
+          Validators::DatabaseValidator.new.check(dbo)
         elsif @repo.table? dbo
-          TableValidator.new.check(dbo)
+          Validators::TableValidator.new.check(dbo)
         else
           error "Database metadata for '#{dbo}' is not found."
         end
