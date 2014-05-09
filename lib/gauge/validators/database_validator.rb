@@ -6,7 +6,6 @@ module Gauge
       include ConsoleListener
 
       def check(database_spec)
-        info database_spec
       end
     end
   end

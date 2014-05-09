@@ -1,4 +1,4 @@
-# Eithery Lab., 2013.
+# Eithery Lab., 2014.
 # Class Gauge::Schema::DataColumnSchema.
 # Data column schema.
 # Contains metadata info defining a data table column.
