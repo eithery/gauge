@@ -5,8 +5,11 @@ module Gauge
     class TableValidator
       include ConsoleListener
 
-      def check(table_name)
-        info "#{table_name} is found!"
+      def check(table_schema)
+        log "Inspecting #{table_schema.table_name} data table" do
+          []
+        end
+#        database.validate_table table_spec
       end
     end
   end

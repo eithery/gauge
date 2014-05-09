@@ -68,19 +68,19 @@ module Gauge
 
 			def type_map
 				{
-					:string => 'nvarchar',
-					:id => 'bigint',
-					:bool => 'tinyint',
-					:int => 'int',
-					:byte => 'tinyint',
-					:datetime => 'datetime',
-					:date => 'datetime',
-					:us_state => 'nchar',
-					:country => 'nchar',
-					:money => 'decimal',
-					:enum => 'tinyint',
-					:long => 'bigint',
-					:xml => 'xml'
+					string: 'nvarchar',
+					id: 'bigint',
+					bool: 'tinyint',
+					int: 'int',
+					byte: 'tinyint',
+					datetime: 'datetime',
+					date: 'datetime',
+					us_state: 'nchar',
+					country: 'nchar',
+					money: 'decimal',
+					enum: 'tinyint',
+					long: 'bigint',
+					xml: 'xml'
 				}
 			end
 		end
