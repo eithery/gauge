@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[correctReasons]
+	Contains reasons used to perform cancel/correct direct trade operations.
+-->
+<table name="correctReasons">
+	<columns>
+		<col id="true" identity="true"/>
+		<col name="code" length="2" required="true" unique="true"/>
+		<col name="description"/>
+	</columns>
+</table>

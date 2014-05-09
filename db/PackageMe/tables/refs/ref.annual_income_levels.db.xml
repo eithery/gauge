@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+	[ref].[annual_income_levels]
+	Contains available values for customer annual income levels.
+-->
+<table name="annual_income_levels" schema="ref">
+	<columns>
+		<col id="true"/>
+		<col name="name" length="256" required="true" unique="true"/>
+		<col name="display_name" length="256" required="true"/>
+		<col name="ordinal" type="int" required="true" check=">0" unique="true"/>
+		<col name="is_enabled" required="true" default="true"/>
+		<col name="export_value" length="256"/>
+		<col name="min_value" type="money"/>
+		<col name="max_value" type="money"/>
+	</columns>
+</table>

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[br_master_account]
+	Contains master accounts.
+-->
+<table name="br_master_account">
+	<columns>
+		<col name="master_account_id" id="true"/>
+		<col name="master_account_number" length="20" business_id="true"/>
+		<col name="registration_id" ref="br_registration" required="true"/>
+		<col name="isConverted" required="true"/>
+		<col name="account_title"/>
+		<col name="supportsTitleUpdate" type="bool"/>
+		<col name="agent_code" length="10" index="true"/>
+		<col name="office_code" length="10"/>
+		<col name="division_code" length="10"/>
+		<col name="trustName" length="256"/>
+		<col name="comments"/>
+		<col ref="ref.investment_time_horizon"/>
+		<col ref="ref.risk_tolerance"/>
+		<col name="has_documents_in_order"/>
+		<col name="documents_in_order_by" length="256"/>
+		<col name="is_restricted" required="true"/>
+		<col name="restriction_note" length="256"/>
+		<col name="restriction_entered" type="datetime"/>
+		<col name="restriction_entered_by" length="256"/>
+		<col name="is_erisa_sponsored_plan"/>
+		<col name="is_annuity_exchanged"/>
+		<col name="annuity_exchanged" type="date"/>
+		<col name="status" dbtype="smallint" required="true" default="1" check="-1..1"/>
+		<col name="statusChanged" type="datetime"/>
+		<col name="statusChangedBy" length="256"/>
+		<col name="changeStatusReasonId" ref="accountActivationReasons"/>
+		<col name="purgeDate" type="datetime"/>
+		<col name="mergedToAccount" length="20"/>
+		<col name="mergedAt" type="datetime"/>
+		<col name="mergedBy" length="256"/>
+		<col name="mergeReasonId" ref="mergeReasons"/>
+		<col name="is_suppressed" required="true"/>
+		<col name="suppression_reason_id" ref="supTrigReasons"/>
+		<col name="established_on" type="datetime"/>
+		<timestamps/>
+	</columns>
+</table>

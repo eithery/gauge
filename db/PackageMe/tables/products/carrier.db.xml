@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[carrier]
+	Contains product carrier records.
+-->
+<table name="carrier">
+	<columns>
+		<col name="carrier_id" length="6" business_id="true"/>
+		<col name="super_carrier_id" length="6" ref="carrier"/>
+		<col name="carrier_name" length="35" required="true"/>
+		<col name="carrier_mail_addr1" length="35"/>
+		<col name="carrier_mail_addr2" length="35"/>
+		<col name="carrier_mail_city" length="15"/>
+		<col name="carrier_mail_state" type="us_state"/>
+		<col name="carrier_mail_zip" length="10"/>
+		<col name="alternate_addr1" length="30"/>
+		<col name="alternate_addr2" length="30"/>
+		<col name="alternate_city" length="15"/>
+		<col name="alternate_state" type="us_state"/>
+		<col name="alternate_zip" length="10"/>
+		<col name="carrier_dealer_phone" length="15"/>
+		<col name="carrier_order_phone" length="15"/>
+		<col name="carrier_comment" length="150"/>
+		<col name="carrier_network_ind" type="enum" check="0..3"/>
+		<col name="carrier_commserv_ips" type="char"/>
+		<col name="carrier_electronic_ind" type="char"/>
+		<col name="carrier_trail_cycle" type="char"/>
+		<col name="carrier_comm_cycle" type="char"/>
+		<col name="carrier_service_level" type="char" required="true" default="N"/>
+		<col name="carrier_account_length" type="int"/>
+		<col name="carrier_aadb_code" type="char"/>
+		<col name="carrier_mml_dealer_id" length="15"/>
+		<col name="carrier_old_id" length="15"/>
+		<col name="selling_start_date" type="datetime"/>
+		<col name="selling_end_date" type="datetime"/>
+		<col name="isStrategicPartnership" required="true"/>
+		<col name="isCria" required="true"/>
+		<col name="contactName" length="50"/>
+		<col name="proprietary" type="enum" required="true" check="0..2"/>
+		<col name="explicitOrder" type="int"/>
+		<col name="process_confirm_trans" type="bool" required="true"/>
+		<col name="far_eligibility_level" type="enum" required="true" check="0..3"/>
+		<timestamps/>
+	</columns>
+</table>

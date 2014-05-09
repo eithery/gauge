@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[br_registration]
+	Defines master account registration types.
+-->
+<table name="br_registration">
+	<columns>
+		<col name="registration_id" id="true"/>
+		<col name="registration_code" length="32" business_id="true"/>
+		<col name="name" length="64" required="true" unique="true"/>
+		<col name="is_account_suitability_required" required="true" default="1"/>
+		<col name="nscc_social_code" type="byte" required="true" check=">0"/>
+		<col name="is_networking_eligible" required="true"/>
+		<col name="description"/>
+		<col name="mml_code" type="byte" check=">0"/>
+		<col name="orderIndex" type="int" required="true"/>
+		<col name="isShell" required="true"/>
+		<col name="isSystem" required="true"/>
+		<col name="is2821ruleChecked" required="true"/>
+		<col name="groupId" ref="br_registration_type_groups"/>
+		<col name="isUnique" required="true" default="1"/>
+		<col name="stp_support" type="int" check="-1..2"/>
+		<col name="isTrustNameRequired" required="true"/>
+		<col name="is_enabled" required="true" default="1"/>
+		<col name="is_erisa_enabled" required="true"/>
+		<timestapms/>
+	</columns>
+</table>

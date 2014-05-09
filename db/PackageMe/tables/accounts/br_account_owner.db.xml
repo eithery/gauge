@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[br_account_owner]
+	Cross reference data table providing many-to-many relationship between
+	master accounts and customers (natural owners).
+-->
+<table name="br_account_owner">
+	<columns>
+		<col name="master_account_id" ref="br_master_account" id="true"/>
+		<col name="natural_owner_id" ref="br_natural_owner" id="true"/>
+		<col name="registration_role_id" ref="br_registration_role" required="true"/>
+		<col name="ordinal" type="int" required="true" check=">0"/>
+		<col name="address_id" ref="br_address"/>
+		<col name="last_rap_at" type="datetime"/>
+		<col name="last_nap_at" type="datetime"/>
+		<col name="last_bnr_at" type="datetime"/>
+		<col name="next_bnr_due" type="datetime"/>
+		<timestamps/>
+	</columns>
+</table>

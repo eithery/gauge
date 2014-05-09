@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[comm_load]
+	Contains loaded commision records.
+-->
+<table name="comm_load">
+	<columns>
+		<col name="load_id" type="int" id="true" business_id="true" identity="true"/>
+		<col name="trade_id" type="int"/>
+		<col name="batch_id" length="20"/>
+
+		<col name="carrier_id" length="6"/>
+		<col name="product_cusip" length="9"/>
+		<col name="product_name" length="30"/>
+		<col name="pr_type_code" length="5"/>
+		<col name="fund_account" length="20" index="true"/>
+		<col name="bin" length="20"/>
+		<col name="cust_ssn" length="15"/>
+		<col name="cust_name" length="80"/>
+		<col name="cust_fname" length="25"/>
+		<col name="cust_dob" type="date"/>
+		<col name="cust_state" type="us_state"/>
+		<col name="source_id" type="int"/>
+		<col name="source" length="4"/>
+		<col name="state_sale" type="us_state"/>
+
+		<col name="branch_code" length="10"/>
+		<col name="rep_code" length="100"/>
+		<col name="rep_name" length="256"/>
+
+		<col name="load_date" type="datetime"/>
+		<col name="trade_date" type="datetime"/>
+		<col name="settle_date" type="datetime"/>
+		<col name="issue_date" type="datetime"/>
+
+		<col name="gross_amount" type="money"/>
+		<col name="comm_rate" type="rate"/>
+		<col name="dealer_comm" type="money"/>
+		<col name="rep_comm" type="money"/>
+
+		<col name="account_aum" type="money"/>
+		<col name="household_aum" type="money"/>
+		<col name="proration_ratio" type="rate"/>
+		<col name="pay_rep_of_order" type="bool" required="true"/>
+		<col name="auto_match_exception"/>
+
+		<col name="service_start_date" type="datetime"/>
+		<col name="service_end_date" type="datetime"/>
+
+		<col name="account_ind" type="char"/>
+		<col name="purchase_code" type="char"/>
+		<col name="quantity" type="money"/>
+		<col name="comm_type_old" length="2"/>
+		<col name="file_id" type="int"/>
+		<col name="fund_process_date" type="datetime"/>
+		<col name="settle_test_flag" type="char"/>
+		<col name="cust_alast" length="35"/>
+		<col name="cust_afirst" length="25"/>
+		<col name="cust_assn" length="9"/>
+		<col name="cust_adob" type="datetime"/>
+		<col name="comm_type" length="3"/>
+		<col name="rec_comm_amount" type="money"/>
+		<col name="rec_comm_perc" type="money"/>
+		<col name="mno_load_date" type="datetime" required="true" default="getdate"/>
+		<col name="network_ind" type="char"/>
+	</columns>
+</table>

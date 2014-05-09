@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[batch_sources]
+	Contains available batch sources.
+-->
+<table name="batch_sources">
+	<columns>
+		<col id="true"/>
+		<col name="code" length="10" business_id="true"/>
+		<col name="name" length="256"/>
+		<col name="description"/>
+		<col name="is_auto" required="true"/>
+		<col name="is_visible" required="true" default="true"/>
+		<col name="allow_delete_batch" type="bool" required="true"/>
+		<col name="batch_number_generator" length="256"/>
+	</columns>
+</table>

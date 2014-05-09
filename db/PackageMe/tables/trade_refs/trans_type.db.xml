@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[trans_type]
+	Contains available trade types.
+-->
+<table name="trans_type">
+	<columns>
+		<col name="code" length="18" business_id="true"/>
+		<col name="tr_type" length="18" required="true"/>
+		<col name="tr_type_code" length="2" required="true"/>
+		<col name="display_name" length="256"/>
+		<col name="blotter" length="2"/>
+		<col name="bs_code" type="char"/>
+		<col name="seq" type="int" required="true"/>
+		<col name="haircut" type="rate" required="true" default="1.0"/>
+		<col name="allowMultipleTradeAllocations" type="bool" required="true"/>
+		<col name="zeroAmount" type="enum" required="true" check="0..3"/>
+		<col name="tag" length="2"/>
+		<col name="stp_support" type="bool" required="true"/>
+		<col name="stp_ordinal" type="int"/>
+		<col name="is_trackable_trade" required="true" default="true"/>
+	</columns>
+</table>

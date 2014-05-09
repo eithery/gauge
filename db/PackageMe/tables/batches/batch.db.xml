@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[batch]
+	Contains batch info.
+-->
+<table name="batch">
+	<columns>
+		<col name="batch_num" type="int" business_id="true" identity="true"/>
+		<col name="batch_id" length="20" required="true"/>
+		<col name="source" length="10"/>
+		<col name="company" length="3"/>
+		<col name="carrier_id" length="6" ref="carrier" required="true"/>
+		<col name="status" length="10"/>
+
+		<col name="check_no" length="18"/>
+		<col name="check_date" type="datetime"/>
+		<col name="check_amt" type="money"/>
+		<col name="batch_amt" type="money"/>
+		<col name="fund_check_amount" type="money"/>
+		<col name="manager_id" length="32"/>
+
+		<col name="closed" type="datetime"/>
+		<col name="released" type="datetime"/>
+		<col name="wire_ind" db_type="smallint"/>
+		<col name="batch_wire_date" type="datetime"/>
+		<col name="deposit_date" type="datetime"/>
+		<col name="statement_begin_date" type="datetime"/>
+		<col name="statement_end_date" type="datetime"/>
+		<col name="batch_cycle_date" type="datetime"/>
+		<col name="match_date" type="datetime"/>
+		<col name="match_fat_date" type="datetime"/>
+		<col name="ips_consolidated" type="datetime"/>
+
+		<col name="export_rec" type="int"/>
+		<col name="export_rec_user" length="32"/>
+		<col name="export_rec_time" type="datetime"/>
+
+		<col name="comment"/>
+		<timestamps/>
+	</columns>
+</table>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[br_registration_interested_party_prototype]
+	Contains interested party metadata for master account registration types.
+-->
+<table name="br_registration_interested_party_prototype">
+	<columns>
+		<col id="true"/>
+		<col name="registration_id" ref="br_registration" required="true"/>
+		<col name="interested_party_type_id" ref="br_interested_party_type" required="true"/>
+		<col name="min_count" type="byte" required="true" check=">=0"/>
+		<col name="max_count" type="byte" required="true" check="&lt;8; &lt;[min_count]"/>
+	</columns>
+</table>

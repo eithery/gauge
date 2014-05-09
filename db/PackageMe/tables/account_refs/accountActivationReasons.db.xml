@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[accountActivationReasons]
+	Contains reasons used to activate/deactive master accounts.
+-->
+<table name="accountActivationReasons">
+	<columns>
+		<col id="true"/>
+		<col name="name" length="256" required="true" unique="true"/>
+		<col name="description"/>
+		<col name="type" type="enum" required="true" check="[0..1]"/>
+	</columns>
+</table>

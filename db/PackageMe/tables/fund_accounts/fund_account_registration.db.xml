@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[fund_account_registration]
+	Contains additional information related to fund accounts.
+-->
+<table name="fund_account_registration">
+	<columns>
+		<col name="fund_account_number" length="20" business_id="true"/>
+		<col name="cusip" length="9" business_id="true"/>
+
+		<col name="fi_regType" length="6"/>
+		<col name="fi_cust_name" length="256"/>
+		<col name="fi_cust_short_name" length="20"/>
+		<col name="fi_cust_ssn" length="15"/>
+		<col name="fi_state" type="us_state"/>
+
+		<col name="fi_office_id" length="10"/>
+		<col name="fi_rep_id" length="10"/>
+		<col name="fi_rep_name" length="20"/>
+
+		<col name="fi_registration_1" length="50"/>
+		<col name="fi_registration_2" length="50"/>
+		<col name="fi_registration_3" length="50"/>
+		<col name="fi_registration_4" length="50"/>
+		<col name="fi_registration_5" length="50"/>
+		<col name="fi_registration_6" length="50"/>
+		<col name="fi_registration_7" length="50"/>
+
+		<col name="fi_update_date" type="datetime"/>
+		<col name="fi_source" length="5"/>
+	</columns>
+</table>

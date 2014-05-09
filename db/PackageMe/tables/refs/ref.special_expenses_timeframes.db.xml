@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+	[ref].[special_expenses_timeframes]
+	Contains available values for special expenses timeframe levels.
+-->
+<table name="special_expenses_timeframes" schema="ref">
+	<columns>
+		<col id="true"/>
+		<col name="name" length="256" required="true" unique="true"/>
+		<col name="display_name" length="256" required="true"/>
+		<col name="ordinal" type="int" required="true" check=">0" unique="true"/>
+		<col name="is_enabled" required="true" default="true"/>
+		<col name="export_value" length="256"/>
+	</columns>
+</table>

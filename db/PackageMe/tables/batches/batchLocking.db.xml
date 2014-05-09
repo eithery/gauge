@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[batchLocking]
+	Supports pessimistic locking for batches.
+	Contains records for locked batches.
+-->
+<table name="batchLocking">
+	<columns>
+		<col id="true" identity="true"/>
+		<col name="batchId" length="20" required="true"/>
+		<col name="userLogin" length="32" required="true"/>
+		<col name="workDate" type="datetime" required="true"/>
+		<col name="actionCode" length="64" required="true"/>
+	</columns>
+</table>

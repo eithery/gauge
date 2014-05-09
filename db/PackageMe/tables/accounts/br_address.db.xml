@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[br_address]
+	Contains address info for master account owners, customers, and interested parties.
+-->
+<table name="br_address">
+	<columns>
+		<col name="address_id" id="true"/>
+		<col name="street" length="96"/>
+		<col name="street2" length="96"/>
+		<col name="city" length="64"/>
+		<col name="state_code" type="us_state"/>
+		<col name="postal_code" length="16"/>
+		<col name="country_code" type="country" default="US"/>
+	</columns>
+</table>

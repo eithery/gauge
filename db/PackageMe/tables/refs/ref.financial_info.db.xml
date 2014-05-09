@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+	[ref].[financial_info]
+	Defines metadata for customer financial info fields.
+-->
+<table name="financial_info" schema="ref">
+	<columns>
+		<col id="true"/>
+		<col name="name" length="256" required="true" unique="true"/>
+		<col name="display_name" length="256" required="true"/>
+		<col name="description"/>
+		<col name="ordinal" type="int" required="true" check=">0" unique="true"/>
+		<col name="is_enabled" required="true" default="true"/>
+		<col name="has_comment" required="true"/>
+		<col name="has_amount" required="true" default="true"/>
+		<col name="has_percent" required="true"/>
+		<col name="has_levels" required="true" default="true"/>
+		<col name="source" length="256"/>
+	</columns>
+</table>

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+	[dbo].[br_registration_role]
+	Defines registration roles for master account owners.
+-->
+<table name="br_registration_role">
+	<columns>
+		<col name="registration_role_id" id="true"/>
+		<col name="registration_role_code" type="char" length="1" required="true"
+			check="['G', 'B', 'T', 'M', 'C', 'O', 'N']"/>
+		<col name="name" length="64" required="true"/>
+		<col name="displayName" length="50"/>
+		<col name="description" length="200"/>
+		<col name="is_primary" required="true"/>
+		<col name="licenseCheckEnabled" type="bool" required="true" default="1"/>
+		<col name="cipEnabled" type="bool" required="true" default="1"/>
+		<col name="customerRoleId" length="5"/>
+		<col name="rapRecipientEnabled" type="bool" required="true" default="1"/>
+		<col name="isSuitabilityRequired" required="true"/>
+		<col name="isMaritalStatusValidated" required="true" default="1"/>
+		<col name="isPersonalIdValidated" required="true" default="1"/>
+		<col name="isEmploymentValidated" required="true" default="1"/>
+		<col name="isAffiliationValidated" required="true" default="1"/>
+		<col name="isGenericSuitabilityValidated" required="true" default="1"/>
+		<col name="isAnnualIncomeValidated" required="true" default="1"/>
+		<col name="isSignatureNeeded" required="true"/>
+	</columns>
+</table>
