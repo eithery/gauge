@@ -5,6 +5,7 @@ module Gauge
     include ConsoleListener
 
     def initialize(global_opts, opts, args)
+      @repo = Repo.new
       @args = args
     end
 
@@ -12,10 +13,19 @@ module Gauge
     # Performs check operation for the specified database or database objects
     # against the predefined schema.
     def check
-      if @args.any?
-        DatabaseValidator.new.check
-      else
+      if @args.empty?
         error 'No database objects specified to be inspected.'
+        return
+      end
+
+      @args.each do |dbo|
+        if @repo.database? dbo
+          DatabaseValidator.new.check(dbo)
+        elsif @repo.table? dbo
+          TableValidator.new.check(dbo)
+        else
+          error "Database metadata for '#{dbo}' is not found."
+        end
       end
     end
   end

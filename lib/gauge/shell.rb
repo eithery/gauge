@@ -1,6 +1,8 @@
 # Eithery Lab., 2014.
 # Class Gauge::Shell
 # Executes application commands.
+require 'gauge'
+
 module Gauge
   class Shell
     attr_reader :listeners
@@ -18,7 +20,7 @@ module Gauge
     # Performs check operation for the specified database or separate database objects
     # against the predefined schema.
     def check(*args)
-      Inspector.new(*args).check
+      DatabaseInspector.new(*args).check
     end
   end
 end
