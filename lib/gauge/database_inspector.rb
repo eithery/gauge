@@ -4,9 +4,10 @@ module Gauge
   class DatabaseInspector
     include ConsoleListener
 
-    def initialize(global_opts, opts, args)
+    def initialize(global_opts, options, args)
       @repo = Repo.new
       @args = args
+      @connection = DB::Connection.new(global_opts)
     end
 
 
@@ -20,7 +21,7 @@ module Gauge
 
       @args.each do |dbo|
         if @repo.database? dbo
-          Validators::DatabaseValidator.new.check(@repo.schema dbo)
+          Validators::DatabaseValidator.new(@connection).check(@repo.schema dbo)
         elsif @repo.table? dbo
           Validators::TableValidator.new.check(@repo.schema dbo)
         else

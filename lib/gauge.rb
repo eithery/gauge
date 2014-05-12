@@ -1,6 +1,7 @@
 # Contains all requires for Database Gauge applicaion.
 require 'gauge/console_listener'
 require 'gauge/database_inspector'
+require 'gauge/db/connection'
 require 'gauge/helper'
 require 'gauge/repo'
 require 'gauge/schema/data_column_schema'
@@ -16,3 +17,4 @@ require 'gli'
 require 'rainbow'
 require 'rainbow/ext/string'
 require 'rexml/document'
+require 'sequel'

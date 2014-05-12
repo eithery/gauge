@@ -32,13 +32,5 @@ module Gauge
 				end
 				errors
 			end
-
-
-		private
-			# Determines whether the data table exists in the database.
-			def table_exists?(table_spec, dba)
-				dba.table_exists?(table_spec.to_key)
-			end
-		end
 	end
 end
