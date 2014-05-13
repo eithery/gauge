@@ -20,12 +20,19 @@ module Gauge
       end
 
       @args.each do |dbo|
-        if @repo.database? dbo
-          Validators::DatabaseValidator.new(@connection).check(@repo.schema dbo)
-        elsif @repo.table? dbo
-          Validators::TableValidator.new.check(@repo.schema dbo)
-        else
-          error "Database metadata for '#{dbo}' is not found."
+        Sequel.tinytds(dataserver: @connection.server, database: @repo.schema(dbo).database_name,
+          user: @connection.user, password: @connection.password) do |db_adapter|
+
+          db_adapter.test_connection
+
+          if @repo.database? dbo
+            Validators::DatabaseValidator.new(db_adapter).check(@repo.schema dbo)
+          elsif @repo.table? dbo
+            Validators::TableValidator.new(db_adapter).check(@repo.schema dbo)
+          else
+            error "Database metadata for '#{dbo}' is not found."
+          end
+
         end
       end
     end
