@@ -7,7 +7,10 @@ require 'gauge'
 module Gauge
 	module Schema
 		class DataColumnSchema
+			attr_reader :table_name
+
 			def initialize(column_attributes)
+				@table_name = column_attributes[:table]
 				@column_attrs = column_attributes
 			end
 

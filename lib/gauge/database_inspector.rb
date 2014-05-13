@@ -11,8 +11,7 @@ module Gauge
     end
 
 
-    # Performs check operation for the specified database or database objects
-    # against the predefined schema.
+    # Validates the specified database or database objects structure against the predefined schema.
     def check
       if @args.empty?
         error 'No database objects specified to be inspected.'
