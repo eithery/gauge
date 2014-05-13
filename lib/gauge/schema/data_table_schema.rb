@@ -42,16 +42,16 @@ private
 				@local_name = xml_doc.root.attributes['name']
 				@sql_schema = xml_doc.root.attributes['schema']
 				xml_doc.root.each_element('/table/columns/col') do |col|
-					column_attributes = { table: table_name }
+					column_attributes = {}
 					col.attributes.each { |name, value|	column_attributes[name.to_sym] = value }
-					@columns << DataColumnSchema.new(column_attributes)
+					@columns << DataColumnSchema.new(@local_name, column_attributes)
 				end
 				if has_timestamps?(xml_doc)
-					@columns << DataColumnSchema.new(name: 'created', type: 'datetime', required: true, table: table_name)
-					@columns << DataColumnSchema.new(name: 'created_by', required: true, table: table_name)
-					@columns << DataColumnSchema.new(name: 'modified', type: 'datetime', required: true, table: table_name)
-					@columns << DataColumnSchema.new(name: 'modified_by', required: true, table: table_name)
-					@columns << DataColumnSchema.new(name: 'version', type: 'long', required: true, table: table_name)
+					@columns << DataColumnSchema.new(@local_name, name: 'created', type: 'datetime', required: true)
+					@columns << DataColumnSchema.new(@local_name, name: 'created_by', required: true)
+					@columns << DataColumnSchema.new(@local_name, name: 'modified', type: 'datetime', required: true)
+					@columns << DataColumnSchema.new(@local_name, name: 'modified_by', required: true)
+					@columns << DataColumnSchema.new(@local_name, name: 'version', type: 'long', required: true)
 				end
 			end
 

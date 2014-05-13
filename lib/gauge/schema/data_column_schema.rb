@@ -9,8 +9,8 @@ module Gauge
 		class DataColumnSchema
 			attr_reader :table_name
 
-			def initialize(column_attributes)
-				@table_name = column_attributes[:table]
+			def initialize(table_name, column_attributes)
+				@table_name = table_name
 				@column_attrs = column_attributes
 			end
 
