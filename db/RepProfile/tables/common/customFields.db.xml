@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[customFields]
+  Contains custom fields metadata for offices and reps.
+-->
+<table name="customFields">
+  <columns>
+    <col id="true"/>
+    <col name="name" length="256" required="true"/>
+    <col name="displayName" length="256" required="true"/>
+    <col name="isVisible"/>
+    <col name="isRequired"/>
+    <col name="objectType" required="true"/>
+    <col name="fieldTypeId" ref="fieldTypes" required="true"/>
+    <col name="fieldTypeManagerParameters" required="true"/>
+    <col name="order" type="int" required="true"/>
+  </columns>
+</table>
