@@ -83,7 +83,8 @@ module Gauge
 					money: 'decimal',
 					enum: 'tinyint',
 					long: 'bigint',
-					xml: 'xml'
+					xml: 'xml',
+					blob: 'varbinary'
 				}
 			end
 		end
