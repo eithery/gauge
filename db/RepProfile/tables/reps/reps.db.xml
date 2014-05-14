@@ -10,6 +10,6 @@
     <col name="name" length="256"/>
     <col name="officeId" ref="offices" required="true"/>
     <col name="description"/>
-    <timestamps/>
+    <timestamps case="camel"/>
   </columns>
 </table>

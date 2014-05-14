@@ -18,6 +18,6 @@
     <col name="mailingAddressId" ref="addresses"/>
     <col name="contactsId" ref="contacts"/>
     <col name="is_broker_dealer" required="true"/>
-    <timestamps/>
+    <timestamps case="camel"/>
   </columns>
 </table>
