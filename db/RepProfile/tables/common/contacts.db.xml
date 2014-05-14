@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[contacts]
+  Contains contact info records for reps.
+-->
+<table name="contacts">
+  <columns>
+    <col id="true"/>
+    <col name="businessPhone" length="32"/>
+    <col name="businessPhoneExt" length="4"/>
+    <col name="additionalPhone" length="32"/>
+    <col name="additionalPhoneExt" length="4"/>
+    <col name="cellPhone" length="32"/>
+    <col name="cellPhoneExt" length="4"/>
+    <col name="homePhone" length="32"/>
+    <col name="homePhoneExt" length="4"/>
+    <col name="fax" length="32"/>
+    <col name="faxExt" length="4"/>
+    <col name="imAddress" length="256"/>
+    <col name="email" length="256"/>
+    <col name="web" length="256"/>
+    <col name="primary_phone" type="enum" required="true" check="0..4"/>
+  </columns>
+</table>

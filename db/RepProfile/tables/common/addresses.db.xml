@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[addresses]
+  Contains address records for offices and reps.
+-->
+<table name="addresses">
+  <columns>
+    <col id="true"/>
+    <col name="city" length="256"/>
+    <col name="street" length="256"/>
+    <col name="streetExt" length="256"/>
+    <col name="zip" length="20"/>
+    <col name="state" type="us_state"/>
+    <col name="country" type="country"/>
+  </columns>
+</table>

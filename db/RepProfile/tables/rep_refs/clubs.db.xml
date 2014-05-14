@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[clubs]
+  Contains available rep clubs and awards.
+-->
+<table name="clubs">
+  <columns>
+    <col id="true"/>
+    <col name="code" length="20" required="true"/>
+    <col name="name" length="256" required="true"/>
+    <col name="description"/>
+  </columns>
+</table>

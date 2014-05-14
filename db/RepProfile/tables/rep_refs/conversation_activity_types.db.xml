@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[conversation_activity_types]
+  Contains available rep conversation activity types.
+-->
+<table name="conversation_activity_types">
+  <columns>
+    <col id="true"/>
+    <col name="name" length="256" required="true"/>
+    <col name="description"/>
+    <col name="ordinal" type="int" required="true" check=">0"/>
+    <col name="is_enabled" required="true" default="true"/>
+    <col name="icon" type="blob"/>
+  </columns>
+</table>
