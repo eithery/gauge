@@ -15,6 +15,6 @@
     <col name="carryDeficit" type="bool" required="true"/>
     <col name="balanceForward" type="bool" required="true"/>
     <col name="affiliationDate" type="datetime" required="true"/>
-    <col name="status" function="get_rep_status" params="[:id, getdate()]"/>
+    <col name="status" type="byte" function="get_rep_status" params="[:id, getdate()]"/>
   </columns>
 </table>

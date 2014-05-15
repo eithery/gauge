@@ -8,7 +8,7 @@
     <col name="code" length="10" required="true"/>
     <col name="name" length="256" required="true"/>
     <col name="description"/>
-    <col name="roleType" type="enum" required="true"/>
+    <col name="roleType" type="enum" required="true" check="0..3"/>
     <col ref="supervision_types"/>
     <col name="clientCode" length="10"/>
   </columns>
