@@ -14,7 +14,7 @@
     <col name="crdNumber" length="10"/>
     <col name="carryDeficit" type="bool" required="true"/>
     <col name="balanceForward" type="bool" required="true"/>
-    <col name="affiliationDate" type="datetime" required="true"/>
+    <col name="affiliationDate" required="true"/>
     <col name="status" type="byte" function="get_rep_status" params="[:id, getdate()]"/>
   </columns>
 </table>

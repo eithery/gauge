@@ -10,8 +10,8 @@
     <col name="primaryRepId" ref="primaryReps"/>
     <col name="officeRoleId" ref="officeRoles" required="true"/>
     <col name="officeId" ref="offices" required="true"/>
-    <col name="startDate" type="datetime" required="true"/>
-    <col name="endDate" type="datetime"/>
+    <col name="startDate" required="true"/>
+    <col name="endDate"/>
     <col name="is_default" required="true"/>
   </columns>
 </table>

@@ -7,8 +7,8 @@
   <columns>
     <col name="parent_id" ref="primaryReps" required="true"/>
     <col name="email" length="256" required="true"/>
-    <col name="start_date" type="datetime" required="true"/>
-    <col name="end_date" type="datetime"/>
+    <col name="start_date" required="true"/>
+    <col name="end_date"/>
     <col name="is_primary" required="true"/>
   </columns>
 </table>

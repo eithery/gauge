@@ -8,7 +8,7 @@
     <col name="officeId" ref="offices"/>
     <col name="leaderRepId" ref="primaryReps"/>
     <col name="seminarName" length="256"/>
-    <col name="seminarDate" type="datetime"/>
+    <col name="seminarDate"/>
     <col name="notes"/>
   </columns>
 </table>
