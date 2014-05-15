@@ -27,8 +27,8 @@ module Gauge
 				return :id if contains_ref_id?
 				return type.to_sym unless type.nil?
 				return :bool if column_name.downcase.start_with?('is', 'has', 'allow')
-				return :date if column_name.downcase.end_with?('date', '_on')
-				return :datetime if column_name.downcase.end_with?('_at')
+				return :datetime if column_name.downcase.end_with?('date', '_at')
+				return :date if column_name.downcase.end_with?('_on')
 				:string
 			end
 
