@@ -5,7 +5,6 @@
 -->
 <table name="br_account_interested_party">
 	<columns>
-		<col id="true"/>
 		<col name="master_account_id" ref="br_master_account" required="true"/>
 		<col name="interested_party_type_id" ref="br_interested_party_type" required="true"/>
 		<col name="ordinal" type="byte" required="true"/>

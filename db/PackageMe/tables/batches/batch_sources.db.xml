@@ -5,7 +5,6 @@
 -->
 <table name="batch_sources">
 	<columns>
-		<col id="true"/>
 		<col name="code" length="10" business_id="true"/>
 		<col name="name" length="256"/>
 		<col name="description"/>

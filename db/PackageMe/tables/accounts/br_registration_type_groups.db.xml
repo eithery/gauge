@@ -5,7 +5,6 @@
 -->
 <table name="br_registration_type_groups">
 	<columns>
-		<col id="true"/>
 		<col name="name" length="64" required="true"/>
 		<col name="description"/>
 	</columns>

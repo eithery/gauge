@@ -5,7 +5,6 @@
 -->
 <table name="customer_financial_info" schema="br">
 	<columns>
-		<col id="true"/>
 		<col name="customer_id" ref="br_natural_owner" business_id="true"/>
 		<col ref="ref.financial_info" business_id="true"/>
 		<col name="level_value" type="int" check=">=0"/>

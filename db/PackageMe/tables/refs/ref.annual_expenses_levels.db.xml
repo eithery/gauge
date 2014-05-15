@@ -5,7 +5,6 @@
 -->
 <table name="annual_expenses_levels" schema="ref">
 	<columns>
-		<col id="true"/>
 		<col name="name" length="256" required="true" unique="true"/>
 		<col name="display_name" length="256" required="true"/>
 		<col name="ordinal" type="int" required="true" check=">0" unique="true"/>

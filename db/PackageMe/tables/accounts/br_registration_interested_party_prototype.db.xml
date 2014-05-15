@@ -5,7 +5,6 @@
 -->
 <table name="br_registration_interested_party_prototype">
 	<columns>
-		<col id="true"/>
 		<col name="registration_id" ref="br_registration" required="true"/>
 		<col name="interested_party_type_id" ref="br_interested_party_type" required="true"/>
 		<col name="min_count" type="byte" required="true" check=">=0"/>

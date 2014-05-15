@@ -5,7 +5,6 @@
 -->
 <table name="customer_investment_experience" schema="br">
 	<columns>
-		<col id="true"/>
 		<col name="customer_id" ref="br_natural_owner" business_id="true"/>
 		<col name="investment_experience_id" ref="ref.investment_experience" business_id="true"/>
 		<col name="experience_level_id" ref="ref.investment_experience_levels"/>

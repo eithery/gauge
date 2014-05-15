@@ -5,7 +5,6 @@
 -->
 <table name="customer_assets_held_away" schema="br">
 	<columns>
-		<col id="true"/>
 		<col name="customer_id" ref="br_natural_owner" business_id="true"/>
 		<col name="assets_held_away_id" ref="ref.assets_held_away" business_id="true"/>
 		<col name="asset_value" type="percent" required="true"/>

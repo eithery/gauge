@@ -5,7 +5,6 @@
 -->
 <table name="investment_objectives" schema="ref">
 	<columns>
-		<col id="true"/>
 		<col name="name" length="256" required="true" unique="true"/>
 		<col name="display_name" length="256" required="true"/>
 		<col name="description"/>

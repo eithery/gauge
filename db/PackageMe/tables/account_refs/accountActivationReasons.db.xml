@@ -5,7 +5,6 @@
 -->
 <table name="accountActivationReasons">
 	<columns>
-		<col id="true"/>
 		<col name="name" length="256" required="true" unique="true"/>
 		<col name="description"/>
 		<col name="type" type="enum" required="true" check="[0..1]"/>

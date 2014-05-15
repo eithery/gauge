@@ -5,7 +5,6 @@
 -->
 <table name="account_investment_objectives" schema="br">
 	<columns>
-		<col id="true"/>
 		<col name="master_account_id" ref="br_master_account" business_id="true"/>
 		<col ref="ref.investment_objectives" business_id="true"/>
 		<col name="rank" type="byte" required="true" check=">0"/>
