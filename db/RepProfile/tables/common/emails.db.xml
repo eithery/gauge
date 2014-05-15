@@ -5,7 +5,6 @@
 -->
 <table name="emails">
   <columns>
-    <col id="true"/>
     <col name="parent_id" ref="primaryReps" required="true"/>
     <col name="email" length="256" required="true"/>
     <col name="start_date" type="datetime" required="true"/>

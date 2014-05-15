@@ -5,7 +5,6 @@
 -->
 <table name="customFieldValues">
   <columns>
-    <col id="true"/>
     <col name="objectId" type="long" required="true"/>
     <col name="fieldValue"/>
     <col name="customFieldId" ref="customFields" required="true"/>

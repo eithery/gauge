@@ -5,7 +5,6 @@
 -->
 <table name="officeAudit">
   <columns>
-    <col id="true"/>
     <col name="officeId" ref="offices"/>
     <col name="repId" ref="primaryReps"/>
     <col name="auditDate" type="datetime" required="true"/>

@@ -5,7 +5,6 @@
 -->
 <table name="customFields">
   <columns>
-    <col id="true"/>
     <col name="name" length="256" required="true"/>
     <col name="displayName" length="256" required="true"/>
     <col name="isVisible"/>

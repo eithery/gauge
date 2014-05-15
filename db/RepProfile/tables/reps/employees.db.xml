@@ -5,7 +5,6 @@
 -->
 <table name="employees">
   <columns>
-    <col id="true"/>
     <col name="firstName" length="256"/>
     <col name="middleName" length="256"/>
     <col name="lastName" length="256" required="true"/>

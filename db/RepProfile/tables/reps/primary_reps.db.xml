@@ -5,7 +5,6 @@
 -->
 <table name="primaryReps">
   <columns>
-    <col id="true"/>
     <col name="rr2CodeId" ref="rr2Codes"/>
     <col name="employeeId" ref="employees" required="true"/>
     <col name="repContractTypeId" ref="repContractTypes" required="true"/>

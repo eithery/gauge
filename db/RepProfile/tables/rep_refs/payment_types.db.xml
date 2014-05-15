@@ -5,7 +5,6 @@
 -->
 <table name="paymentTypes">
   <columns>
-    <col id="true"/>
     <col name="code" length="1" required="true"/>
     <col name="name" length="256" required="true"/>
     <col name="description"/>

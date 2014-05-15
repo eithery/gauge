@@ -5,7 +5,6 @@
 -->
 <table name="contacts">
   <columns>
-    <col id="true"/>
     <col name="businessPhone" length="32"/>
     <col name="businessPhoneExt" length="4"/>
     <col name="additionalPhone" length="32"/>

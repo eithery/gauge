@@ -5,7 +5,6 @@
 -->
 <table name="fieldTypes">
   <columns>
-    <col id="true"/>
     <col name="name" length="256" required="true"/>
     <col name="description"/>
     <col name="fieldTypeManagerType" required="true"/>
