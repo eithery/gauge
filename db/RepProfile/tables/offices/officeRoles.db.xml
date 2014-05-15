@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[officeRoles]
+  Contains available office roles.
+-->
+<table name="officeRoles">
+  <columns>
+    <col id="true"/>
+    <col name="code" length="10" required="true"/>
+    <col name="name" length="256" required="true"/>
+    <col name="description"/>
+    <col name="roleType" type="enum" required="true"/>
+    <col ref="supervision_types"/>
+    <col name="clientCode" length="10"/>
+  </columns>
+</table>

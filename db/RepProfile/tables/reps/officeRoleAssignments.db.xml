@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[officeRoleAssignments]
+  Contains office role assignments.
+-->
+<table name="officeRoleAssignments">
+  <columns>
+    <col id="true"/>
+    <col name="name" length="256"/>
+    <col name="description"/>
+    <col name="primaryRepId" ref="primaryReps"/>
+    <col name="officeRoleId" ref="officeRoles" required="true"/>
+    <col name="officeId" ref="offices" required="true"/>
+    <col name="startDate" type="datetime" required="true"/>
+    <col name="endDate" type="datetime"/>
+    <col name="is_default" required="true"/>
+  </columns>
+</table>

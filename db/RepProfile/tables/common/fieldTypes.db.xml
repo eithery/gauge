@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[fieldTypes]
+  Contains available custom fields types.
+-->
+<table name="fieldTypes">
+  <columns>
+    <col id="true"/>
+    <col name="name" length="256" required="true"/>
+    <col name="description"/>
+    <col name="fieldTypeManagerType" required="true"/>
+  </columns>
+</table>

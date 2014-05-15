@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+  [msh].[direct_supervisions]
+  Defines direct supervisor-subordinate relationships.
+-->
+<table name="direct_supervisions" schema="msh">
+  <columns>
+    <col id="true"/>
+    <col name="subordinate_id" ref="primaryReps" required="true" business_id="true"/>
+    <col name="supervisor_id" ref="officeRoleAssignments" required="true" business_id="true"/>
+    <col ref="supervision_types" required="true"/>
+  </columns>
+</table>

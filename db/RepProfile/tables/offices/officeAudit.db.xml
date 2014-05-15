@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[officeAudit]
+  Contains office audit records.
+-->
+<table name="officeAudit">
+  <columns>
+    <col id="true"/>
+    <col name="officeId" ref="offices"/>
+    <col name="repId" ref="primaryReps"/>
+    <col name="auditDate" type="datetime" required="true"/>
+    <col name="auditCompleteDate" type="datetime"/>
+    <col name="auditSentDate" type="datetime"/>
+    <col name="responseDate" type="datetime"/>
+    <col name="notes"/>
+  </columns>
+</table>

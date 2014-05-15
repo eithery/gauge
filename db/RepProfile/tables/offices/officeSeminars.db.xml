@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[officeSeminars]
+  Contains office seminars records.
+-->
+<table name="officeSeminars">
+  <columns>
+    <col id="true"/>
+    <col name="officeId" ref="offices"/>
+    <col name="leaderRepId" ref="primaryReps"/>
+    <col name="seminarName" length="256"/>
+    <col name="seminarDate" type="datetime"/>
+    <col name="notes"/>
+  </columns>
+</table>
