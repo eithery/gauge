@@ -8,7 +8,7 @@ module Gauge
       def initialize(db_adapter)
         @dba = db_adapter
       end
-      
+
 
       def check(table_schema)
         unless table_exists? table_schema

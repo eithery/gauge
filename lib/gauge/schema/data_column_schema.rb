@@ -73,18 +73,19 @@ module Gauge
 
 			def type_map
 				{
-					string: 'nvarchar',
 					id: 'bigint',
-					bool: 'tinyint',
 					int: 'int',
+					long: 'bigint',
+					string: 'nvarchar',
+					char: 'nchar',
+					bool: 'tinyint',
 					byte: 'tinyint',
 					datetime: 'datetime',
-					date: 'datetime',
+					date: 'date',
 					us_state: 'nchar',
 					country: 'nchar',
 					money: 'decimal',
 					enum: 'tinyint',
-					long: 'bigint',
 					xml: 'xml',
 					blob: 'varbinary'
 				}
