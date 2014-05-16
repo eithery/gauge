@@ -3,7 +3,7 @@
   [at].[domain_fields_metadata]
   Defines fields metadata for rep business domain objects.
 -->
-<table name="clubs" schema="at">
+<table name="domain_fields_metadata" schema="at">
   <columns>
     <col name="domain_object" length="128" required="true"/>
     <col name="column_name" length="128" required="true"/>
