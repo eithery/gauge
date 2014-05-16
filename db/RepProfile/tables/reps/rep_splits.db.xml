@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[repSplits]
+  Contains rep splits.
+-->
+<table name="repSplits">
+  <columns>
+    <col name="splitCode" length="10" required="true" business_id="true"/>
+    <col name="name" length="256"/>
+    <col name="officeId" ref="offices" required="true"/>
+    <col name="rr2CodeId" ref="rr2Codes" unique="true"/>
+    <col name="description"/>
+    <timestamps case="camel"/>
+  </columns>
+</table>

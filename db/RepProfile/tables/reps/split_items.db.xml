@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[splitItems]
+  Contains rep splits participants.
+-->
+<table name="splitItems">
+  <columns>
+    <col name="repSplitDetailId" ref="repSplitDetails" required="true"/>
+    <col name="repId" ref="reps" required="true"/>
+    <col name="rate" type="percent" required="true" check="0..100"/>
+    <col name="seq" type="int" required="true"/>
+  </columns>
+  <indexes>
+    <index unique="true" columns="[repSpltDetailId, seq]"/>
+  </indexes>
+</table>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[rep_bd_affiliations]
+  Contains broker/dealer affiliations for the rep.
+-->
+<table name="rep_bd_affiliations">
+  <columns>
+    <col name="rep_id" ref="primaryReps" required="true"/>
+    <col name="broker_dealer_id" ref="offices" required="true"/>
+    <col name="start_date"/>
+    <col name="end_date"/>
+    <timestamps/>
+  </columns>
+</table>

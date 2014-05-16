@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[reps2Reps]
+  Represents many-to-many relationships between reps related to reporting visibility purposes.
+-->
+<table name="reps2Reps">
+  <columns>
+    <col name="masterRepId" ref="primaryReps" required="true"/>
+    <col name="dependentRepId" ref="primaryReps" required="true"/>
+    <col name="accessType" type="byte" required="true"/>
+  </columns>
+  <indexes>
+    <index unique="true" columns="[masterRepId, dependentRepId]"/>
+  </indexes>
+</table>

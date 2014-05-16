@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[splitCodesCounter]
+  Contains templates for split codes automatic generation.
+-->
+<table name="splitCodesCounter">
+  <columns>
+    <col name="prefix" length="10"/>
+    <col name="maxDigitalLength" type="byte" required="true"/>
+    <col name="setLeading0" type="boolean" required="true"/>
+    <col name="lastCandidate" type="int" required="true"/>
+  </columns>
+</table>

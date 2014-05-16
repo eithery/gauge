@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[rep_attributes_rules]
+  Contains many-to-many relationships between rep attributes and contract types.
+  Defines rules which rep attributes are available for contract types.
+-->
+<table name="rep_attributes_rules">
+  <columns>
+    <col ref="rep_attributes"/>
+    <col name="rep_attribute_name" function="get_rep_attribute" params="rep_attribute_id"/>
+    <col name="contract_type_id" ref="repContractTypes"/>
+    <col name="contract_type_name" function="get_contract_type" params="contract_type_id"/>
+    <col name="is_enabled" required="true"/>
+  </columns>
+  <constraints>
+    <check sql="rep_attribute_id is not null or contract_type_id is not null"/>
+  </constraints>
+</table>

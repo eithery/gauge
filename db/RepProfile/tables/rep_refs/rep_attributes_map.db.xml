@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[rep_attributes_map]
+  Contains many-to-many relationships for primary reps and its attributes.
+-->
+<table name="rep_attributes_map">
+  <columns>
+    <col name="primary_rep_id" ref="primaryReps" required="true" id="true"/>
+    <col ref="rep_attributes" required="true" id="true"/>
+    <col name="start_date" type="date"/>
+    <col name="end_date" type="date"/>
+  </columns>
+</table>

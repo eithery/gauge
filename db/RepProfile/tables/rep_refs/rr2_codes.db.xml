@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[rr2Codes]
+  Contains the collection of allocated RR2 codes.
+-->
+<table name="rr2Codes">
+  <columns>
+    <col name="rr2Code" length="3"/>
+  </columns>
+</table>

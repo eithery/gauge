@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[repClubs]
+  Contains rep clubs and awards records.
+-->
+<table name="repClubs">
+  <columns>
+    <col name="repId" ref="primaryReps"/>
+    <col name="clubId" ref="clubs" required="true"/>
+    <col name="year" type="int" required="true"/>
+    <col name="start_date"/>
+    <col name="end_date"/>
+    <col name="description"/>
+  </columns>
+</table>

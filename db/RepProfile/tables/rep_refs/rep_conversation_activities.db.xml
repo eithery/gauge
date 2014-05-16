@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[rep_conversation_activities]
+  Contains rep conversation activities.
+-->
+<table name="rep_conversation_activities">
+  <columns>
+    <col ref="employees" required="true" business_id="true"/>
+    <col ref="conversation_activity_types" required="true"/>
+    <col name="subject" length="256" required="true"/>
+    <col name="content" required="true"/>
+    <col name="contacted" type="datetime" required="true"/>
+    <col name="contacted_by" length="256" required="true"/>
+    <col name="created" type="datetime" required="true" business_id="true"/>
+    <col name="created_by" length="256" required="true"/>
+    <col name="modified" type="datetime" required="true"/>
+    <col name="modified_by" length="256" required="true"/>
+  </columns>
+</table>

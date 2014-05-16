@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+  [dbo].[repContractTypes]
+  Contains available rep contract types.
+-->
+<table name="repContractTypes">
+  <columns>
+    <col name="code" length="10" required="true" unique="true"/>
+    <col name="name" length="256" required="true"/>
+    <col name="description"/>
+  </columns>
+</table>
