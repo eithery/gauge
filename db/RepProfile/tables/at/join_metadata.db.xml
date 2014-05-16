@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+  [at].[join_metadata]
+  Defines metadata for domain object associations.
+-->
+<table name="join_metadata" schema="at">
+  <columns>
+    <col name="domain_object" length="128" required="true" id="true"/>
+    <col name="join_type" length="8" required="true"/>
+    <col name="table_name" length="128" required="true" id="true"/>
+    <col name="table_alias" length="32" required="true" id="true"/>
+    <col name="predicate" length="256"/>
+    <col name="order_by" length="256"/>
+    <col name="order" type="int" required="true"/>
+  </columns>
+</table>

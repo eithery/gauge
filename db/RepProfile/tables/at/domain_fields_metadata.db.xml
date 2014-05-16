@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+  [at].[domain_fields_metadata]
+  Defines fields metadata for rep business domain objects.
+-->
+<table name="clubs" schema="at">
+  <columns>
+    <col name="domain_object" length="128" required="true"/>
+    <col name="column_name" length="128" required="true"/>
+    <col name="xpath" length="256" required="true"/>
+    <col name="order" type="int" required="true"/>
+    <col name="ref_domain_object" length="128"/>
+    <col name="ref_column_name" length="128"/>
+    <col name="is_visible" required="true" default="true"/>
+  </columns>
+</table>
