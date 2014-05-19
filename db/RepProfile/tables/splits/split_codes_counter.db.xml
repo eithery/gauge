@@ -5,9 +5,9 @@
 -->
 <table name="splitCodesCounter">
   <columns>
-    <col name="prefix" length="10"/>
+    <col name="prefix" length="10" required="true"/>
     <col name="maxDigitalLength" type="byte" required="true"/>
-    <col name="setLeading0" type="boolean" required="true"/>
+    <col name="setLeading0" type="bool" required="true" default="true"/>
     <col name="lastCandidate" type="int" required="true"/>
   </columns>
 </table>
