@@ -61,7 +61,7 @@ module Gauge
 
 			# Determines whether the column schema contains ref or id attributes.
 			def contains_ref_id?
-				@column_attrs.include?(:ref) || @column_attrs.include?(:id)
+				@column_attrs.include?(:ref)
 			end
 
 
@@ -85,9 +85,11 @@ module Gauge
 					us_state: 'nchar',
 					country: 'nchar',
 					money: 'decimal',
+					percent: 'decimal',
 					enum: 'tinyint',
 					xml: 'xml',
-					blob: 'varbinary'
+					blob: 'varbinary',
+					binary: 'binary'
 				}
 			end
 		end

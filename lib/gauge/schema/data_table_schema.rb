@@ -41,7 +41,7 @@ private
         @xml = xml_doc
         @local_name = xml_doc.root.attributes['name']
         @sql_schema = xml_doc.root.attributes['schema']
-        @columns << DataColumnSchema.new(@local_name, name: 'id', type: 'long', required: true)
+        @columns << DataColumnSchema.new(@local_name, name: 'id', type: 'long', required: true) unless has_id?
         xml_doc.root.each_element('/table/columns/col') do |col|
           column_attributes = {}
           col.attributes.each { |name, value| column_attributes[name.to_sym] = value }
@@ -54,6 +54,11 @@ private
           @columns << DataColumnSchema.new(@local_name, name: modified_by_column, required: true)
           @columns << DataColumnSchema.new(@local_name, name: 'version', type: 'long', required: true)
         end
+      end
+
+
+      def has_id?
+        !@xml.root.elements["columns/col[@id='true']"].nil?
       end
 
 
