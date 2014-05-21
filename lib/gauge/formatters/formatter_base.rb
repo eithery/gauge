@@ -1,6 +1,6 @@
 require 'gauge'
 
 module Formatters
-  class Base
+  class FormatterBase
   end
 end

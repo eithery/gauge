@@ -1,6 +1,6 @@
 require 'gauge'
 
 module Formatters
-  class ConsoleFormatter < Base
+  class ConsoleFormatter < FormatterBase
   end
 end

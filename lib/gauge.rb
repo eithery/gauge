@@ -2,7 +2,7 @@
 require 'gauge/console_listener'
 require 'gauge/database_inspector'
 require 'gauge/db/connection'
-require 'gauge/formatters/base'
+require 'gauge/formatters/formatter_base'
 require 'gauge/formatters/console_formatter'
 require 'gauge/helper'
 require 'gauge/repo'
