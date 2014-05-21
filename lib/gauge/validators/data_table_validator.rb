@@ -2,9 +2,7 @@ require 'gauge'
 
 module Gauge
   module Validators
-    class TableValidator
-      include ConsoleListener
-
+    class DataTableValidator < ValidatorBase
       def initialize(db_adapter)
         @dba = db_adapter
       end

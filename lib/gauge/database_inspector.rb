@@ -27,11 +27,10 @@ module Gauge
           if @repo.database? dbo
             Validators::DatabaseValidator.new(db_adapter).check(@repo.schema dbo)
           elsif @repo.table? dbo
-            Validators::TableValidator.new(db_adapter).check(@repo.schema dbo)
+            Validators::DataTableValidator.new(db_adapter).check(@repo.schema dbo)
           else
             error "Database metadata for '#{dbo}' is not found."
           end
-
         end
       end
     end
