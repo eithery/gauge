@@ -3,6 +3,7 @@ require 'gauge'
 module Gauge
   module Validators
     class DataTableValidator < ValidatorBase
+
       def check(table_schema)
         DB::Adapter.session(table_schema.database_name) { |dba| validate(table_schema, dba) }
       end
@@ -21,6 +22,12 @@ module Gauge
             errors
           end
         end
+      end
+
+
+  protected
+      def validators
+        [DataColumnValidator.new]
       end
 
 

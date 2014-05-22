@@ -11,7 +11,6 @@ module Gauge
           @column_name = column_schema.column_name
           @options = @dba.schema(column_schema.table_name).select { |item| item.first == column_schema.to_key }.first.last
 
-          errors = []
           if column_schema.allow_null? != allow_null?
             should_be = column_schema.allow_null? ? 'NULL' : 'NOT NULL'
             errors << "Data column '".color(:red) + @column_name.color(:red).bright +

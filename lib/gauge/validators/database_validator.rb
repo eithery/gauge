@@ -7,10 +7,14 @@ module Gauge
         info "Inspecting #{database_schema.database_name} database ..."
 
         DB::Adapter.session(database_schema.database_name) do |dba|
-          database_schema.tables.values.each do |table|
-            DataTableValidator.new.validate(table, dba)
-          end
+          database_schema.tables.values.each { |table| validate table, dba }
         end
+      end
+
+protected
+
+      def validators
+        [DataTableValidator.new]
       end
     end
   end

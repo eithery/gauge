@@ -6,9 +6,19 @@ module Gauge
       include ConsoleListener
 
   protected
-      # Child validators collection.
+
+      def validate(db_schema, dba)
+        validators.each { |v| v.validate db_schema, dba }
+      end
+
+
       def validators
         []
+      end
+
+
+      def errors
+        @errors ||= []
       end
     end
   end
