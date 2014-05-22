@@ -1,7 +1,15 @@
 require 'gauge'
 
 module Gauge
-  class ValidatorBase
-    include ConsoleListener
+  module Validators
+    class ValidatorBase
+      include ConsoleListener
+
+  protected
+      # Child validators collection.
+      def validators
+        []
+      end
+    end
   end
 end

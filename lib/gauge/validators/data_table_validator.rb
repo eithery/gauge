@@ -3,19 +3,20 @@ require 'gauge'
 module Gauge
   module Validators
     class DataTableValidator < ValidatorBase
-      def initialize(db_adapter)
-        @dba = db_adapter
+      def check(table_schema)
+        DB::Adapter.session(table_schema.database_name) { |dba| validate(table_schema, dba) }
       end
 
 
-      def check(table_schema)
+      def validate(table_schema, dba)
+        @dba = dba
         unless table_exists? table_schema
           missing_table table_schema.table_name
         else
           log "Check [#{table_schema.table_name}] data table" do
             errors = []
             table_schema.columns.each do |col|
-              errors += DataColumnValidator.new(@dba).check(col)
+              errors += DataColumnValidator.new.validate(col, dba)
             end
             errors
           end

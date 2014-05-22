@@ -3,12 +3,8 @@ require 'gauge'
 module Gauge
   module Validators
     class DataColumnValidator < ValidatorBase
-      def initialize(db_adapter)
-        @dba = db_adapter
-      end
-
-
-      def check(column_schema)
+      def validate(column_schema, dba)
+        @dba = dba
         unless column_exists? column_schema
           [missing_column(column_schema.column_name)]
         else
@@ -48,7 +44,6 @@ module Gauge
       end
 
 
-      # Column data type.
       def data_type
         @options[:db_type]
       end
