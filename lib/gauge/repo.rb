@@ -36,7 +36,7 @@ private
 
     # Determines whether the specified name represents the name of data table
     def table?(dbo_name)
-      Dir["#{@data_root}/**/tables/**/#{dbo_name}.db.xml"].any?
+      table_template(dbo_name).any? || table_template(dbo_name.underscore).any?
     end
 
 
@@ -44,7 +44,11 @@ private
     def schema(dbo_name)
       database = Schema::DatabaseSchema.new(database_name(dbo_name), @data_root)
       return database if database? dbo_name
-      database.tables[dbo_name.downcase] if table? dbo_name
+      if table? dbo_name
+        table_schema = database.tables[dbo_name.downcase]
+        table_schema = database.tables[dbo_name.camelize.downcase] if table_schema.nil?
+        table_schema
+      end
     end
 
 
@@ -53,12 +57,18 @@ private
       return dbo_name if database? dbo_name
 
       if table? dbo_name
-        table_spec_file = Dir["#{@data_root}/**/tables/**/#{dbo_name}.db.xml"].first
-        parts = table_spec_file.split('/')
+        table_schema = table_template(dbo_name).first
+        table_schema = table_template(dbo_name.underscore).first if table_schema.nil?
+        parts = table_schema.split('/')
         return parts[parts.find_index('tables') - 1]
       end
 
       raise "Database metadata for '#{dbo_name}' is not found."
+    end
+
+
+    def table_template(table_name)
+      Dir["#{@data_root}/**/tables/**/#{table_name}.db.xml"]
     end
   end
 end
