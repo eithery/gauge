@@ -3,48 +3,28 @@ require 'gauge'
 module Gauge
   module Validators
     class DataColumnValidator < ValidatorBase
-      def validate(column_schema, dba)
-        @dba = dba
-        unless column_exists? column_schema
-          [missing_column(column_schema.column_name)]
-        else
-          @column_name = column_schema.column_name
-          @options = @dba.schema(column_schema.table_name).select { |item| item.first == column_schema.to_key }.first.last
 
-          if column_schema.allow_null? != allow_null?
-            should_be = column_schema.allow_null? ? 'NULL' : 'NOT NULL'
-            errors << "Data column '".color(:red) + @column_name.color(:red).bright +
-              "' must be defined as #{should_be}.".color(:red)
-          end
-          if column_schema.data_type != data_type
-            errors << "Data column '".color(:red) + @column_name.color(:red).bright +
-              "' is '#{data_type}' but it must be '#{column_schema.data_type}'.".color(:red)
-          end
-          errors
+      def validate(column_schema, dba)
+        unless missing_column? column_schema, dba
+          db_column = dba.schema(column_schema.table_name).select { |item| item.first == column_schema.to_key }.first.last
+          super(column_schema, db_column)
         end
+        errors
+      end
+
+  protected
+
+      def validators
+        [ColumnNullabilityValidator.new, ColumnTypeValidator.new]
       end
 
 
   private
-      def column_exists?(column_schema)
-        table_name = column_schema.table_name
-        @dba.schema(table_name).any? { |item| item.first == column_schema.to_key }
-      end
-
-
-      def missing_column(column_name)
-        "Missing '".color(:red) + column_name.color(:red).bright + "' data column.".color(:red)
-      end
-
-
-      # Determines whether data column allows NULL value.
-      def allow_null?
-        @options[:allow_null]
-      end
-
-
-      def data_type
-        @options[:db_type]
+      def missing_column?(column_schema, dba)
+        mcv = MissingColumnValidator.new
+        mcv.validate column_schema, dba
+        errors.concat(mcv.errors)
+        mcv.errors.any?
       end
     end
   end

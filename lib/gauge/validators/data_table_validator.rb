@@ -15,11 +15,9 @@ module Gauge
           missing_table table_schema.table_name
         else
           log "Check [#{table_schema.table_name}] data table" do
-            errors = []
-            table_schema.columns.each do |col|
-              errors += DataColumnValidator.new.validate(col, dba)
-            end
-            errors
+            self.errors.clear
+            table_schema.columns.each { |col| super(col, dba) }
+            self.errors
           end
         end
       end

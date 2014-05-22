@@ -8,7 +8,10 @@ module Gauge
   protected
 
       def validate(db_schema, dba)
-        validators.each { |v| v.validate db_schema, dba }
+        validators.each do |v|
+          v.validate db_schema, dba
+          errors.concat v.errors
+        end
       end
 
 
