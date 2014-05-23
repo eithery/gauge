@@ -36,7 +36,8 @@ private
 
     # Determines whether the specified name represents the name of data table
     def table?(dbo_name)
-      table_template(dbo_name).any? || table_template(dbo_name.underscore).any?
+      table_template(dbo_name).any? || table_template(dbo_name.underscore).any? ||
+        table_template(dbo_name.split('.').last).any?
     end
 
 
@@ -59,6 +60,7 @@ private
       if table? dbo_name
         table_schema = table_template(dbo_name).first
         table_schema = table_template(dbo_name.underscore).first if table_schema.nil?
+        table_schema = table_template(dbo_name.split('.').last).first if table_schema.nil?
         parts = table_schema.split('/')
         return parts[parts.find_index('tables') - 1]
       end

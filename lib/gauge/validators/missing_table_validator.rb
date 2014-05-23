@@ -4,16 +4,17 @@ module Gauge
   module Validators
     class MissingTableValidator < ValidatorBase
       def validate(table_schema, dba)
-        @dba = dba
-        unless table_exists? table_schema
+        unless table_exists? table_schema, dba
           missing_table table_schema.table_name
+          return false
         end
+        true
       end
 
   private
 
-      def table_exists?(table_schema)
-        @dba.tables(schema: table_schema.sql_schema).include?(table_schema.to_key)
+      def table_exists?(table_schema, dba)
+        dba.tables(schema: table_schema.sql_schema).include?(table_schema.to_key)
       end
 
 

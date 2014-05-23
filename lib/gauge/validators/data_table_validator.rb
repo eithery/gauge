@@ -10,7 +10,7 @@ module Gauge
 
 
       def validate(table_schema, dba)
-        unless missing_table? table_schema, dba
+        if before_validate table_schema, dba
           log "Check [#{table_schema.table_name}] data table" do
             self.errors.clear
             table_schema.columns.each { |col| super(col, dba) }
@@ -22,17 +22,13 @@ module Gauge
 
   protected
 
-      def validators
-        [DataColumnValidator.new]
+      def before_validators
+        [MissingTableValidator.new]
       end
 
-  private
 
-      def missing_table?(table_schema, dba)
-        mtv = MissingTableValidator.new
-        mtv.validate table_schema, dba
-        errors.concat(mtv.errors)
-        mtv.errors.any?
+      def validators
+        [DataColumnValidator.new]
       end
     end
   end
