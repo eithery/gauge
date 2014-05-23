@@ -10,7 +10,7 @@ module Gauge
 
 
       def validate(table_schema, dba)
-        if before_validate table_schema, dba
+        super(table_schema, dba) do
           log "Check [#{table_schema.table_name}] data table" do
             self.errors.clear
             table_schema.columns.each { |col| super(col, dba) }
