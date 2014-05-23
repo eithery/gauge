@@ -20,6 +20,7 @@ require 'gauge/validators/database_validator'
 require 'gauge/validators/missing_column_validator'
 require 'gauge/validators/missing_table_validator'
 require 'gauge/version'
+require 'sequel/tinytds/database'
 
 require 'active_support/core_ext/string/inflections'
 require 'gli'
