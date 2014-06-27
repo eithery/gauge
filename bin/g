@@ -3,7 +3,7 @@ require 'gauge'
 require 'yaml'
 include GLI::App
 
-CONFIG_FILE = File.join(File.dirname(__FILE__), '/../config/options.rc.yaml')
+CONFIG_FILE = File.join(File.dirname(__FILE__), '/../config/options.rc.yml')
 defaults = YAML.load_file(CONFIG_FILE)
 
 # Global command suite options:
