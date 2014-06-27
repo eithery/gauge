@@ -1,13 +1,13 @@
 # Eithery Lab., 2014.
 # Class Gauge::Helper
-# Displays brief help and version information for the app.
+# Displays brief help and version information for the application.
 require 'gauge'
 
 module Gauge
   class Helper
     include ConsoleListener
 
-    def initialize(global_opts, options, args)
+    def initialize(global_opts)
       @global_opts = global_opts
     end
 

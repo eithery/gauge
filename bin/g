@@ -32,7 +32,7 @@ flag [:p, :password]
 # Help.
 command [:h, :help] do |c|
   c.action do |global_opts, options, args|
-    Gauge::Shell.new.help global_opts, options, args
+    Gauge::Shell.new.help global_opts
   end
 end
 

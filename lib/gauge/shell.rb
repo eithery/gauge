@@ -5,19 +5,18 @@ require 'gauge'
 
 module Gauge
   class Shell
-    attr_reader :listeners
-
     def initialize
       Rainbow.enabled = true
     end
 
 
-    def help(*args)
-      Helper.new(*args).application_info
+    # Displays help info about the application and available commands.
+    def help(global_opts)
+      Helper.new(global_opts).application_info
     end
 
 
-    # Performs check operation for the specified database or separate database objects
+    # Validates the specified database or particular database objects
     # against the predefined schema.
     def check(*args)
       DatabaseInspector.new(*args).check
