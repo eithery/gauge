@@ -1,8 +1,13 @@
+# Eithery Lab., 2014.
+# Class Gauge::Validators::ColumnTypeValidator
+# Checks the data column type against the predefined metadata.
 require 'gauge'
 
 module Gauge
   module Validators
     class ColumnTypeValidator < ValidatorBase
+
+      # Checks the data column type.
       def validate(column_schema, db_column)
         data_type = db_column[:db_type]
         if column_schema.data_type != data_type

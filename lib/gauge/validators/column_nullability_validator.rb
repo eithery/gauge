@@ -1,8 +1,13 @@
+# Eithery Lab., 2014.
+# Class Gauge::Validators::ColumnNullabilityValidator
+# Checks the data column nullability against the predefined metadata.
 require 'gauge'
 
 module Gauge
   module Validators
     class ColumnNullabilityValidator < ValidatorBase
+
+      # Checks the data column nullability.
       def validate(column_schema, db_column)
         if column_schema.allow_null? != db_column[:allow_null]
           should_be = column_schema.allow_null? ? 'NULL' : 'NOT NULL'

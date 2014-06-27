@@ -1,3 +1,6 @@
+# Eithery Lab., 2014.
+# Class Gauge::DB::Adapter
+# Database adapter class encapsulating interations with Sequel.
 require 'gauge'
 
 module Gauge

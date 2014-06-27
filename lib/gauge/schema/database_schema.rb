@@ -1,5 +1,5 @@
 # Eithery Lab., 2014.
-# Class Gauge::Schema::DatabaseSchema.
+# Class Gauge::Schema::DatabaseSchema
 # Database schema.
 # Contains metadata info defining a database structure.
 require 'gauge'

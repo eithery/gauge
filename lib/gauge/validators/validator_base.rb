@@ -1,3 +1,6 @@
+# Eithery Lab., 2014.
+# Class Gauge::Validators::ValidatorBase
+# Represents abstract validator to check a database structure.
 require 'gauge'
 
 module Gauge
@@ -7,6 +10,7 @@ module Gauge
 
   protected
 
+      # Performs validation of the specified database object against predefined schema.
       def validate(db_schema, dba)
         if block_given?
           yield db_schema, dba if before_validate db_schema, dba
@@ -19,16 +23,19 @@ module Gauge
       end
 
 
+      # Validators called before the main validation cycle.
       def before_validators
         []
       end
 
 
+      # Child validators.
       def validators
         []
       end
 
 
+      # Validation errors.
       def errors
         @errors ||= []
       end

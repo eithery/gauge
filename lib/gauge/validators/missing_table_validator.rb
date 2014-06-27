@@ -1,8 +1,13 @@
+# Eithery Lab., 2014.
+# Class Gauge::Validators::MissingTableValidator
+# Performs check for missing data table.
 require 'gauge'
 
 module Gauge
   module Validators
     class MissingTableValidator < ValidatorBase
+
+      # Checks for missing data table.
       def validate(table_schema, dba)
         unless dba.table_exists? table_schema
           missing_table table_schema.table_name

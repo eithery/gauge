@@ -1,5 +1,5 @@
 # Eithery Lab., 2014.
-# Class Gauge::Schema::DataTableSchema.
+# Class Gauge::Schema::DataTableSchema
 # Data table schema.
 # Contains metadata info defining a data table structure.
 require 'gauge'
@@ -37,6 +37,7 @@ module Gauge
 
 
 private
+
       def parse_xml(xml_doc)
         @xml = xml_doc
         @local_name = xml_doc.root.attributes['name']

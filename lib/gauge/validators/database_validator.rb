@@ -1,8 +1,13 @@
+# Eithery Lab., 2014.
+# Class Gauge::Validators::DatabaseValidator
+# Checks a database structure against the predefined schema.
 require 'gauge'
 
 module Gauge
   module Validators
     class DatabaseValidator < ValidatorBase
+
+      # Performs validation check.
       def check(database_schema)
         info "Inspecting #{database_schema.database_name} database ..."
 
@@ -13,6 +18,7 @@ module Gauge
 
 protected
 
+      # Child validators.
       def validators
         [DataTableValidator.new]
       end

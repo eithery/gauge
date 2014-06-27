@@ -1,3 +1,7 @@
+# Eithery Lab., 2014.
+# Class Gauge::DatabaseInspector
+# Performs various validation checks of the specified database or
+# particular database objects structure against the predefined schema.
 require 'gauge'
 
 module Gauge
@@ -15,7 +19,7 @@ module Gauge
     end
 
 
-    # Validates the specified database or database objects structure against the predefined schema.
+    # Validates the specified database or particular database objects structure against the predefined schema.
     def check
       repo = Repo.new
       @args.each { |dbo| repo.validate dbo }

@@ -1,5 +1,5 @@
 # Eithery Lab., 2014.
-# Class Gauge::Schema::DataColumnSchema.
+# Class Gauge::Schema::DataColumnSchema
 # Data column schema.
 # Contains metadata info defining a data table column.
 require 'gauge'
@@ -33,6 +33,7 @@ module Gauge
 			end
 
 
+			# Column SQL data type
 			def data_type
 				type_map[column_type]
 			end
@@ -50,7 +51,8 @@ module Gauge
 			end
 
 
-		private
+	private
+
 			# Determines the column name based on 'id' or 'ref' attributes.
 			def name_from_ref
 				raise "Data column name is not specified." unless contains_ref_id?

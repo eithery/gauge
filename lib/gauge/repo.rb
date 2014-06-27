@@ -1,4 +1,5 @@
-# Metadata repo.
+# Eithery Lab., 2014.
+# Class Gauge::Repo
 # Represents a repository containing database metadata info.
 require 'gauge'
 

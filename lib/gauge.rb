@@ -1,3 +1,4 @@
+# Eithery Lab., 2014.
 # Contains all requires for Database Gauge applicaion.
 require 'gauge/console_listener'
 require 'gauge/database_inspector'
