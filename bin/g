@@ -1,10 +1,12 @@
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + '/../lib')
+
 require 'gauge'
 require 'yaml'
 include GLI::App
 
 CONFIG_FILE = File.join(File.dirname(__FILE__), '/../config/options.rc.yml')
 defaults = YAML.load_file(CONFIG_FILE)
+
 
 # Global command suite options:
 desc 'Displays the version of the application.'
@@ -24,7 +26,6 @@ flag [:u, :user]
 desc 'Password used to connect to db server.'
 default_value defaults[:password] || 'secret'
 flag [:p, :password]
-
 
 
 # Available commands.
