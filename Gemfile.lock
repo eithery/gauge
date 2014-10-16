@@ -1,14 +1,14 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    gli (2.12.1)
+    gli (2.12.2)
     rainbow (2.0.0)
-    sequel (4.14.0)
+    sequel (4.15.0)
 
 PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
-  gli (= 2.12.1)
+  gli (= 2.12.2)
   rainbow (= 2.0.0)
-  sequel (= 4.14.0)
+  sequel (= 4.15.0)
