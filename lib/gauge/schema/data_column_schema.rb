@@ -9,19 +9,17 @@ module Gauge
 		class DataColumnSchema
 			attr_reader :table_name
 
-			def initialize(table_name, column_attributes)
+			def initialize(table_name, column_attributes={})
 				@table_name = table_name
 				@column_attrs = column_attributes
 			end
 
 
-			# Data column name.
 			def column_name
 				@column_attrs[:name] || name_from_ref
 			end
 
 
-			# Column type.
 			def column_type
 				type = @column_attrs[:type]
 				return :id if contains_ref_id?
@@ -33,19 +31,16 @@ module Gauge
 			end
 
 
-			# Column SQL data type
 			def data_type
 				type_map[column_type]
 			end
 
 
-			# Determines whether the data column allows NULLs.
 			def allow_null?
 				!(identity? || @column_attrs[:required])
 			end
 
 
-			# Converts a column name into the symbol in downcase to be used as key.
 			def to_key
 				column_name.to_sym.downcase
 			end
@@ -57,7 +52,7 @@ module Gauge
 			def name_from_ref
 				raise "Data column name is not specified." unless contains_ref_id?
 				ref_name = @column_attrs[:ref]
-				ref_name.nil? ? 'id' : ref_name.split('.').last.singularize + '_id'
+				ref_name.split('.').last.singularize + '_id'
 			end
 
 
