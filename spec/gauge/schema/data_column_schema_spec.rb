@@ -96,10 +96,44 @@ module Gauge
 
 
       describe '#data_type' do
+        it "supports convertion from the specified column type" do
+          [:id, :long].should be_converted_to(:bigint)
+          [:int].should be_converted_to(:int)
+          [:string].should be_converted_to(:nvarchar)
+          [:char, :us_state, :country].should be_converted_to(:nchar)
+          [:bool, :byte, :enum].should be_converted_to(:tinyint)
+          [:datetime].should be_converted_to(:datetime)
+          [:date].should be_converted_to(:date)
+          [:money, :percent].should be_converted_to(:decimal)
+          [:xml].should be_converted_to(:xml)
+          [:blob].should be_converted_to(:varbinary)
+          [:binary].should be_converted_to(:binary)
+        end
       end
 
 
       describe '#allow_null?' do
+        subject { @column.allow_null? }
+
+        context "no identity or required attributes defined" do
+          before { @column = DataColumnSchema.new(table_name, name: 'account_number') }
+          it { should be true }
+        end
+
+        context "when the column is defined as identity column" do
+          before { @column = DataColumnSchema.new(table_name, id: true) }
+          it { should be false }
+        end
+
+        context "when the column defined as business identity column" do
+          before { @column = DataColumnSchema.new(table_name, business_id: true) }
+          it { should be false }
+        end
+
+        context "when the column is defined as required" do
+          before { @column = DataColumnSchema.new(table_name, required: true) }
+          it { should be false }
+        end
       end
 
 

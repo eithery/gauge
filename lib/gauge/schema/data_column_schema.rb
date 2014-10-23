@@ -70,23 +70,23 @@ module Gauge
 
 			def type_map
 				{
-					id: 'bigint',
-					int: 'int',
-					long: 'bigint',
-					string: 'nvarchar',
-					char: 'nchar',
-					bool: 'tinyint',
-					byte: 'tinyint',
-					datetime: 'datetime',
-					date: 'date',
-					us_state: 'nchar',
-					country: 'nchar',
-					money: 'decimal',
-					percent: 'decimal',
-					enum: 'tinyint',
-					xml: 'xml',
-					blob: 'varbinary',
-					binary: 'binary'
+					id: :bigint,
+					int: :int,
+					long: :bigint,
+					string: :nvarchar,
+					char: :nchar,
+					bool: :tinyint,
+					byte: :tinyint,
+					datetime: :datetime,
+					date: :date,
+					us_state: :nchar,
+					country: :nchar,
+					money: :decimal,
+					percent: :decimal,
+					enum: :tinyint,
+					xml: :xml,
+					blob: :varbinary,
+					binary: :binary
 				}
 			end
 		end
