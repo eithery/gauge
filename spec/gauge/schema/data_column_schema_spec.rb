@@ -14,6 +14,21 @@ module Gauge
       it { should respond_to :allow_null? }
       it { should respond_to :to_key }
 
+
+      describe '#initialize' do
+        it "raises an error when the passed table name is blank" do
+          expect { DataColumnSchema.new(nil) }.to raise_error(ArgumentError, /table name is not specified/)
+          expect { DataColumnSchema.new("   ") }.to raise_error(ArgumentError, /table name is not specified/)
+        end
+
+        it "raises an error for not supported column types" do
+          expect do
+            DataColumnSchema.new(table_name, type: :unknown).data_type
+          end.to raise_error(ArgumentError, /invalid column type/i)
+        end
+      end
+
+
       describe '#table_name' do
         it "returns the table name passed in the initializer" do
           column.table_name.should == table_name
@@ -36,7 +51,7 @@ module Gauge
           context "and no refs to another table defined" do
             before { @no_name_column = DataColumnSchema.new(table_name) }
             it "should raise the error" do
-              expect { @no_name_column.column_name }.to raise_error('Data column name is not specified.')
+              expect { @no_name_column.column_name }.to raise_error(/column name is not specified/)
             end
           end
         end
@@ -115,7 +130,7 @@ module Gauge
       describe '#allow_null?' do
         subject { @column.allow_null? }
 
-        context "no identity or required attributes defined" do
+        context "when no identity or required attributes defined" do
           before { @column = DataColumnSchema.new(table_name, name: 'account_number') }
           it { should be true }
         end
@@ -138,6 +153,9 @@ module Gauge
 
 
       describe '#to_key' do
+        it "returns column name converted to symbol" do
+          column.to_key.should == :account_number
+        end
       end
     end
   end

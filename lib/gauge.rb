@@ -23,6 +23,7 @@ require 'gauge/validators/missing_table_validator'
 require 'gauge/version'
 require 'sequel/tinytds/database'
 
+require 'active_support/core_ext/string'
 require 'active_support/core_ext/string/inflections'
 require 'gli'
 require 'rainbow'

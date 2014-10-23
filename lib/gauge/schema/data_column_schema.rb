@@ -10,8 +10,11 @@ module Gauge
 			attr_reader :table_name
 
 			def initialize(table_name, column_attributes={})
+				raise ArgumentError.new('Data table name is not specified.') if table_name.blank?
+
 				@table_name = table_name
 				@column_attrs = column_attributes
+				validate_column_type
 			end
 
 
@@ -47,8 +50,7 @@ module Gauge
 
 
 	private
-
-			# Determines the column name based on 'id' or 'ref' attributes.
+	
 			def name_from_ref
 				raise "Data column name is not specified." unless contains_ref_id?
 				ref_name = @column_attrs[:ref]
@@ -56,13 +58,11 @@ module Gauge
 			end
 
 
-			# Determines whether the column schema contains ref or id attributes.
 			def contains_ref_id?
 				@column_attrs.include?(:ref)
 			end
 
 
-			# Determines whether the column is identity or the part of identity.
 			def identity?
 				@column_attrs.include?(:id) || @column_attrs.include?(:business_id)
 			end
@@ -88,6 +88,12 @@ module Gauge
 					blob: :varbinary,
 					binary: :binary
 				}
+			end
+
+
+			def validate_column_type
+				col_type = @column_attrs[:type]
+				raise ArgumentError.new('Invalid column type.') unless col_type.nil? || type_map.keys.include?(col_type)
 			end
 		end
 	end
