@@ -11,21 +11,20 @@ module Gauge
       private :local_name
 
       def initialize(schema_file)
-        raise "Metadata file '#{schema_file}' not found." unless File.exists?(schema_file)
+        raise ArgumentError.new("Metadata file '#{schema_file}' not found.") unless File.exists?(schema_file)
+
         @schema_file = schema_file
         @columns = []
         File.open(schema_file, 'r') { |file| parse_xml REXML::Document.new(file) }
       end
 
 
-      # Returns the database name containing the table.
       def database_name
         parts = @schema_file.split('/')
         parts[parts.find_index('tables') - 1]
       end
 
 
-      # Returns the full table name.
       def table_name
         @sql_schema.nil? ? @local_name : @sql_schema + '.' + @local_name
       end

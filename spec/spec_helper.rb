@@ -9,7 +9,11 @@ Dir[File.join(File.dirname(__FILE__) + '/gauge/support/**/*.rb')].each { |f| req
 RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = [:should, :expect]
-
-    config.include Gauge::SchemaMatchers
   end
+
+  config.mock_with :rspec do |mocks|
+    mocks.syntax = [:should, :expect]
+  end
+
+  config.include Gauge::SchemaMatchers
 end
