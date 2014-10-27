@@ -19,7 +19,8 @@ module Gauge
 
 
 			def column_name
-				@column_attrs[:name] || name_from_ref
+				column_name = @column_attrs[:name] || name_from_ref
+				column_name.to_sym
 			end
 
 
@@ -27,9 +28,9 @@ module Gauge
 				type = @column_attrs[:type]
 				return :id if contains_ref_id?
 				return type.to_sym unless type.nil?
-				return :bool if column_name.downcase.start_with?('is', 'has', 'allow')
-				return :datetime if column_name.downcase.end_with?('date', '_at')
-				return :date if column_name.downcase.end_with?('_on')
+				return :bool if column_name.to_s.downcase.start_with?('is', 'has', 'allow')
+				return :datetime if column_name.to_s.downcase.end_with?('date', '_at')
+				return :date if column_name.to_s.downcase.end_with?('_on')
 				:string
 			end
 
@@ -93,7 +94,7 @@ module Gauge
 
 			def validate_column_type
 				col_type = @column_attrs[:type]
-				raise ArgumentError.new('Invalid column type.') unless col_type.nil? || type_map.keys.include?(col_type)
+				raise ArgumentError.new('Invalid column type.') unless col_type.nil? || type_map.keys.include?(col_type.to_sym)
 			end
 		end
 	end

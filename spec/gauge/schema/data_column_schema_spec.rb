@@ -38,13 +38,13 @@ module Gauge
       describe '#column_name' do
         context "when name is explicitly passed in constructor arguments" do
           subject { column.column_name }
-          it { should == 'account_number' }
+          it { should == :account_number }
         end
 
         context "when no name passed in constructors arguments" do
           context "and column attributes contain the ref to another table" do
             it "concludes the column name based on the ref" do
-              ref_column.column_name.should == 'primary_rep_id'
+              ref_column.column_name.should == :primary_rep_id
             end
           end
 

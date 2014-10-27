@@ -2,6 +2,7 @@
 # RSpec helper file.
 
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + '/../lib')
+require 'rspec/collection_matchers'
 require 'gauge'
 
 Dir[File.join(File.dirname(__FILE__) + '/gauge/support/**/*.rb')].each { |f| require f }

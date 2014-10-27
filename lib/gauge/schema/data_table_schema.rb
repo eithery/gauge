@@ -11,7 +11,7 @@ module Gauge
       private :local_name
 
       def initialize(schema_file)
-        raise ArgumentError.new("Metadata file '#{schema_file}' not found.") unless File.exists?(schema_file)
+        raise ArgumentError.new("Data table definition file '#{schema_file}' is not found.") unless File.exists?(schema_file)
 
         @schema_file = schema_file
         @columns = []
@@ -26,7 +26,7 @@ module Gauge
 
 
       def table_name
-        @sql_schema.nil? ? @local_name : @sql_schema + '.' + @local_name
+        "[#{@sql_schema}].[#{@local_name}]"
       end
 
 
@@ -35,12 +35,18 @@ module Gauge
       end
 
 
+      def contains?(column_name)
+        columns.any? { |col| col.column_name == column_name.to_sym }
+      end
+
+
 private
 
       def parse_xml(xml_doc)
         @xml = xml_doc
         @local_name = xml_doc.root.attributes['name']
-        @sql_schema = xml_doc.root.attributes['schema']
+        @sql_schema = xml_doc.root.attributes['schema'] || 'dbo'
+        @sql_schema = @sql_schema.to_sym
         @columns << DataColumnSchema.new(@local_name, name: 'id', type: 'long', required: true) unless has_id?
         xml_doc.root.each_element('/table/columns/col') do |col|
           column_attributes = {}
