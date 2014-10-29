@@ -179,8 +179,17 @@ module Gauge
 
 
       describe '#to_key' do
-        it "returns the local table name converted to symbol" do
-          table_schema.to_key.should == :source_firms
+        context "for default SQL schema" do
+          it "returns the local table name converted to symbol" do
+            table_schema.to_key.should == :source_firms
+          end
+        end
+
+        context "for custom SQL schema" do
+          before { @xml = %{ <table name="source_firms" schema="ref"><columns/></table> } }
+          it "concatenates SQL schema and local table name" do
+            table_schema.to_key.should == :ref_source_firms
+          end
         end
       end
     end

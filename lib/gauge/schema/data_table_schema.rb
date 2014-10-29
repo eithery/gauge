@@ -31,7 +31,7 @@ module Gauge
 
 
       def to_key
-        local_name.to_sym.downcase
+        sql_schema == :dbo ? local_name.downcase.to_sym : "#{sql_schema}_#{local_name}".to_sym
       end
 
 
@@ -47,18 +47,18 @@ private
         @local_name = xml_doc.root.attributes['name']
         @sql_schema = xml_doc.root.attributes['schema'] || 'dbo'
         @sql_schema = @sql_schema.to_sym
-        @columns << DataColumnSchema.new(@local_name, name: 'id', type: 'long', required: true) unless has_id?
+        @columns << DataColumnSchema.new(@local_name, name: 'id', type: :long, required: true) unless has_id?
         xml_doc.root.each_element('/table/columns/col') do |col|
           column_attributes = {}
           col.attributes.each { |name, value| column_attributes[name.to_sym] = value }
           @columns << DataColumnSchema.new(@local_name, column_attributes)
         end
         if has_timestamps?
-          @columns << DataColumnSchema.new(@local_name, name: 'created', type: 'datetime', required: true)
+          @columns << DataColumnSchema.new(@local_name, name: 'created', type: :datetime, required: true)
           @columns << DataColumnSchema.new(@local_name, name: created_by_column, required: true)
-          @columns << DataColumnSchema.new(@local_name, name: 'modified', type: 'datetime', required: true)
+          @columns << DataColumnSchema.new(@local_name, name: 'modified', type: :datetime, required: true)
           @columns << DataColumnSchema.new(@local_name, name: modified_by_column, required: true)
-          @columns << DataColumnSchema.new(@local_name, name: 'version', type: 'long', required: true)
+          @columns << DataColumnSchema.new(@local_name, name: 'version', type: :long, required: true)
         end
       end
 
