@@ -13,9 +13,9 @@ module Gauge
         DataTableSchema.new(@table_schema_file)
       end
 
-      before do
-        @table_schema_file = 'master_accounts.db.xml'
-        @xml = %{
+      let(:xml_with_custom_sql_schema) { %{<table name="master_accounts" schema="ref"/>} }
+      let(:xml_with_default_sql_schema) do
+        %{
           <table name="source_firms">
             <columns>
               <col name="name" length="256" required="true"/>
@@ -25,10 +25,15 @@ module Gauge
         }
       end
 
+      before do
+        @table_schema_file = 'master_accounts.db.xml'
+        @xml = xml_with_default_sql_schema
+      end
+
 
       subject { table_schema }
       it { should respond_to :sql_schema, :columns }
-      it { should respond_to :database_name, :table_name }
+      it { should respond_to :database_name, :table_name, :local_name }
       it { should respond_to :to_key }
 
 
@@ -47,7 +52,7 @@ module Gauge
         end
 
         context "when data table is defined in custom SQL schema" do
-          before { @xml = %{<table name="master_accounts" schema="ref"/>} }
+          before { @xml = xml_with_custom_sql_schema }
           it { should == :ref }
         end
       end
@@ -172,8 +177,22 @@ module Gauge
         end
 
         context "when data table is defined in custom SQL schema" do
-          before { @xml = %{<table name="master_accounts" schema="ref"/>} }
+          before { @xml = xml_with_custom_sql_schema }
           it { should == '[ref].[master_accounts]' }
+        end
+      end
+
+
+      describe '#local_name' do
+        subject { table_schema.local_name }
+
+        context "when data table is defined in default SQL schema" do
+          it { should == 'source_firms' }
+        end
+
+        context "when data table is defined in custom SQL schema" do
+          before { @xml = xml_with_custom_sql_schema }
+          it { should == 'master_accounts' }
         end
       end
 
@@ -186,9 +205,9 @@ module Gauge
         end
 
         context "for custom SQL schema" do
-          before { @xml = %{ <table name="source_firms" schema="ref"><columns/></table> } }
+          before { @xml = xml_with_custom_sql_schema }
           it "concatenates SQL schema and local table name" do
-            table_schema.to_key.should == :ref_source_firms
+            table_schema.to_key.should == :ref_master_accounts
           end
         end
       end

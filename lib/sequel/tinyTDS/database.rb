@@ -10,7 +10,7 @@ module Sequel
 
       # Determines whether the specified data table exists in the database.
       def table_exists?(table_schema)
-        self.tables(schema: table_schema.sql_schema).include?(table_schema.to_key)
+        self.tables(schema: table_schema.sql_schema).include?(table_schema.local_name.downcase.to_sym)
       end
 
 

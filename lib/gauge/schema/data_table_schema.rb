@@ -8,7 +8,6 @@ module Gauge
   module Schema
     class DataTableSchema
       attr_reader :local_name, :sql_schema, :columns
-      private :local_name
 
       def initialize(schema_file)
         raise ArgumentError.new("Data table definition file '#{schema_file}' is not found.") unless File.exists?(schema_file)
