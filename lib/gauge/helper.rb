@@ -18,6 +18,7 @@ module Gauge
 
 
   private
+  
     def version
       info "Database Gauge #{VERSION}"
     end
