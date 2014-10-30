@@ -12,7 +12,6 @@ module Gauge
     end
 
 
-    # Validates the specified data object.
     def validate(dbo)
       validator = validator_for dbo
       validator.check(schema dbo) unless validator.nil?
@@ -20,7 +19,6 @@ module Gauge
 
 private
 
-    # Returns the validator instance based on the specified database object name.
     def validator_for(dbo)
       return Validators::DatabaseValidator.new if database? dbo
       return Validators::DataTableValidator.new if table? dbo
@@ -29,32 +27,28 @@ private
     end
 
 
-    # Determines whether the specified name represents the name of a database
     def database?(dbo_name)
       Dir.exist?("#{@data_root}/#{dbo_name}")
     end
 
 
-    # Determines whether the specified name represents the name of data table
     def table?(dbo_name)
       table_template(dbo_name).any? || table_template(dbo_name.underscore).any? ||
         table_template(dbo_name.split('.').last).any?
     end
 
 
-    # Creates and returns the schema for the specified database object.
     def schema(dbo_name)
       database = Schema::DatabaseSchema.new(database_name(dbo_name), @data_root)
       return database if database? dbo_name
       if table? dbo_name
-        table_schema = database.tables[dbo_name.downcase]
-        table_schema = database.tables[dbo_name.camelize.downcase] if table_schema.nil?
+        table_schema = database.tables[dbo_name.downcase.to_sym]
+        table_schema = database.tables[dbo_name.camelize.downcase.to_sym] if table_schema.nil?
         table_schema
       end
     end
 
 
-    # Retrieves the database name for the specified database object name.
     def database_name(dbo_name)
       return dbo_name if database? dbo_name
 
