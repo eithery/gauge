@@ -23,7 +23,7 @@ module Gauge
 
           context "and actual data column in DB is nullable" do
             before { stub_db_column_and_return true }
-            it { should_append_error_message 'account_number', 'NOT NULL' }
+            it { should_append_error_message(/Data column '.*account_number.*' must be defined as NOT NULL/) }
           end
 
           context "and actual data column in DB is NOT nullable" do
@@ -42,7 +42,7 @@ module Gauge
 
           context "and actual data column in DB is NOT nullable" do
             before { stub_db_column_and_return false }
-            it { should_append_error_message 'account_number', 'NULL' }
+            it { should_append_error_message(/Data column '.*account_number.*' must be defined as NULL/) }
           end
         end
       end
@@ -56,19 +56,6 @@ private
 
       def stub_db_column_and_return(allow_null)
         @db_column.stub(:[]).with(:allow_null).and_return(allow_null)
-      end
-
-
-      def no_validation_errors_detected
-        @errors.should_not_receive(:<<)
-        validator.validate(@column_schema, @db_column)
-        @errors.should be_empty
-      end
-
-
-      def should_append_error_message(column_name, nullability)
-        @errors.should_receive(:<<).with(/Data column '.*#{column_name}.*' must be defined as #{nullability}/)
-        validator.validate(@column_schema, @db_column)
       end
     end
   end

@@ -17,4 +17,5 @@ RSpec.configure do |config|
   end
 
   config.include Gauge::SchemaMatchers
+  config.include Gauge::Validators::ValidatorSpecHelper
 end

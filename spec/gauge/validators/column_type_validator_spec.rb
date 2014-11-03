@@ -26,11 +26,7 @@ module Gauge
             stub_column_schema_for_type :bigint
             stub_db_column_for_type :nvarchar
           end
-
-          it "appends validation error message into errors collection" do
-            @errors.should_receive(:<<).with(/Data column '.*account_number.*' is 'nvarchar' but it must be 'bigint'/)
-            validator.validate(@column_schema, @db_column)
-          end
+          it { should_append_error_message(/Data column '.*account_number.*' is 'nvarchar' but it must be 'bigint'/) }
         end
 
 
@@ -39,12 +35,7 @@ module Gauge
             stub_column_schema_for_type :nvarchar
             stub_db_column_for_type :nvarchar
           end
-
-          specify "no validation errors detected" do
-            @errors.should_not_receive(:<<)
-            validator.validate(@column_schema, @db_column)
-            @errors.should be_empty
-          end
+          specify { no_validation_errors_detected }
         end
       end
 
