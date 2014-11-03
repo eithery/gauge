@@ -7,7 +7,6 @@ module Gauge
   module Validators
     class ColumnTypeValidator < ValidatorBase
 
-      # Checks the data column type.
       def validate(column_schema, db_column)
         data_type = db_column[:db_type].to_sym
         if column_schema.data_type != data_type

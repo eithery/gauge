@@ -6,20 +6,10 @@ module Gauge
   module Validators
     describe ColumnTypeValidator do
       let(:validator) { ColumnTypeValidator.new }
-      subject { validator }
-
-
-      it { should respond_to :validate }
-
+      it_behaves_like "any database object validator"
 
       describe '#validate' do
-        before do
-          @errors = []
-          validator.stub(:errors).and_return(@errors)
-          @column_schema = double('column_schema', column_name: 'account_number')
-          @db_column = double('db_column')
-        end
-
+        before { create_data_column_stubs }
 
         context "when the actual column type is different from defined in metadata" do
           before do
@@ -28,7 +18,6 @@ module Gauge
           end
           it { should_append_error_message(/Data column '.*account_number.*' is 'nvarchar' but it must be 'bigint'/) }
         end
-
 
         context "when the actual column type is the same as defined in metadata" do
           before do

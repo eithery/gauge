@@ -7,14 +7,12 @@ module Gauge
   module Validators
     class DataColumnValidator < ValidatorBase
 
-      # Performs validation check for the specified data column.
       def validate(column_schema, dba)
         super(column_schema, dba) do
           super(column_schema, dba.data_column(column_schema))
         end
         errors
       end
-
 
   protected
 
