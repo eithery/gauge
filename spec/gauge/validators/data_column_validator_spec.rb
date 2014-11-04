@@ -10,36 +10,66 @@ module Gauge
 
       describe '#validate' do
         before do
-          create_data_column_stubs
-          @dba.stub(:column_exists?).and_return(true)
-          @column_schema.stub(:allow_null?).and_return(true)
-          @column_schema.stub(:data_type).and_return(:nvarchar)
-          @db_column.stub(:[]).with(:allow_null).and_return(true)
-          @db_column.stub(:[]).with(:db_type).and_return(:nvarchar)
+          create_dba_stubs
+          stub_column_schema_nullability :null
+          stub_column_schema_type :nvarchar
+          stub_db_column_nullability :null
+          stub_db_column_type :nvarchar
         end
 
-        it "performs check for missing data columns" do
-          missing_column_validator = MissingColumnValidator.new
-          MissingColumnValidator.stub(:new).and_return(missing_column_validator)
-          missing_column_validator.should_receive(:validate).with(@column_schema, @dba)
+        it "always performs check for missing data columns" do
+          stub_validator(MissingColumnValidator).should_receive(:validate).with(@column_schema, @dba)
           validator.validate @column_schema, @dba
         end
 
-        it "performs data column type validation" do
-          column_type_validator = ColumnTypeValidator.new
-          ColumnTypeValidator.stub(:new).and_return(column_type_validator)
-          column_type_validator.should_receive(:validate).with(@column_schema, @db_column)
-          validator.validate @column_schema, @dba
+        context "when data column exists in the table" do
+          before { @dba.stub(:column_exists?).and_return(true) }
+
+          it "performs data column type validation" do
+            stub_validator(ColumnTypeValidator).should_receive(:validate).with(@column_schema, @db_column)
+            validator.validate @column_schema, @dba
+          end
+
+          it "performs data column nullability check" do
+            stub_validator(ColumnNullabilityValidator).should_receive(:validate).with(@column_schema, @db_column)
+            validator.validate @column_schema, @dba
+          end
         end
 
-        it "performs data column nullability check" do
-          nullability_validator = ColumnNullabilityValidator.new
-          ColumnNullabilityValidator.stub(:new).and_return(nullability_validator)
-          nullability_validator.should_receive(:validate).with(@column_schema, @db_column)
-          validator.validate @column_schema, @dba
+        context "when missing data column" do
+          before { @dba.stub(:column_exists?).and_return(false) }
+
+          it "does not perform data column type validation" do
+            stub_validator(ColumnTypeValidator).should_not_receive(:validate)
+            validator.validate @column_schema, @dba
+          end
+
+          it "does not perform data column nullability check" do
+            stub_validator(ColumnNullabilityValidator).should_not_receive(:validate)
+            validator.validate @column_schema, @dba
+          end
         end
 
-        it "aggregates all errors in the errors collection"
+        context "when no errors found" do
+          specify "errors collection remains empty" do
+            validator.validate @column_schema, @dba
+            validator.errors.should be_empty
+          end
+        end
+
+        context "when some errors found" do
+          before do
+            @db_column.stub(:[]).with(:allow_null).and_return(false)
+            @db_column.stub(:[]).with(:db_type).and_return(:bigint)
+          end
+
+          it "aggregates all errors in the errors collection" do
+            validator.validate @column_schema, @dba
+            validator.should have(2).errors
+            validator.errors.should include(/but it must be 'nvarchar'/)
+            validator.errors.should include(/must be defined as NULL/)
+          end
+        end
       end
     end
   end

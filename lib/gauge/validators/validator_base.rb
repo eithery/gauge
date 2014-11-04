@@ -8,6 +8,10 @@ module Gauge
     class ValidatorBase
       include ConsoleListener
 
+      def errors
+        @errors ||= []
+      end
+
   protected
 
       # Performs validation of the specified database object against predefined schema.
@@ -32,12 +36,6 @@ module Gauge
       # Child validators.
       def validators
         []
-      end
-
-
-      # Validation errors.
-      def errors
-        @errors ||= []
       end
 
   private
