@@ -14,6 +14,7 @@ module Gauge
       def create_data_column_stubs
         @column_schema = double('column_schema', column_name: 'account_number')
         @db_column = double('db_column')
+        @dba = @db_column
       end
 
 
@@ -47,16 +48,17 @@ module Gauge
 
 
       def no_validation_errors_detected
+        expect { validator.validate(@column_schema, @dba) }.not_to change { validator.errors.count }
+
         validator.errors.should_not_receive(:<<)
-        expect { validator.validate(@column_schema, @db_column) }.not_to change { validator.errors.count }
-        validator.validate(@column_schema, @db_column)
+        validator.validate(@column_schema, @dba)
         validator.errors.should be_empty
       end
 
 
       def should_append_error_message(error_message)
         validator.errors.should_receive(:<<).with(error_message)
-        validator.validate(@column_schema, @db_column)
+        validator.validate(@column_schema, @dba)
       end
 
 

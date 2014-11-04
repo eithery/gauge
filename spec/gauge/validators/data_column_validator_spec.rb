@@ -52,8 +52,7 @@ module Gauge
 
         context "when no errors found" do
           specify "errors collection remains empty" do
-            validator.validate @column_schema, @dba
-            validator.errors.should be_empty
+            no_validation_errors_detected
           end
         end
 
