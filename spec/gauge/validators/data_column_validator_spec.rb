@@ -10,11 +10,12 @@ module Gauge
 
       describe '#validate' do
         before do
-          create_dba_stubs
+          create_data_column_stubs
           stub_column_schema_nullability :null
           stub_column_schema_type :nvarchar
           stub_db_column_nullability :null
           stub_db_column_type :nvarchar
+          create_dba_stubs
         end
 
         it "always performs check for missing data columns" do

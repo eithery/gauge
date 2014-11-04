@@ -6,15 +6,21 @@ module Gauge
     module ValidatorSpecHelper
 
       def create_dba_stubs
-        create_data_column_stubs
-        @dba = double('dba', data_column: @db_column, column_exists?: true)
+        @dba = double('dba', data_column: @db_column, column_exists?: true, table_exists?: true)
       end
 
 
       def create_data_column_stubs
         @column_schema = double('column_schema', column_name: 'account_number')
         @db_column = double('db_column')
+        @schema = @column_schema
         @dba = @db_column
+      end
+
+
+      def create_data_table_stubs
+        @table_schema = double('table_schema', table_name: '[dbo].[master_accounts]')
+        @schema = @table_schema
       end
 
 
@@ -48,17 +54,17 @@ module Gauge
 
 
       def no_validation_errors_detected
-        expect { validator.validate(@column_schema, @dba) }.not_to change { validator.errors.count }
+        expect { validator.validate(@schema, @dba) }.not_to change { validator.errors.count }
 
         validator.errors.should_not_receive(:<<)
-        validator.validate(@column_schema, @dba)
+        validator.validate(@schema, @dba)
         validator.errors.should be_empty
       end
 
 
       def should_append_error_message(error_message)
         validator.errors.should_receive(:<<).with(error_message)
-        validator.validate(@column_schema, @dba)
+        validator.validate(@schema, @dba)
       end
 
 

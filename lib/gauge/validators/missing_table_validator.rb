@@ -22,7 +22,6 @@ module Gauge
         message = "Check ".color(:red) + table_name.color(:red).bright + " data table - ".color(:red) +
           "missing".color(:red).bright
         errors << message
-        puts message
       end
     end
   end
