@@ -18,10 +18,11 @@ module Gauge
           create_dba_stubs
         end
 
-        it "always performs check for missing data columns" do
+        it "always performs check for missing data column" do
           stub_validator(MissingColumnValidator).should_receive(:validate).with(@column_schema, @dba)
           validator.validate @column_schema, @dba
         end
+
 
         context "when data column exists in the table" do
           before { @dba.stub(:column_exists?).and_return(true) }
@@ -37,6 +38,7 @@ module Gauge
           end
         end
 
+
         context "when missing data column" do
           before { @dba.stub(:column_exists?).and_return(false) }
 
@@ -51,11 +53,13 @@ module Gauge
           end
         end
 
+
         context "when no errors found" do
           specify "errors collection remains empty" do
             no_validation_errors_detected
           end
         end
+
 
         context "when some errors found" do
           before do

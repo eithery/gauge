@@ -14,7 +14,6 @@ module Gauge
 
   protected
 
-      # Performs validation of the specified database object against predefined schema.
       def validate(db_schema, dba)
         if block_given?
           yield db_schema, dba if before_validate db_schema, dba
