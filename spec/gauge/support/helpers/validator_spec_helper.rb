@@ -15,6 +15,11 @@ module Gauge
         @db_column = double('db_column')
         @schema = @column_schema
         @dba = @db_column
+
+        @db_column.stub(:[]).with(:allow_null)
+          .and_return(false, false, true, false, false, true)
+        @db_column.stub(:[]).with(:db_type)
+          .and_return(:bigint, :nvarchar, :datetime, :bigint, :nvarchar, :datetime)
       end
 
 
@@ -77,6 +82,13 @@ module Gauge
         subject { validator }
         it { should respond_to :validate }
         it { should respond_to :errors }
+      end
+
+
+      shared_examples_for "validation passed successfully" do
+        specify "errors collection remains empty" do
+          no_validation_errors_detected
+        end
       end
     end
   end

@@ -55,9 +55,7 @@ module Gauge
 
 
         context "when no errors found" do
-          specify "errors collection remains empty" do
-            no_validation_errors_detected
-          end
+          it_behaves_like "validation passed successfully"
         end
 
 
