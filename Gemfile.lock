@@ -10,7 +10,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.1.0)
     rspec-support (3.1.2)
-    sequel (4.15.0)
+    sequel (4.16.0)
 
 PLATFORMS
   x86-mingw32
@@ -19,4 +19,4 @@ DEPENDENCIES
   gli (= 2.12.2)
   rainbow (= 2.0.0)
   rspec-collection_matchers
-  sequel (= 4.15.0)
+  sequel (= 4.16.0)
