@@ -12,7 +12,6 @@ module Gauge
         @errors ||= []
       end
 
-  protected
 
       def validate(db_schema, dba)
         if block_given?
@@ -26,13 +25,13 @@ module Gauge
       end
 
 
-      # Validators called before the main validation cycle.
+  protected
+
       def before_validators
         []
       end
 
 
-      # Child validators.
       def validators
         []
       end

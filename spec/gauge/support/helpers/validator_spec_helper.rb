@@ -63,6 +63,14 @@ module Gauge
       end
 
 
+      def stub_db_adapter
+        DB::Connection.stub(:server).and_return('local\SQL2012')
+        DB::Connection.stub(:user).and_return('admin')
+        DB::Connection.stub(:password).and_return('secret')
+        Sequel::TinyTDS::Database.any_instance.stub(:test_connection)
+      end
+
+
       def no_validation_errors_detected
         expect { validator.validate(@schema, @dba) }.not_to change { validator.errors.count }
 
@@ -80,8 +88,10 @@ module Gauge
 
       shared_examples_for "any database object validator" do
         subject { validator }
+
         it { should respond_to :validate }
         it { should respond_to :errors }
+        specify { validator.errors.should be_empty }
       end
 
 

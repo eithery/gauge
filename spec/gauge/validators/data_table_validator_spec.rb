@@ -14,7 +14,7 @@ module Gauge
       describe '#check' do
         let(:table_schema) { double('table_schema', database_name: 'accounts_db') }
 
-        it "creates data adapter session" do
+        it "runs within data adapter session" do
           DB::Adapter.should_receive(:session).with('accounts_db')
           validator.check(table_schema)
         end
@@ -102,15 +102,6 @@ module Gauge
             validator.errors.should include(/must be defined as NULL/)
           end
         end
-      end
-
-private
-      
-      def stub_db_adapter
-        DB::Connection.stub(:server).and_return('local\SQL2012')
-        DB::Connection.stub(:user).and_return('admin')
-        DB::Connection.stub(:password).and_return('secret')
-        Sequel::TinyTDS::Database.any_instance.stub(:test_connection)
       end
     end
   end
