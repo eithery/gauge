@@ -25,6 +25,7 @@ module Gauge
 
       def create_data_table_stubs
         @table_schema = double('table_schema', table_name: '[dbo].[master_accounts]',
+          sql_schema: :ref, local_name: 'master_accounts',
           columns: [
             double(column_name: 'id', data_type: :bigint, allow_null?: false),
             double(column_name: 'number', data_type: :nvarchar, allow_null?: false),
