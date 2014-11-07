@@ -8,7 +8,7 @@ module Gauge
       it "displays name, version and copyright info" do
         helper.should_receive(:info).with(/^Database Gauge. Version \d\.\d\.\d/)
         helper.should_receive(:info).with(/Copyright \(C\) M&O Systems, Inc\., 2014\./)
-        helper.should_receive(:info).with(/usage: g \[\-\-version\|\-v\] \[\-\-help\|\-h\] <command> \[<args>\]/)
+        helper.should_receive(:info).with(/usage: gauge \[\-\-version\|\-v\] \[\-\-help\|\-h\] <command> \[<args>\]/)
         helper.application_info
       end
     end
