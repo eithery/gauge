@@ -9,14 +9,16 @@ module Gauge
 		class DatabaseSchema
 			attr_reader :database_name, :tables
 
-			def initialize(database_name, data_root)
-				root = File.join(data_root, database_name)
-				raise "Metadata for '#{database_name}' is not defined." unless File.exists?(root)
+			def initialize(database, data_root)
+				db_definition_file = File.join(data_root, 'databases.rb')
+				raise "Metadata for '#{database}' database is not defined." unless File.exists?(db_definition_file)
 
-				@root = root
-				@database_name = database_name
+				require db_definition_file
+
 				@tables = {}
-				Dir["#{@root}/tables/**/*.db.xml"].map do |schema_file|
+				@database_name = database
+
+				Dir["#{data_root}/#{database_name}/**/*.db.xml"].map do |schema_file|
 					table_schema = DataTableSchema.new(schema_file)
 					@tables[table_schema.to_key] = table_schema
 				end
