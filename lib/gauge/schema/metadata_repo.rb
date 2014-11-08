@@ -6,6 +6,9 @@ require 'gauge'
 module Gauge
   module Schema
     class MetadataRepo
+      def self.databases
+        @@databases ||= {}
+      end
     end
   end
 end
