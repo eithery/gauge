@@ -5,7 +5,8 @@
 require 'gauge'
 
 class Object
-  def database(name, options)
+  def database(*args)
+    Gauge::Schema::MetadataFactory.define_database(*args)
   end
 
 
