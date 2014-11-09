@@ -14,13 +14,15 @@ module Gauge
 				@options = options
 				@tables = {}
 
-#				db_definition_file = File.join(data_root, 'databases.rb')
-#				raise "Metadata for '#{database}' database is not defined." unless File.exists?(db_definition_file)
-#				require db_definition_file
-#				Dir["#{data_root}/#{database_name}/**/*.db.xml"].map do |schema_file|
-#					table_schema = DataTableSchema.new(schema_file)
-#					@tables[table_schema.to_key] = table_schema
-#				end
+				Dir["#{MetadataRepo.metadata_home}/#{sql_name}/**/*.db.xml"].map do |schema_file|
+					table_schema = DataTableSchema.new(schema_file)
+					@tables[table_schema.to_key] = table_schema
+				end
+			end
+
+
+			def sql_name
+				@options[:sql_name] || database_name.to_s
 			end
 		end
 	end

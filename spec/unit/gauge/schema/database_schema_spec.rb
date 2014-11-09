@@ -7,23 +7,33 @@ module Gauge
     describe DatabaseSchema do
       let(:db_schema) do
         File.stub(:exists?).and_return(true)
-        DatabaseSchema.new('rep_profile_db', '.')
+        DatabaseSchema.new(:rep_profile, sql_name: 'RepProfile_DB')
       end
+
       subject { db_schema }
-
-      it { should respond_to :database_name, :tables }
-
-
-      describe '#initialize' do
-        it "raises an error when the database metadata does not exist" do
-          expect { DatabaseSchema.new('missing_db_name', '.') }.to raise_error(/metadata for '.*' is not defined/i)
-        end
-      end
+      it { should respond_to :database_name, :sql_name, :tables }
 
 
       describe '#database_name' do
         subject { db_schema.database_name }
-        it { should == 'rep_profile_db'}
+        it { should == :rep_profile }
+      end
+
+
+      describe '#sql_name' do
+        subject { @db_schema.sql_name }
+
+        context "when physical database name is same with the logical one" do
+          before { @db_schema = DatabaseSchema.new(:rep_profile) }
+
+          it { should == 'rep_profile' }
+          it { should == @db_schema.database_name.to_s }
+        end
+
+        context "when physical database name differs from the logical one and specified explicitly" do
+          before { @db_schema = db_schema }
+          it { should == 'RepProfile_DB' }
+        end
       end
 
 
