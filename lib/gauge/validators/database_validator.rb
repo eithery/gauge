@@ -9,8 +9,8 @@ module Gauge
 
       # Performs validation check.
       def check(database_schema)
-        info "Inspecting '#{database_schema.database_name}' database ..."
-        DB::Adapter.session(database_schema.database_name) do |dba|
+        info "Inspecting '#{database_schema.database_name.to_s}' database ..."
+        DB::Adapter.session(database_schema.sql_name) do |dba|
           database_schema.tables.values.each { |table| validate table, dba }
         end
       end

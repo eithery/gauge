@@ -7,7 +7,7 @@ module Gauge
     describe DatabaseValidator do
       let(:validator) { DatabaseValidator.new }
       let(:database_schema) do
-        double('database_schema', database_name: 'accounts_db',
+        double('database_schema', database_name: :accounts_profile, sql_name: 'accounts_db_name',
           tables: {
             accounts: double('accounts', sql_schema: 'dbo'),
             reps: double('reps', sql_schema: 'ref'),
@@ -28,11 +28,11 @@ module Gauge
         it "displays database validation header message" do
           DB::Adapter.stub(:session)
           allow(validator).to receive(:info).and_call_original
-          expect { validator.check(database_schema) }.to output(/inspecting 'accounts_db' database/i).to_stdout
+          expect { validator.check(database_schema) }.to output(/inspecting 'accounts_profile' database/i).to_stdout
         end
 
         it "runs within data adapter session" do
-          DB::Adapter.should_receive(:session).with('accounts_db')
+          DB::Adapter.should_receive(:session).with('accounts_db_name')
           validator.check database_schema
         end
 
