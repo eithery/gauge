@@ -12,7 +12,18 @@ module Gauge
 
 
       def self.metadata_home
-        @@metadata_home ||= File.expand_path(File.dirname(__FILE__) + '../../../../db')
+        @@metadata_home ||= expand_path('/db')
+      end
+
+
+      def self.load
+        require expand_path('/config/databases.rb')
+      end
+
+private
+
+      def self.expand_path(path)
+        File.expand_path(File.dirname(__FILE__) + '/../../../' + path)
       end
     end
   end

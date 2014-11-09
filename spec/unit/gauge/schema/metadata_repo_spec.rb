@@ -8,6 +8,7 @@ module Gauge
       subject { MetadataRepo }
 
       it { should respond_to :databases, :metadata_home }
+      it { should respond_to :load }
 
       describe 'databases' do
         subject { MetadataRepo.databases }
@@ -28,6 +29,14 @@ module Gauge
       describe 'metadata_home' do
         it "points to the folder containing metadata files" do
           MetadataRepo.metadata_home.should =~ /gauge\/db\z/
+        end
+      end
+
+
+      describe 'load' do
+        it "loads databases metadata file" do
+          MetadataRepo.should_receive(:require).with(/config\/databases\.rb/)
+          MetadataRepo.load
         end
       end
     end
