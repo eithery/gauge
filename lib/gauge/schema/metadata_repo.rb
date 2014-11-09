@@ -9,6 +9,11 @@ module Gauge
       def self.databases
         @@databases ||= {}
       end
+
+
+      def self.metadata_home
+        @@metadata_home ||= File.expand_path(File.dirname(__FILE__) + '../../../../db')
+      end
     end
   end
 end
