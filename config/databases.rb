@@ -10,4 +10,4 @@
 # Data tables metadata files can be found in db/<database_name> folder and all its subfolders.
 
 database :rep_profile, sql_name: 'RepProfile'
-database :package_me, sql_name: 'PackageMe'
+#database :package_me, sql_name: 'PackageMe'
