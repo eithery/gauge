@@ -20,6 +20,7 @@ module Gauge
         return
       end
 
+      Schema::MetadataRepo.load
       repo = Repo.new
       @args.each { |dbo| repo.validate dbo }
     end

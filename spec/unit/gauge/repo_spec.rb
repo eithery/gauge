@@ -4,7 +4,8 @@ require 'spec_helper'
 
 module Gauge
   describe Repo do
-    let(:db_name) { 'rep_profile_db' }
+    let(:db_name) { :rep_profile }
+    let(:db_sql_name) { 'RepProfile_DB' }
     let(:table_name) { 'master_accounts' }
     let(:table_schema) do
       %{
@@ -18,13 +19,15 @@ module Gauge
       Repo.new
     end
 
+    it { should respond_to :validate }
+
 
     describe '#validate' do
       context "when the argument is a database name" do
         before do
           repo.stub(:database?).and_return(true)
-          @validator = Validators::DatabaseValidator.new
-          Validators::DatabaseValidator.stub(:new).and_return(@validator)
+          @validator = stub_validator(Validators::DatabaseValidator)
+          Schema::MetadataRepo.databases[db_name] = Schema::DatabaseSchema.new(db_name, sql_name: db_sql_name)
         end
 
         it "performs database structure validation using DatabaseValidator class" do
@@ -41,8 +44,7 @@ module Gauge
           end
           Dir.stub(:[]).and_return([table_name])
           repo.stub(:database_name).and_return(db_name)
-          @validator = Validators::DataTableValidator.new
-          Validators::DataTableValidator.stub(:new).and_return(@validator)
+          @validator = stub_validator(Validators::DataTableValidator)
         end
 
         it "performs data table structure validation using DataTableValidator class" do
