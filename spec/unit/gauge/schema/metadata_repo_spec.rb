@@ -8,18 +8,23 @@ module Gauge
       subject { MetadataRepo }
       let(:database_schema) do
         db_schema = DatabaseSchema.new(:rep_profile, sql_name: 'RepProfile_DB')
-        db_schema.tables[:primary_reps] = double('primary_reps')
-        db_schema.tables[:ref_]
+        db_schema.tables[:dbo_primary_reps] = double('primary_reps')
+        db_schema.tables[:ref_contract_types] = double('contract_types')
         db_schema
       end
+      let(:valid_dbo_table_names) { [:primary_reps, 'primary_reps', 'Primary_REPS', '[primary_reps]',
+        'dbo.primary_reps', '[dbo].[primary_reps]']}
+      let(:valid_ref_table_names) { ['ref.contract_types', '[ref].[contract_types]'] }
+
       before { MetadataRepo.databases[:rep_profile] = database_schema }
 
       it { should respond_to :databases, :metadata_home }
       it { should respond_to :load, :clear }
       it { should respond_to :database?, :table? }
+      it { should respond_to :schema }
 
 
-      describe 'databases' do
+      describe '.databases' do
         subject { MetadataRepo.databases }
 
         context "when no database metadata defined" do
@@ -34,14 +39,14 @@ module Gauge
       end
 
 
-      describe 'metadata_home' do
+      describe '.metadata_home' do
         it "points to the folder containing metadata files" do
           MetadataRepo.metadata_home.should =~ /gauge\/db\z/
         end
       end
 
 
-      describe 'load' do
+      describe '.load' do
         it "loads databases metadata file" do
           MetadataRepo.should_receive(:require).with(/config\/databases\.rb/)
           MetadataRepo.load
@@ -49,7 +54,7 @@ module Gauge
       end
 
 
-      describe 'clear' do
+      describe '.clear' do
         it "clears metadata repository" do
           MetadataRepo.databases.should_not be_empty
           expect { MetadataRepo.clear }.to change { MetadataRepo.databases.empty? }.from(false).to(true)
@@ -58,7 +63,7 @@ module Gauge
       end
 
 
-      describe 'database?' do
+      describe '.database?' do
         context "when database with specifid name is defined in the metadata" do
           specify { MetadataRepo.database?(:rep_profile).should be true }
           specify { MetadataRepo.database?('rep_profile').should be true }
@@ -73,15 +78,74 @@ module Gauge
       end
 
 
-      describe 'table?' do
-        context "when data table with specified name is defined in the metadata" do
-          specify { MetadataRepo.table?(:primary_reps).should be true }
-          specify { MetadataRepo.table?('primary_reps').should be true }
+      describe '.table?' do
+        context "when data table is defined in metadata and table name specified" do
+          context "as symbol" do
+            specify { MetadataRepo.table?(:primary_reps).should be true }
+          end
+
+          context "as string without SQL schema" do
+            specify { MetadataRepo.table?('primary_reps').should be true }
+          end
+
+          context "in different case" do
+            specify { MetadataRepo.table?('Primary_REPS').should be true }
+          end
+
+          context "with square brackets" do
+            specify { MetadataRepo.table?('[primary_reps]').should be true }
+          end
+
+          context "with default SQL schema" do
+            specify { MetadataRepo.table?('dbo.primary_reps').should be true }
+          end
+
+          context "with default SQL schema and square brackets" do
+            specify { MetadataRepo.table?('[dbo].[primary_reps]').should be true }
+          end
+
+          context "with custom SQL schema" do
+            specify { MetadataRepo.table?('ref.contract_types').should be true }
+          end
+
+          context "with custom SQL schema and square brackets" do
+            specify { MetadataRepo.table?('[ref].[contract_types]').should be true }
+          end
         end
 
         context "when data table with specified name is not found" do
           specify { MetadataRepo.table?(:master_accounts).should be false }
           specify { MetadataRepo.table?('master_accounts').should be false }
+        end
+      end
+
+
+      describe '.schema' do
+        context "when passed db object name is a database name" do
+          it "returns a valid database schema" do
+            MetadataRepo.schema(:rep_profile).should == database_schema
+            MetadataRepo.schema('rep_profile').should == database_schema
+            MetadataRepo.schema('RepProfile_DB').should == database_schema
+          end
+        end
+
+
+        context "when passed db object name is an existing data table name" do
+          it "returns a valid table schema" do
+            valid_dbo_table_names.each do |table_name|
+              MetadataRepo.schema(table_name).should == database_schema.tables[:dbo_primary_reps]
+            end
+            valid_ref_table_names.each do |table_name|
+              MetadataRepo.schema(table_name).should == database_schema.tables[:ref_contract_types]
+            end
+          end
+        end
+
+
+        context "when metadata for passed db object name is not found" do
+          it "raises an error" do
+            expect { MetadataRepo.schema 'unknown_db_object' }.to raise_error(/metadata for '(.*)' is not found/i)
+          end
         end
       end
     end
