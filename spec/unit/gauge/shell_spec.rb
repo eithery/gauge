@@ -31,8 +31,8 @@ module Gauge
 
     describe '#check' do
       it "delegates call to DatabaseInspector instance" do
-        Repo.any_instance.stub(:puts)
         db_inspector = DatabaseInspector.new(global_options, options, args)
+        db_inspector.stub(:error)
         DatabaseInspector.should_receive(:new).with(global_options, options, args).and_return(db_inspector)
         @shell.check(global_options, options, args)
       end
