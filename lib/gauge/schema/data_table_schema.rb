@@ -30,7 +30,7 @@ module Gauge
 
 
       def to_key
-        sql_schema == :dbo ? local_name.downcase.to_sym : "#{sql_schema}_#{local_name}".to_sym
+        "#{sql_schema}_#{local_name}".downcase.to_sym
       end
 
 

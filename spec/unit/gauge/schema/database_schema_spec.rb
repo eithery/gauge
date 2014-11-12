@@ -63,10 +63,10 @@ module Gauge
 
         it { should_not be_empty }
         it { should have(2).tables }
-        specify { db_schema.tables.keys.should == [:accounts, :ref_reps] }
+        specify { db_schema.tables.keys.should == [:dbo_accounts, :ref_reps] }
 
         it "contains data table schema definitions" do
-          accounts = db_schema.tables[:accounts]
+          accounts = db_schema.tables[:dbo_accounts]
           accounts.table_name.should == '[dbo].[accounts]'
           accounts.sql_schema.should == :dbo
           accounts.columns.should have(2).column_definitions

@@ -199,8 +199,8 @@ module Gauge
 
       describe '#to_key' do
         context "for default SQL schema" do
-          it "returns the local table name converted to symbol" do
-            table_schema.to_key.should == :source_firms
+          it "returns the local table name concatenated with 'dbo' and converted to symbol" do
+            table_schema.to_key.should == :dbo_source_firms
           end
         end
 
