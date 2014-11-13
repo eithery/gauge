@@ -7,7 +7,7 @@ module Gauge
   module Schema
     class MetadataFactory
       def self.define_database(database_name, options)
-        MetadataRepo.databases[database_name] = DatabaseSchema.new(database_name, options)
+        Repo.databases[database_name] = DatabaseSchema.new(database_name, options)
       end
     end
   end

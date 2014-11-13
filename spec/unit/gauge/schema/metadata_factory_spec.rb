@@ -10,7 +10,7 @@ module Gauge
       it { should respond_to :define_database }
 
       describe 'define_database' do
-        before { MetadataRepo.databases.clear }
+        before { Repo.databases.clear }
 
         it "creates database metadata" do
           DatabaseSchema.should_receive(:new).with(:rep_profile, hash_including(:sql_name))
@@ -19,7 +19,7 @@ module Gauge
 
         it "register database metadata in the repository" do
           MetadataFactory.define_database(:rep_profile, sql_name: 'RepProfile')
-          MetadataRepo.databases.should include(:rep_profile)
+          Repo.databases.should include(:rep_profile)
         end
       end
     end

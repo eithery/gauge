@@ -1,11 +1,11 @@
 # Eithery Lab., 2014.
-# Class Gauge::Schema::MetadataRepo
+# Class Gauge::Schema::Repo
 # Represent a repository containing metadata describing database structure.
 require 'gauge'
 
 module Gauge
   module Schema
-    class MetadataRepo
+    class Repo
 
       def self.databases
         @@databases ||= {}

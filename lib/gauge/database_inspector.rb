@@ -20,18 +20,18 @@ module Gauge
         return
       end
 
-      Schema::MetadataRepo.load
+      Schema::Repo.load
       @args.each do |dbo|
         validator = validator_for dbo
-        validator.check(Schema::MetadataRepo.schema dbo) unless validator.nil?
+        validator.check(Schema::Repo.schema dbo) unless validator.nil?
       end
     end
 
 private
 
     def validator_for(dbo)
-      return Validators::DatabaseValidator.new if Schema::MetadataRepo.database? dbo
-      return Validators::DataTableValidator.new if Schema::MetadataRepo.table? dbo
+      return Validators::DatabaseValidator.new if Schema::Repo.database? dbo
+      return Validators::DataTableValidator.new if Schema::Repo.table? dbo
 
       error "Database metadata for '#{dbo}' is not found."
     end

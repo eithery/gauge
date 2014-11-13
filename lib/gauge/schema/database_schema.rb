@@ -14,7 +14,7 @@ module Gauge
 				@options = options
 				@tables = {}
 
-				Dir["#{MetadataRepo.metadata_home}/#{sql_name}/**/*.db.xml"].map do |schema_file|
+				Dir["#{Repo.metadata_home}/#{sql_name}/**/*.db.xml"].map do |schema_file|
 					table_schema = DataTableSchema.new(schema_file)
 					@tables[table_schema.to_key] = table_schema
 				end

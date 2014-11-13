@@ -26,7 +26,7 @@ module Gauge
       before do
         @db_schema = Schema::DatabaseSchema.new(:rep_profile, sql_name: 'RepProfile_DB')
         @db_schema.tables[:dbo_primary_reps] = table_schema_stub
-        Schema::MetadataRepo.databases[:rep_profile] = @db_schema
+        Schema::Repo.databases[:rep_profile] = @db_schema
       end
 
       it "performs validation for each data object passed as an argument" do
