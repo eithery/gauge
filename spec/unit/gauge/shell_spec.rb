@@ -7,8 +7,9 @@ module Gauge
     let(:global_options) { {v: true, server: 'local\SQL2012'} }
     let(:options) { {} }
     let(:args) { ['database_name', 'data_table_name'] }
+    let(:shell) { Shell.new }
 
-    before { @shell = Shell.new }
+    it { should respond_to :help, :check }
 
 
     describe '#initialize' do
@@ -24,7 +25,7 @@ module Gauge
         Helper.any_instance.stub(:puts)
         helper = Helper.new(global_options)
         Helper.should_receive(:new).with(global_options).and_return(helper)
-        @shell.help(global_options)
+        shell.help(global_options)
       end
     end
 
@@ -34,7 +35,7 @@ module Gauge
         db_inspector = DatabaseInspector.new(global_options, options, args)
         db_inspector.stub(:error)
         DatabaseInspector.should_receive(:new).with(global_options, options, args).and_return(db_inspector)
-        @shell.check(global_options, options, args)
+        shell.check(global_options, options, args)
       end
     end
   end

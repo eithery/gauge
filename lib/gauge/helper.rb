@@ -7,7 +7,7 @@ module Gauge
   class Helper
     include ConsoleListener
 
-    def initialize(global_opts)
+    def initialize(global_opts={})
       @global_opts = global_opts
     end
 

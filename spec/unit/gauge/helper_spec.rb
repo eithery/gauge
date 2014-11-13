@@ -4,6 +4,9 @@ require 'spec_helper'
 
 module Gauge
   describe Helper do
+    it { should respond_to :application_info }
+
+
     shared_examples_for "displaying application header" do
       it "displays name, version and copyright info" do
         helper.should_receive(:info).with(/^Database Gauge. Version \d\.\d\.\d/)
@@ -36,7 +39,7 @@ module Gauge
         before { @global_options = {h: true} }
         it_behaves_like "displaying application header"
 
-        it "displays detail help information" do
+        it "displays additional detail help information" do
           helper.should_receive(:info).with(/The most commonly used gauge commands are:/)
           helper.should_receive(:info).with(/check/)
           helper.should_receive(:info).with(/help/)
