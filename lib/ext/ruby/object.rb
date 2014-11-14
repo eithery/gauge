@@ -10,6 +10,7 @@ class Object
   end
 
 
-  def table(name, options)
+  def table(*args)
+    Gauge::Schema::MetadataFactory.define_table(*args)
   end
 end

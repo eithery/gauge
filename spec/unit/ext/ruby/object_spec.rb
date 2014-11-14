@@ -16,5 +16,9 @@ describe Object do
 
 
   describe '#table' do
+    it "Delegates creaing new data table schema to metadata factory" do
+      Gauge::Schema::MetadataFactory.should_receive(:define_table).with(:primary_reps)
+      table :primary_reps
+    end
   end
 end
