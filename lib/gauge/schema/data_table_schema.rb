@@ -14,7 +14,7 @@ module Gauge
         @options = options
         @columns = []
 
-        instance_eval(&block)
+        instance_eval(&block) if block
         columns << DataColumnSchema.new(:id, type: :long, required: true) unless has_id?
       end
 
@@ -51,9 +51,9 @@ module Gauge
 
       def timestamps(options={})
         columns << DataColumnSchema.new(:created, type: :datetime, required: true)
-        columns << DataColumnSchema.new(created_by_column, required: true)
+        columns << DataColumnSchema.new(created_by_column(options), required: true)
         columns << DataColumnSchema.new(:modified, type: :datetime, required: true)
-        columns << DataColumnSchema.new(modified_by_column, required: true)
+        columns << DataColumnSchema.new(modified_by_column(options), required: true)
         columns << DataColumnSchema.new(:version, type: :long, required: true)
       end
 
@@ -64,19 +64,13 @@ private
       end
 
 
-      def has_timestamps?(options={})
-        camel_case_attr = options[:camel_case] ? "[@case='camel']" : ""
-        !@xml.root.elements["columns/timestamps#{camel_case_attr}"].nil?
+      def created_by_column(options)
+        options[:casing] == :camel ? :createdBy : :created_by
       end
 
 
-      def created_by_column
-        has_timestamps?(camel_case: true) ? :createdBy : :created_by
-      end
-
-
-      def modified_by_column
-        has_timestamps?(camel_case: true) ? :modifiedBy : :modified_by
+      def modified_by_column(options)
+        options[:casing] == :camel ? :modifiedBy : :modified_by
       end
     end
   end

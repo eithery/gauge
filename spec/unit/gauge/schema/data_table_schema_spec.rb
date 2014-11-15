@@ -23,13 +23,12 @@ module Gauge
           col :code
         end
       end
-      let(:table_with_timestamps) { DataTableSchema.new(:customers) { timestamps } }
 
       subject { dbo_table_schema }
 
       it { should respond_to :table_name, :local_name }
       it { should respond_to :sql_schema, :columns }
-      it { should respond_to :to_key }
+      it { should respond_to :to_key, :contains? }
       it { should respond_to :col, :timestamps }
 
 
@@ -124,34 +123,42 @@ module Gauge
 
         context "when table definition contains timestamps" do
           context "in default case" do
+            before do
+              @table_with_timestamps = DataTableSchema.new(:customers) { timestamps }
+            end
+
             it "should contain 4 timestamp columns and id" do
-              table_with_timestamps.should have(6).columns
-              table_with_timestamps.should contain_column :created
-              table_with_timestamps.should contain_column :created_by
-              table_with_timestamps.should contain_column :modified
-              table_with_timestamps.should contain_column :modified_by
-              table_with_timestamps.should contain_column :version
+              @table_with_timestamps.should have(6).columns
+              @table_with_timestamps.should contain_column :created
+              @table_with_timestamps.should contain_column :created_by
+              @table_with_timestamps.should contain_column :modified
+              @table_with_timestamps.should contain_column :modified_by
+              @table_with_timestamps.should contain_column :version
             end
           end
 
           context "in camel case" do
-#           <columns><timestamps case="camel"/></columns>
-
+            before do
+              @table_with_timestamps = DataTableSchema.new(:customers) do
+                timestamps casing: :camel
+              end
+            end
             it "should contain 4 timestamp columns named in camel case and id" do
-              table_with_timestamps.should have(6).columns
-              table_with_timestamps.should contain_column :created
-              table_with_timestamps.should contain_column :createdBy
-              table_with_timestamps.should contain_column :modified
-              table_with_timestamps.should contain_column :modifiedBy
-              table_with_timestamps.should contain_column :version
+              @table_with_timestamps.should have(6).columns
+              @table_with_timestamps.should contain_column :created
+              @table_with_timestamps.should contain_column :createdBy
+              @table_with_timestamps.should contain_column :modified
+              @table_with_timestamps.should contain_column :modifiedBy
+              @table_with_timestamps.should contain_column :version
             end
           end
         end
 
         context "when no columns specified in metadata" do
+          before { @empty_table_schema = DataTableSchema.new(:customers) }
           it "contains only one 'id' data column" do
-            empty_table_schema.should have(1).column
-            empty_table_schema.should contain_column(:id)
+            @empty_table_schema.should have(1).column
+            @empty_table_schema.should contain_column(:id)
           end
         end
       end
