@@ -9,9 +9,7 @@ module Sequel
       let(:column_schema) { Gauge::Schema::DataColumnSchema.new('customers', name: 'account_number') }
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new('customers', name: 'missing_column') }
 
-      subject { database }
-
-      it { should respond_to :table_exists?, :column_exists?, :data_column }
+      it { should respond_to :table_exists?, :column_exists?, :column }
 
       describe '#table_exists?' do
         before do
@@ -55,11 +53,11 @@ module Sequel
       end
 
 
-      describe '#data_column' do
+      describe '#column' do
         it "retrieves SQL metadata for the data table" do
           database.should_receive(:schema).with('customers')
             .and_return([[:account_number, double('account_number')]])
-          database.data_column column_schema
+          database.column column_schema
         end
       end
 

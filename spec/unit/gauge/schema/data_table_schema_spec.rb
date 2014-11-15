@@ -5,144 +5,78 @@ require 'spec_helper'
 module Gauge
   module Schema
     describe DataTableSchema do
-      let(:table_schema) do
-        File.stub(:exists?).and_return(true)
-        File.stub(:open) do |file, mode, &block|
-          block.call(@xml)
+      let(:dbo_table_schema) do
+        DataTableSchema.new(:master_accounts) do
+          col :account_number
+          col :total_amount
         end
-        DataTableSchema.new(@table_schema_file)
       end
-
-      let(:xml_with_custom_sql_schema) { %{<table name="master_accounts" schema="ref"/>} }
-      let(:xml_with_default_sql_schema) do
-        %{
-          <table name="source_firms">
-            <columns>
-              <col name="name" length="256" required="true"/>
-              <col name="display_name" length="256" required="true"/>
-            </columns>
-          </table>
-        }
+      let(:ref_table_schema) do
+        DataTableSchema.new(:source_firms, sql_schema: :ref) do
+          col :source_firm_id
+        end
       end
-
-      before do
-        @table_schema_file = 'master_accounts.db.xml'
-        @xml = xml_with_default_sql_schema
+      let(:table_schema) { dbo_table_schema }
+      let(:table_with_id) do
+        DataTableSchema.new(:carriers) do
+          col :carrier_id, id: true
+          col :code
+        end
       end
+      let(:table_with_timestamps) { DataTableSchema.new(:customers) { timestamps } }
 
+      subject { dbo_table_schema }
 
-      subject { table_schema }
+      it { should respond_to :table_name, :local_name }
       it { should respond_to :sql_schema, :columns }
-      it { should respond_to :database_name, :table_name, :local_name }
       it { should respond_to :to_key }
+      it { should respond_to :col, :timestamps }
 
 
-      describe '#initialize' do
-        it "raises an error if the specified file is not found" do
-          expect { DataTableSchema.new('unknown_schema') }.to raise_error(ArgumentError, /file '.*' is not found/)
-        end
-      end
-
-
-      describe '#sql_schema' do
-        subject { table_schema.sql_schema }
-
+      describe '#table_name' do
         context "when data table is defined in default SQL schema" do
-          it { should == :dbo }
+          specify { dbo_table_schema.table_name.should == '[dbo].[master_accounts]' }
         end
 
         context "when data table is defined in custom SQL schema" do
-          before { @xml = xml_with_custom_sql_schema }
-          it { should == :ref }
+          specify { ref_table_schema.table_name.should == '[ref].[source_firms]' }
         end
       end
 
 
-      describe '#columns' do
-        context "when id column is taken by convention" do
-          it "contains the number of columns defined in metadata + 1" do
-            table_schema.should have(3).columns
-            table_schema.should contain_column(:name)
-            table_schema.should contain_column(:display_name)
-            table_schema.should_not contain_column(:rep_code)
-          end
 
-          it "contains 'id' data column" do
-            table_schema.should contain_column(:id)
+      describe '#sql_schema' do
+        context "when data table is defined in default SQL schema" do
+          specify { dbo_table_schema.sql_schema.should == :dbo }
+        end
+
+        context "when data table is defined in custom SQL schema" do
+          specify { ref_table_schema.sql_schema.should == :ref }
+        end
+      end
+
+
+      describe '#local_name' do
+        context "when data table is defined in default SQL schema" do
+          specify { dbo_table_schema.local_name.should == 'master_accounts' }
+        end
+
+        context "when data table is defined in custom SQL schema" do
+          specify { ref_table_schema.local_name.should == 'source_firms' }
+        end
+      end
+
+
+      describe '#to_key' do
+        context "for default SQL schema" do
+          it "returns the local table name concatenated with 'dbo' and converted to symbol" do
+            dbo_table_schema.to_key.should == :dbo_master_accounts
           end
         end
 
-        context "when id column is defined in metadata" do
-          before do
-            @xml = %{
-              <table name="source_firms">
-                <columns>
-                  <col name="source_firm_id" id="true"/>
-                  <col name="name" length="256" required="true"/>
-                </columns>
-              </table>
-            }
-          end
-
-          it "contains exact number of columns defined in metadata" do
-            table_schema.should have(2).columns
-            table_schema.should contain_column :name
-            table_schema.should_not contain_column :display_name
-          end
-
-          it "contains the data column defined as id" do
-            table_schema.should contain_column :source_firm_id
-            table_schema.should_not contain_column :id
-          end
-        end
-
-        context "when table definition contains timestamps" do
-          context "in default case" do
-            before do
-              @xml = %{
-                <table name="source_firms">
-                  <columns><timestamps/></columns>
-                </table>
-              }
-            end
-
-            it "should contain 4 timestamp columns and id" do
-              table_schema.should have(6).columns
-              table_schema.should contain_column :created
-              table_schema.should contain_column :created_by
-              table_schema.should contain_column :modified
-              table_schema.should contain_column :modified_by
-              table_schema.should contain_column :version
-            end
-          end
-
-          context "in camel case" do
-            before do
-              @xml = %{
-                <table name="source_firms">
-                  <columns><timestamps case="camel"/></columns>
-                </table>
-              }
-            end
-
-            it "should contain 4 timestamp columns named in camel case and id" do
-              table_schema.should have(6).columns
-              table_schema.should contain_column :created
-              table_schema.should contain_column :createdBy
-              table_schema.should contain_column :modified
-              table_schema.should contain_column :modifiedBy
-              table_schema.should contain_column :version
-            end
-          end
-        end
-
-        context "when no columns specified in metadata" do
-          before do
-            @xml = %{ <table name="source_firms"><columns/></table> }
-          end
-          it "contains only one 'id' data column" do
-            table_schema.should have(1).column
-            table_schema.should contain_column(:id)
+        context "for custom SQL schema" do
+          it "concatenates SQL schema and local table name" do
+            ref_table_schema.to_key.should == :ref_source_firms
           end
         end
       end
@@ -150,8 +84,8 @@ module Gauge
 
       describe '#contains?' do
         context "when the column defined in table definition" do
-          specify { table_schema.contains?(:name).should be true }
-          specify { table_schema.contains?('name').should be true }
+          specify { table_schema.contains?(:account_number).should be true }
+          specify { table_schema.contains?('account_number').should be true }
         end
 
         context "when the column is not defined in table definition" do
@@ -161,53 +95,63 @@ module Gauge
       end
 
 
-      describe '#database_name' do
-        before { @table_schema_file = 'e:/databases/package_me/tables/main/accounts/master_accounts.db.xml' }
-        it "equivalent to the name of folder one level up from 'tables'" do
-          table_schema.database_name.should == 'package_me'
-        end
-      end
+      describe '#columns' do
+        context "when id column is taken by convention" do
+          it "contains the number of columns defined in metadata + 1" do
+            table_schema.should have(3).columns
+            table_schema.should contain_column(:account_number)
+            table_schema.should contain_column(:total_amount)
+            table_schema.should_not contain_column(:rep_code)
+          end
 
-
-      describe '#table_name' do
-        subject { table_schema.table_name }
-
-        context "when data table is defined in default SQL schema" do
-          it { should == '[dbo].[source_firms]' }
-        end
-
-        context "when data table is defined in custom SQL schema" do
-          before { @xml = xml_with_custom_sql_schema }
-          it { should == '[ref].[master_accounts]' }
-        end
-      end
-
-
-      describe '#local_name' do
-        subject { table_schema.local_name }
-
-        context "when data table is defined in default SQL schema" do
-          it { should == 'source_firms' }
-        end
-
-        context "when data table is defined in custom SQL schema" do
-          before { @xml = xml_with_custom_sql_schema }
-          it { should == 'master_accounts' }
-        end
-      end
-
-
-      describe '#to_key' do
-        context "for default SQL schema" do
-          it "returns the local table name concatenated with 'dbo' and converted to symbol" do
-            table_schema.to_key.should == :dbo_source_firms
+          it "contains 'id' data column" do
+            table_schema.should contain_column(:id)
           end
         end
 
-        context "for custom SQL schema" do
-          before { @xml = xml_with_custom_sql_schema }
-          it "concatenates SQL schema and local table name" do
-            table_schema.to_key.should == :ref_master_accounts
+        context "when id column is defined in metadata" do
+          it "contains exact number of columns defined in metadata" do
+            table_with_id.should have(2).columns
+            table_with_id.should contain_column :code
+            table_with_id.should_not contain_column :display_name
+          end
+
+          it "contains the data column defined as id" do
+            table_with_id.should contain_column :carrier_id
+            table_with_id.should_not contain_column :id
+          end
+        end
+
+        context "when table definition contains timestamps" do
+          context "in default case" do
+            it "should contain 4 timestamp columns and id" do
+              table_with_timestamps.should have(6).columns
+              table_with_timestamps.should contain_column :created
+              table_with_timestamps.should contain_column :created_by
+              table_with_timestamps.should contain_column :modified
+              table_with_timestamps.should contain_column :modified_by
+              table_with_timestamps.should contain_column :version
+            end
+          end
+
+          context "in camel case" do
+#           <columns><timestamps case="camel"/></columns>
+
+            it "should contain 4 timestamp columns named in camel case and id" do
+              table_with_timestamps.should have(6).columns
+              table_with_timestamps.should contain_column :created
+              table_with_timestamps.should contain_column :createdBy
+              table_with_timestamps.should contain_column :modified
+              table_with_timestamps.should contain_column :modifiedBy
+              table_with_timestamps.should contain_column :version
+            end
+          end
+        end
+
+        context "when no columns specified in metadata" do
+          it "contains only one 'id' data column" do
+            empty_table_schema.should have(1).column
+            empty_table_schema.should contain_column(:id)
           end
         end
       end

@@ -7,25 +7,30 @@ require 'gauge'
 module Gauge
   module Schema
     class DataTableSchema
-      attr_reader :local_name, :sql_schema, :columns
+      attr_reader :columns
 
-      def initialize(schema_file)
-        raise ArgumentError.new("Data table definition file '#{schema_file}' is not found.") unless File.exists?(schema_file)
-
-        @schema_file = schema_file
+      def initialize(table_name, options={}, &block)
+        @local_name = table_name
+        @options = options
         @columns = []
-        File.open(schema_file, 'r') { |file| parse_xml REXML::Document.new(file) }
-      end
 
-
-      def database_name
-        parts = @schema_file.split('/')
-        parts[parts.find_index('tables') - 1]
+        instance_eval(&block)
+        columns << DataColumnSchema.new(:id, type: :long, required: true) unless has_id?
       end
 
 
       def table_name
-        "[#{@sql_schema}].[#{@local_name}]"
+        "[#{sql_schema}].[#{local_name}]"
+      end
+
+
+      def local_name
+        @local_name.to_s
+      end
+
+
+      def sql_schema
+        @options[:sql_schema] || :dbo
       end
 
 
@@ -35,35 +40,27 @@ module Gauge
 
 
       def contains?(column_name)
-        columns.any? { |col| col.column_name == column_name.to_sym }
+        columns.any? { |col| col.column_name.downcase.to_sym == column_name.downcase.to_sym }
       end
 
+
+      def col(*args)
+        columns << DataColumnSchema.new(*args)
+      end
+
+
+      def timestamps(options={})
+        columns << DataColumnSchema.new(:created, type: :datetime, required: true)
+        columns << DataColumnSchema.new(created_by_column, required: true)
+        columns << DataColumnSchema.new(:modified, type: :datetime, required: true)
+        columns << DataColumnSchema.new(modified_by_column, required: true)
+        columns << DataColumnSchema.new(:version, type: :long, required: true)
+      end
 
 private
 
-      def parse_xml(xml_doc)
-        @xml = xml_doc
-        @local_name = xml_doc.root.attributes['name']
-        @sql_schema = xml_doc.root.attributes['schema'] || 'dbo'
-        @sql_schema = @sql_schema.to_sym
-        @columns << DataColumnSchema.new(@local_name, name: 'id', type: :long, required: true) unless has_id?
-        xml_doc.root.each_element('/table/columns/col') do |col|
-          column_attributes = {}
-          col.attributes.each { |name, value| column_attributes[name.to_sym] = value }
-          @columns << DataColumnSchema.new(@local_name, column_attributes)
-        end
-        if has_timestamps?
-          @columns << DataColumnSchema.new(@local_name, name: 'created', type: :datetime, required: true)
-          @columns << DataColumnSchema.new(@local_name, name: created_by_column, required: true)
-          @columns << DataColumnSchema.new(@local_name, name: 'modified', type: :datetime, required: true)
-          @columns << DataColumnSchema.new(@local_name, name: modified_by_column, required: true)
-          @columns << DataColumnSchema.new(@local_name, name: 'version', type: :long, required: true)
-        end
-      end
-
-
       def has_id?
-        !@xml.root.elements["columns/col[@id='true']"].nil?
+        columns.any? { |c| c.id? }
       end
 
 
@@ -74,12 +71,12 @@ private
 
 
       def created_by_column
-        has_timestamps?(camel_case: true) ? 'createdBy' : 'created_by'
+        has_timestamps?(camel_case: true) ? :createdBy : :created_by
       end
 
 
       def modified_by_column
-        has_timestamps?(camel_case: true) ? 'modifiedBy' : 'modified_by'
+        has_timestamps?(camel_case: true) ? :modifiedBy : :modified_by
       end
     end
   end

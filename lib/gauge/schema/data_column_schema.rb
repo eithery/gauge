@@ -7,25 +7,21 @@ require 'gauge'
 module Gauge
 	module Schema
 		class DataColumnSchema
-			attr_reader :table_name
-
-			def initialize(table_name, column_attributes={})
-				raise ArgumentError.new('Data table name is not specified.') if table_name.blank?
-
-				@table_name = table_name
-				@column_attrs = column_attributes
+			def initialize(column_name, options={})
+				@column_name = column_name
+				@options = options
 				validate_column_type
 			end
 
 
 			def column_name
-				column_name = @column_attrs[:name] || name_from_ref
-				column_name.to_sym
+				return @column_name.to_s unless @column_name.blank?
+				name_from_ref
 			end
 
 
 			def column_type
-				type = @column_attrs[:type]
+				type = @options[:type]
 				return :id if contains_ref_id?
 				return type.to_sym unless type.nil?
 				return :bool if column_name.to_s.downcase.start_with?('is', 'has', 'allow')
@@ -41,31 +37,35 @@ module Gauge
 
 
 			def allow_null?
-				!(identity? || @column_attrs[:required])
+				!(identity? || @options[:required])
 			end
 
 
 			def to_key
-				column_name.to_sym.downcase
+				column_name.downcase.to_sym
 			end
 
 
+			def id?
+				@options[:id] == true
+			end
+
 	private
-	
+
 			def name_from_ref
 				raise "Data column name is not specified." unless contains_ref_id?
-				ref_name = @column_attrs[:ref]
+				ref_name = @options[:ref]
 				ref_name.split('.').last.singularize + '_id'
 			end
 
 
 			def contains_ref_id?
-				@column_attrs.include?(:ref)
+				@options.include?(:ref)
 			end
 
 
 			def identity?
-				@column_attrs.include?(:id) || @column_attrs.include?(:business_id)
+				id? || @options.include?(:business_id)
 			end
 
 
@@ -93,7 +93,7 @@ module Gauge
 
 
 			def validate_column_type
-				col_type = @column_attrs[:type]
+				col_type = @options[:type]
 				raise ArgumentError.new('Invalid column type.') unless col_type.nil? || type_map.keys.include?(col_type.to_sym)
 			end
 		end

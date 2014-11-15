@@ -12,7 +12,7 @@ module Gauge
 
 
       def matches?(table_schema)
-        table_schema.columns.any? { |col| col.column_name == @column_name }
+        table_schema.columns.any? { |col| col.column_name.downcase.to_sym == @column_name.downcase.to_sym }
       end
 
 

@@ -9,7 +9,7 @@ module Gauge
 
       it { should respond_to :session }
 
-      describe '#session' do
+      describe '.session' do
         before { stub_db_adapter }
 
         it "uses tinyTDS database adapter" do

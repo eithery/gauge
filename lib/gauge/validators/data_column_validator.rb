@@ -9,7 +9,7 @@ module Gauge
 
       def validate(column_schema, dba)
         super(column_schema, dba) do
-          super(column_schema, dba.data_column(column_schema))
+          super(column_schema, dba.column(column_schema))
         end
         errors
       end

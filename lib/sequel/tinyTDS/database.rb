@@ -18,7 +18,7 @@ module Sequel
       end
 
 
-      def data_column(column_schema)
+      def column(column_schema)
         self.schema(column_schema.table_name).select do |item|
           item.first == column_schema.to_key
         end.first.last

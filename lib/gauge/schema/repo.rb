@@ -19,6 +19,23 @@ module Gauge
 
       def self.load
         require expand_path('/config/databases.rb')
+        databases.values.each do |db_schema|
+          with_database db_schema do
+            Dir["#{metadata_home}/#{db_schema.database_name}/**/tables/**/*.rb"].each { |f| require f }
+          end
+        end
+      end
+
+
+      def self.define_database(*args)
+        db_schema = DatabaseSchema.new(*args)
+        databases[db_schema.to_key] = db_schema
+      end
+
+
+      def self.define_table(*args)
+        table_schema = DataTableSchema.new(*args)
+        current_db_schema.tables[table_schema.to_key] = table_schema
       end
 
 
@@ -83,6 +100,26 @@ private
           return table_schema unless table_schema.nil?
         end
         nil
+      end
+
+
+      def self.with_database(db_schema)
+        begin
+          current_db_schema = db_schema
+          yield
+        ensure
+          current_db_schema = nil;
+        end
+      end
+
+
+      def self.current_db_schema
+        @@current_db_schema
+      end
+
+
+      def self.current_db_schema=(db_schema)
+        @@current_db_schema = db_schema
       end
     end
   end

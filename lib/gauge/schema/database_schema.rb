@@ -7,22 +7,27 @@ require 'gauge'
 module Gauge
 	module Schema
 		class DatabaseSchema
-			attr_reader :database_name, :tables
+			attr_reader :tables
 
 			def initialize(database_name, options={})
 				@database_name = database_name
 				@options = options
 				@tables = {}
+			end
 
-				Dir["#{Repo.metadata_home}/#{sql_name}/**/*.db.xml"].map do |schema_file|
-					table_schema = DataTableSchema.new(schema_file)
-					@tables[table_schema.to_key] = table_schema
-				end
+
+			def database_name
+				@database_name.to_s
 			end
 
 
 			def sql_name
-				@options[:sql_name] || database_name.to_s
+				@options[:sql_name] || database_name
+			end
+
+
+			def to_key
+				database_name.downcase.to_sym
 			end
 		end
 	end

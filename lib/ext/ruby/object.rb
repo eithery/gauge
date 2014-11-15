@@ -6,11 +6,11 @@ require 'gauge'
 
 class Object
   def database(*args)
-    Gauge::Schema::MetadataFactory.define_database(*args)
+    Gauge::Schema::Repo.define_database(*args)
   end
 
 
   def table(*args)
-    Gauge::Schema::MetadataFactory.define_table(*args)
+    Gauge::Schema::Repo.define_table(*args)
   end
 end

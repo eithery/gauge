@@ -12,6 +12,8 @@ module Gauge
         db_schema.tables[:ref_contract_types] = double('contract_types')
         db_schema
       end
+      let(:stub_db_schema) { db_schema = double('blue_troll', to_key: :blue_troll, tables: {}) }        
+
       let(:valid_dbo_table_names) { [:primary_reps, 'primary_reps', 'Primary_REPS', '[primary_reps]',
         'dbo.primary_reps', '[dbo].[primary_reps]']}
       let(:valid_ref_table_names) { ['ref.contract_types', '[ref].[contract_types]'] }
@@ -22,6 +24,7 @@ module Gauge
       it { should respond_to :load, :clear }
       it { should respond_to :database?, :table? }
       it { should respond_to :schema }
+      it { should respond_to :define_table, :define_database }
 
 
       describe '.databases' do
@@ -48,8 +51,43 @@ module Gauge
 
       describe '.load' do
         it "loads databases metadata file" do
-          Repo.should_receive(:require).with(/config\/databases\.rb/)
+          Repo.as_null_object.should_receive(:require).with(/config\/databases\.rb/)
           Repo.load
+        end
+
+        it "loads all data table metadata for the database" do
+          Repo.as_null_object.should_receive(:require).with(/rep_profile\/tables\/(.*)\.rb/i).at_least(5).times
+          Repo.load
+        end
+      end
+
+
+      describe '.define_database' do
+        it "creates database metadata definition" do
+          DatabaseSchema.should_receive(:new).with(:blue_troll, hash_including(:sql_name)).and_return(stub_db_schema)
+          Repo.define_database(:blue_troll, sql_name: 'BlueTroll')
+        end
+
+        it "registers database metadata in the repository" do
+          Repo.define_database(:blue_troll, sql_name: 'BlueTroll')
+          Repo.databases.should include(:blue_troll)
+        end
+      end
+
+
+      describe '.define_table' do
+        before { Repo.stub(:current_db_schema).and_return(stub_db_schema) }
+
+        it "creates data table metadata definition" do
+          table_schema = double('participants', to_key: :participants)
+          DataTableSchema.should_receive(:new).with(:participants).and_return(table_schema)
+          Repo.define_table(:participants)
+        end
+
+        it "registers data table metadata definition in the database metadata" do
+          expect { Repo.define_table(:participants) }
+            .to change { stub_db_schema.tables.count }.from(0).to(1)
+          stub_db_schema.tables.should include(:dbo_participants)
         end
       end
 
