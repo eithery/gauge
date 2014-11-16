@@ -7,6 +7,8 @@ require 'gauge'
 module Gauge
 	module Schema
 		class DataColumnSchema
+			attr_accessor :table_name
+
 			def initialize(column_name, options={}, &block)
 				@column_name = column_name
 				@options = options

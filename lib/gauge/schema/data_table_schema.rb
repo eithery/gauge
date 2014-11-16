@@ -45,7 +45,9 @@ module Gauge
 
 
       def col(*args)
-        columns << DataColumnSchema.new(*args)
+        column = DataColumnSchema.new(*args)
+        column.table_name = local_name
+        columns << column
       end
 
 

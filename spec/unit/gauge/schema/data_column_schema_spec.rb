@@ -10,6 +10,7 @@ module Gauge
       subject { column }
 
       it { should respond_to :column_name, :column_type, :data_type }
+      it { should respond_to :table_name }
       it { should respond_to :allow_null? }
       it { should respond_to :to_key }
       it { should respond_to :id? }

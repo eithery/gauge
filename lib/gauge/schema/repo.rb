@@ -27,14 +27,14 @@ module Gauge
       end
 
 
-      def self.define_database(*args)
-        db_schema = DatabaseSchema.new(*args)
+      def self.define_database(*args, &block)
+        db_schema = DatabaseSchema.new(*args, &block)
         databases[db_schema.to_key] = db_schema
       end
 
 
-      def self.define_table(*args)
-        table_schema = DataTableSchema.new(*args)
+      def self.define_table(*args, &block)
+        table_schema = DataTableSchema.new(*args, &block)
         current_db_schema.tables[table_schema.to_key] = table_schema
       end
 
@@ -105,21 +105,16 @@ private
 
       def self.with_database(db_schema)
         begin
-          current_db_schema = db_schema
+          @@current_db_schema = db_schema
           yield
         ensure
-          current_db_schema = nil;
+          @@current_db_schema = nil;
         end
       end
 
 
       def self.current_db_schema
         @@current_db_schema
-      end
-
-
-      def self.current_db_schema=(db_schema)
-        @@current_db_schema = db_schema
       end
     end
   end

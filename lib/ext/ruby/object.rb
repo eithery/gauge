@@ -5,12 +5,12 @@
 require 'gauge'
 
 class Object
-  def database(*args)
-    Gauge::Schema::Repo.define_database(*args)
+  def database(*args, &block)
+    Gauge::Schema::Repo.define_database(*args, &block)
   end
 
 
-  def table(*args)
-    Gauge::Schema::Repo.define_table(*args)
+  def table(*args, &block)
+    Gauge::Schema::Repo.define_table(*args, &block)
   end
 end

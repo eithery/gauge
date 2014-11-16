@@ -17,7 +17,7 @@ module Gauge
         end
       end
       let(:table_schema) { dbo_table_schema }
-      let(:stub_column_schema) { double('column_schema', id?: false) }
+      let(:stub_column_schema) { double('column_schema', id?: false, :table_name= => 'master_accounts') }
 
       subject { dbo_table_schema }
 

@@ -7,7 +7,7 @@ module Gauge
     describe Repo do
       subject { Repo }
       let(:database_schema) do
-        db_schema = DatabaseSchema.new(:rep_profile, sql_name: 'RepProfile_DB')
+        db_schema = DatabaseSchema.new(:test_db_green, sql_name: 'TestDB_Green')
         db_schema.tables[:dbo_primary_reps] = double('primary_reps')
         db_schema.tables[:ref_contract_types] = double('contract_types')
         db_schema
@@ -18,7 +18,7 @@ module Gauge
         'dbo.primary_reps', '[dbo].[primary_reps]']}
       let(:valid_ref_table_names) { ['ref.contract_types', '[ref].[contract_types]'] }
 
-      before { Repo.databases[:rep_profile] = database_schema }
+      before { Repo.databases[:test_db_green] = database_schema }
 
       it { should respond_to :databases, :metadata_home }
       it { should respond_to :load, :clear }
@@ -37,7 +37,7 @@ module Gauge
 
         context "when any database metadata defined" do
           it { should_not be_empty }
-          specify { Repo.databases.should include(:rep_profile) }
+          specify { Repo.databases.should include(:test_db_green) }
         end
       end
 
@@ -56,7 +56,7 @@ module Gauge
         end
 
         it "loads all data table metadata for the database" do
-          Repo.as_null_object.should_receive(:require).with(/rep_profile\/tables\/(.*)\.rb/i).at_least(5).times
+          Repo.as_null_object.should_receive(:require).with(/test_db_green\/tables\/(.*)\.rb/i).at_least(4).times
           Repo.load
         end
       end
@@ -103,9 +103,9 @@ module Gauge
 
       describe '.database?' do
         context "when database with specifid name is defined in the metadata" do
-          specify { Repo.database?(:rep_profile).should be true }
-          specify { Repo.database?('rep_profile').should be true }
-          specify { Repo.database?('RepProfile_DB').should be true }
+          specify { Repo.database?(:test_db_green).should be true }
+          specify { Repo.database?('test_db_green').should be true }
+          specify { Repo.database?('TestDB_Green').should be true }
         end
 
         context "when database with specified name is not found" do
@@ -161,9 +161,9 @@ module Gauge
       describe '.schema' do
         context "when passed db object name is a database name" do
           it "returns a valid database schema" do
-            Repo.schema(:rep_profile).should == database_schema
-            Repo.schema('rep_profile').should == database_schema
-            Repo.schema('RepProfile_DB').should == database_schema
+            Repo.schema(:test_db_green).should == database_schema
+            Repo.schema('test_db_green').should == database_schema
+            Repo.schema('TestDB_Green').should == database_schema
           end
         end
 
