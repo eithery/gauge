@@ -6,7 +6,7 @@ module Gauge
     module ValidatorSpecHelper
 
       def create_dba_stubs
-        @dba = double('dba', data_column: @db_column, column_exists?: true, table_exists?: true)
+        @dba = double('dba', column: @db_column, column_exists?: true, table_exists?: true)
       end
 
 

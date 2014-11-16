@@ -6,23 +6,23 @@ module Gauge
   module Validators
     describe DataTableValidator do
       let(:validator) { DataTableValidator.new }
-      it_behaves_like "any database object validator"
 
+      it_behaves_like "any database object validator"
       it { should respond_to :check }
 
 
       describe '#check' do
-        let(:table_schema) { double('table_schema', database_name: 'accounts_db') }
+        let(:table_schema) { double('table_schema', database_name: 'rep_profile') }
 
         it "runs within data adapter session" do
-          DB::Adapter.should_receive(:session).with('accounts_db')
+          DB::Adapter.should_receive(:session).with('rep_profile')
           validator.check(table_schema)
         end
 
         it "performs validation check for data table" do
-          stub_db_adapter
-          validator.should_receive(:validate).with(table_schema, instance_of(Sequel::TinyTDS::Database))
-          validator.check table_schema
+         stub_db_adapter
+         validator.should_receive(:validate).with(table_schema, instance_of(Sequel::TinyTDS::Database))
+         validator.check table_schema
         end
       end
 
