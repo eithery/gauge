@@ -7,9 +7,10 @@ require 'gauge'
 module Gauge
 	module Schema
 		class DataColumnSchema
-			def initialize(column_name, options={})
+			def initialize(column_name, options={}, &block)
 				@column_name = column_name
 				@options = options
+        instance_eval(&block) if block
 				validate_column_type
 			end
 
@@ -24,9 +25,9 @@ module Gauge
 				type = @options[:type]
 				return :id if contains_ref_id?
 				return type.to_sym unless type.nil?
-				return :bool if column_name.to_s.downcase.start_with?('is', 'has', 'allow')
-				return :datetime if column_name.to_s.downcase.end_with?('date', '_at')
-				return :date if column_name.to_s.downcase.end_with?('_on')
+				return :bool if bool?
+				return :datetime if datetime?
+				return :date if date?
 				:string
 			end
 
@@ -69,6 +70,21 @@ module Gauge
 			end
 
 
+			def bool?
+				column_name.to_s.downcase.start_with?('is', 'has', 'allow')
+			end
+
+
+			def datetime?
+				column_name.to_s.downcase.end_with?('date', '_at')
+			end
+
+
+			def date?
+				column_name.to_s.downcase.end_with?('_on')
+			end
+
+
 			def type_map
 				{
 					id: :bigint,
@@ -94,7 +110,7 @@ module Gauge
 
 			def validate_column_type
 				col_type = @options[:type]
-				raise ArgumentError.new('Invalid column type.') unless col_type.nil? || type_map.keys.include?(col_type.to_sym)
+				raise ArgumentError.new('Invalid column type.') unless col_type.nil? || type_map.include?(col_type.to_sym)
 			end
 		end
 	end

@@ -5,7 +5,6 @@ require 'spec_helper'
 module Gauge
   module Schema
     describe DataColumnSchema do
-      let(:table_name) { 'my_sample_table' }
       let(:column) { DataColumnSchema.new(:account_number, type: :string, required: true) }
       let(:ref_column) { DataColumnSchema.new(nil, ref: 'br.primary_reps') }
       subject { column }
@@ -18,9 +17,8 @@ module Gauge
 
       describe '#initialize' do
         it "raises an error for not supported column types" do
-          expect do
-            DataColumnSchema.new(table_name, type: :unknown).data_type
-          end.to raise_error(ArgumentError, /invalid column type/i)
+          expect { DataColumnSchema.new(:customers, type: :unknown) }
+            .to raise_error(ArgumentError, /invalid column type/i)
         end
       end
 
@@ -39,7 +37,7 @@ module Gauge
 
           context "and no refs to another table defined" do
             before { @no_name_column = DataColumnSchema.new(nil) }
-            it "should raise the error" do
+            specify do
               expect { @no_name_column.column_name }.to raise_error(/column name is not specified/)
             end
           end
@@ -48,10 +46,8 @@ module Gauge
 
 
       describe '#column_type' do
-        subject { @column.column_type }
-
         context "when type is explicitly passed in constructor arguments" do
-          before { @country_column = DataColumnSchema.new(table_name, type: :country) }
+          before { @country_column = DataColumnSchema.new(:customers, type: :country) }
 
           it "returns initialized column type converted to symbol" do
             column.column_type.should == :string
@@ -61,8 +57,7 @@ module Gauge
 
         context "when no type attribute is defined" do
           context "and column attributes contain the ref to another table" do
-            subject { ref_column.column_type }
-            it { should == :id }
+            specify { ref_column.column_type.should == :id }
           end
 
           context "and column name contains 'is', 'has', or 'allow' prefix" do
@@ -89,12 +84,12 @@ module Gauge
 
           context "and column name contains '_on' suffix" do
             before { @column = DataColumnSchema.new(:created_on) }
-            it { should == :date }
+            specify { @column.column_type.should == :date }
           end
 
           context "and column name does not contain specific prefixes or suffixes" do
             before { @column = DataColumnSchema.new(:account_number) }
-            it { should == :string }
+            specify { @column.column_type.should == :string }
           end
         end
       end
@@ -150,10 +145,15 @@ module Gauge
 
 
       describe '#id?' do
-      end
+        context "when column schema defines surrogate id" do
+          before { @id_column = DataColumnSchema.new(:product_id, id: true) }
+          specify { @id_column.should be_id }
+        end
 
-
-      describe '#required' do
+        context "when column schema does not define surrogate id" do
+          before { @not_id_column = DataColumnSchema.new(:product_id) }
+          specify { @not_id_column.should_not be_id }
+        end
       end
     end
   end

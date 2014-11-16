@@ -17,12 +17,7 @@ module Gauge
         end
       end
       let(:table_schema) { dbo_table_schema }
-      let(:table_with_id) do
-        DataTableSchema.new(:carriers) do
-          col :carrier_id, id: true
-          col :code
-        end
-      end
+      let(:stub_column_schema) { double('column_schema', id?: false) }
 
       subject { dbo_table_schema }
 
@@ -43,6 +38,16 @@ module Gauge
       end
 
 
+      describe '#local_name' do
+        context "when data table is defined in default SQL schema" do
+          specify { dbo_table_schema.local_name.should == 'master_accounts' }
+        end
+
+        context "when data table is defined in custom SQL schema" do
+          specify { ref_table_schema.local_name.should == 'source_firms' }
+        end
+      end
+
 
       describe '#sql_schema' do
         context "when data table is defined in default SQL schema" do
@@ -51,17 +56,6 @@ module Gauge
 
         context "when data table is defined in custom SQL schema" do
           specify { ref_table_schema.sql_schema.should == :ref }
-        end
-      end
-
-
-      describe '#local_name' do
-        context "when data table is defined in default SQL schema" do
-          specify { dbo_table_schema.local_name.should == 'master_accounts' }
-        end
-
-        context "when data table is defined in custom SQL schema" do
-          specify { ref_table_schema.local_name.should == 'source_firms' }
         end
       end
 
@@ -109,15 +103,21 @@ module Gauge
         end
 
         context "when id column is defined in metadata" do
+          before do
+            @table_with_id = DataTableSchema.new(:carriers) do
+              col :carrier_id, id: true
+              col :code
+            end
+          end
           it "contains exact number of columns defined in metadata" do
-            table_with_id.should have(2).columns
-            table_with_id.should contain_column :code
-            table_with_id.should_not contain_column :display_name
+            @table_with_id.should have(2).columns
+            @table_with_id.should contain_column :code
+            @table_with_id.should_not contain_column :display_name
           end
 
           it "contains the data column defined as id" do
-            table_with_id.should contain_column :carrier_id
-            table_with_id.should_not contain_column :id
+            @table_with_id.should contain_column :carrier_id
+            @table_with_id.should_not contain_column :id
           end
         end
 
@@ -134,6 +134,7 @@ module Gauge
               @table_with_timestamps.should contain_column :modified
               @table_with_timestamps.should contain_column :modified_by
               @table_with_timestamps.should contain_column :version
+              @table_with_timestamps.should contain_column :id
             end
           end
 
@@ -150,16 +151,49 @@ module Gauge
               @table_with_timestamps.should contain_column :modified
               @table_with_timestamps.should contain_column :modifiedBy
               @table_with_timestamps.should contain_column :version
+              @table_with_timestamps.should contain_column :id
             end
           end
         end
 
         context "when no columns specified in metadata" do
           before { @empty_table_schema = DataTableSchema.new(:customers) }
+
           it "contains only one 'id' data column" do
             @empty_table_schema.should have(1).column
             @empty_table_schema.should contain_column(:id)
           end
+        end
+      end
+
+
+      describe '#col' do
+        before { table_schema }
+
+        it "creates new data column schema" do
+          DataColumnSchema.should_receive(:new).with(:office_code, hash_including(:type))
+            .and_return(stub_column_schema)
+          table_schema.col :office_code, type: :string
+        end
+
+        it "adds the new column schema to columns collection" do
+          DataColumnSchema.stub(:new).and_return(stub_column_schema)
+          expect { table_schema.col :office_code }.to change { table_schema.columns.count }.by(1)
+          table_schema.columns.should include(stub_column_schema)
+        end
+      end
+
+
+      describe '#timestamps' do
+        before { table_schema }
+
+        it "creates 5 new data column schema instances" do
+          DataColumnSchema.should_receive(:new).at_least(5).times.and_return(stub_column_schema)
+          table_schema.timestamps
+        end
+
+        it "adds 5 new column schema instances to columns collection" do
+          expect { table_schema.timestamps }.to change { table_schema.columns.count }.by(5)
         end
       end
     end

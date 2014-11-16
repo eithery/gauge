@@ -15,7 +15,7 @@ module Gauge
         @columns = []
 
         instance_eval(&block) if block
-        columns << DataColumnSchema.new(:id, type: :long, required: true) unless has_id?
+        define_surrogate_id unless has_id?
       end
 
 
@@ -40,7 +40,7 @@ module Gauge
 
 
       def contains?(column_name)
-        columns.any? { |col| col.column_name.downcase.to_sym == column_name.downcase.to_sym }
+        columns.any? { |col| col.to_key == column_name.downcase.to_sym }
       end
 
 
@@ -50,11 +50,14 @@ module Gauge
 
 
       def timestamps(options={})
-        columns << DataColumnSchema.new(:created, type: :datetime, required: true)
-        columns << DataColumnSchema.new(created_by_column(options), required: true)
-        columns << DataColumnSchema.new(:modified, type: :datetime, required: true)
-        columns << DataColumnSchema.new(modified_by_column(options), required: true)
-        columns << DataColumnSchema.new(:version, type: :long, required: true)
+        {
+          created: :datetime,
+          created_by_column(options) => :string,
+          modified: :datetime,
+          modified_by_column(options) => :string,
+          version: :long
+        }
+        .each { |name, type| col name, type: type, required: true }
       end
 
 private
@@ -71,6 +74,11 @@ private
 
       def modified_by_column(options)
         options[:casing] == :camel ? :modifiedBy : :modified_by
+      end
+
+
+      def define_surrogate_id
+        col :id, type: :long, required: true
       end
     end
   end
