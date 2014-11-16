@@ -6,9 +6,9 @@ table :officeRoleAssignments do
   col :name
   col :description, len: :max
   col :primaryRepId, :ref => :primaryReps
-  col :officeRoleId, :ref => :officeRoles { required }
-  col :officeId, :ref => :offices { required }
-  col :startDate { required }
+  col :officeRoleId, :ref => :officeRoles, required: true
+  col :officeId, :ref => :offices, required: true
+  col :startDate, required: true
   col :endDate
-  col :is_default { required }
+  col :is_default, required: true
 end

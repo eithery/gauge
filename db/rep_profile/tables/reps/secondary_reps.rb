@@ -3,7 +3,7 @@
 # Contains secondary rep codes for reps.
 
 table :secondaryReps do
-  col :primaryRepId, :ref => :primaryReps { required }
+  col :primaryRepId, :ref => :primaryReps, required: true
   col :terminated, type: :datetime
-  col :is_main { required }
+  col :is_main, required: true
 end
