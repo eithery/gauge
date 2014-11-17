@@ -5,7 +5,7 @@ $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'rspec/collection_matchers'
 require 'gauge'
 
-Dir[File.join(File.dirname(__FILE__) + '/unit/support/**/*.rb')].each { |f| require f }
+Dir[File.join(File.dirname(__FILE__) + '/support/**/*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
   config.expect_with :rspec do |c|
