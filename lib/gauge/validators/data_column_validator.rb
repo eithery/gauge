@@ -5,26 +5,10 @@ require 'gauge'
 
 module Gauge
   module Validators
-    class DataColumnValidator < ValidatorBase
-
-      def validate(column_schema, dba)
-        super(column_schema, dba) do
-          super(column_schema, dba.column(column_schema))
-        end
-        errors
-      end
-
-  protected
-
-      # Child validators called before the main validation cycle.
-      def before_validators
-        [MissingColumnValidator.new]
-      end
-
-
-      # Child validators.
-      def validators
-        [ColumnNullabilityValidator.new, ColumnTypeValidator.new]
+    class DataColumnValidator < Validators::Base
+      check_before :missing_column
+      check :column_nullability, :column_type do |column_schema, dba|
+        dba.column(column_schema)
       end
     end
   end

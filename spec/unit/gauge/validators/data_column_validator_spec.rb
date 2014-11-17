@@ -6,21 +6,22 @@ module Gauge
   module Validators
     describe DataColumnValidator do
       let(:validator) { DataColumnValidator.new }
+
       it_behaves_like "any database object validator"
 
-      describe '#validate' do
+      describe '#check' do
         before do
           create_data_column_stubs
+          create_dba_stubs
           stub_column_schema_nullability :null
           stub_column_schema_type :nvarchar
           stub_db_column_nullability :null
           stub_db_column_type :nvarchar
-          create_dba_stubs
         end
 
         it "always performs check for missing data column" do
           stub_validator(MissingColumnValidator).should_receive(:validate).with(@column_schema, @dba)
-          validator.validate @column_schema, @dba
+          validator.check @column_schema, @dba
         end
 
 
@@ -29,12 +30,12 @@ module Gauge
 
           it "performs data column type validation" do
             stub_validator(ColumnTypeValidator).should_receive(:validate).with(@column_schema, @db_column)
-            validator.validate @column_schema, @dba
+            validator.check @column_schema, @dba
           end
 
           it "performs data column nullability check" do
             stub_validator(ColumnNullabilityValidator).should_receive(:validate).with(@column_schema, @db_column)
-            validator.validate @column_schema, @dba
+            validator.check @column_schema, @dba
           end
         end
 
@@ -44,17 +45,18 @@ module Gauge
 
           it "does not perform data column type validation" do
             stub_validator(ColumnTypeValidator).should_not_receive(:validate)
-            validator.validate @column_schema, @dba
+            validator.check @column_schema, @dba
           end
 
           it "does not perform data column nullability check" do
             stub_validator(ColumnNullabilityValidator).should_not_receive(:validate)
-            validator.validate @column_schema, @dba
+            validator.check @column_schema, @dba
           end
         end
 
 
         context "when no errors found" do
+          before { @schema = @column_schema }
           it_behaves_like "validation passed successfully"
         end
 
@@ -66,7 +68,7 @@ module Gauge
           end
 
           it "aggregates all errors in the errors collection" do
-            validator.validate @column_schema, @dba
+            validator.check @column_schema, @dba
             validator.should have(2).errors
             validator.errors.should include(/but it must be 'nvarchar'/)
             validator.errors.should include(/must be defined as NULL/)

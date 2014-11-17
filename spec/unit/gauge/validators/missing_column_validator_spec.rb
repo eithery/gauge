@@ -6,12 +6,14 @@ module Gauge
   module Validators
     describe MissingColumnValidator do
       let(:validator) { MissingColumnValidator.new }
+
       it_behaves_like "any database object validator"
 
       describe '#validate' do
         before do
-          create_dba_stubs
           create_data_column_stubs
+          @schema = @column_schema
+          @dba = @db_column
         end
 
         context "when data column exists in the table" do

@@ -5,15 +5,15 @@ require 'gauge'
 
 module Gauge
   module Validators
-    class MissingColumnValidator < ValidatorBase
+    class MissingColumnValidator < Validators::Base
 
-      # Checks for missing data column.
-      def validate(column_schema, dba)
+      validate do |column_schema, dba|
+        result = true
         unless dba.column_exists? column_schema
           missing_column column_schema.column_name
-          return false
+          result = false
         end
-        true
+        result
       end
 
   private

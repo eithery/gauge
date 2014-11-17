@@ -6,10 +6,16 @@ module Gauge
   module Validators
     describe ColumnNullabilityValidator do
       let(:validator) { ColumnNullabilityValidator.new }
+
       it_behaves_like "any database object validator"
 
       describe '#validate' do
-        before { create_data_column_stubs }
+        before do
+          create_data_column_stubs
+          @schema = @column_schema
+          @dba = @db_column
+        end
+
 
         context "when data column is defined as NOT NULL in metadata" do
           before { stub_column_schema_nullability :not_null }

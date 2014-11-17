@@ -1,5 +1,8 @@
 # Eithery Lab., 2014.
 # Contains all requires for Database Gauge applicaion.
+require 'active_support/core_ext/string'
+require 'active_support/core_ext/string/inflections'
+
 require 'gauge/console_listener'
 require 'gauge/database_inspector'
 require 'gauge/db/adapter'
@@ -12,21 +15,19 @@ require 'gauge/schema/data_column_schema'
 require 'gauge/schema/data_table_schema'
 require 'gauge/schema/database_schema'
 require 'gauge/shell'
-require 'gauge/validators/validator_base'
+require 'gauge/validators/base'
+require 'gauge/validators/missing_table_validator'
+require 'gauge/validators/missing_column_validator'
 require 'gauge/validators/column_nullability_validator'
 require 'gauge/validators/column_type_validator'
 require 'gauge/validators/data_column_validator'
 require 'gauge/validators/data_table_validator'
 require 'gauge/validators/database_validator'
-require 'gauge/validators/missing_column_validator'
-require 'gauge/validators/missing_table_validator'
 require 'gauge/version'
 
 require 'ext/ruby/object'
 require 'sequel/tinytds/database'
 
-require 'active_support/core_ext/string'
-require 'active_support/core_ext/string/inflections'
 require 'gli'
 require 'rainbow'
 require 'rainbow/ext/string'

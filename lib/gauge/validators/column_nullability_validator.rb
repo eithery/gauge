@@ -5,9 +5,9 @@ require 'gauge'
 
 module Gauge
   module Validators
-    class ColumnNullabilityValidator < ValidatorBase
+    class ColumnNullabilityValidator < Validators::Base
 
-      def validate(column_schema, db_column)
+      validate do |column_schema, db_column|
         if column_schema.allow_null? != db_column[:allow_null]
           should_be = column_schema.allow_null? ? 'NULL' : 'NOT NULL'
 

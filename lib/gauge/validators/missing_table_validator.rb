@@ -5,15 +5,15 @@ require 'gauge'
 
 module Gauge
   module Validators
-    class MissingTableValidator < ValidatorBase
+    class MissingTableValidator < Validators::Base
 
-      # Checks for missing data table.
-      def validate(table_schema, dba)
+      validate do |table_schema, dba|
+        result = true
         unless dba.table_exists? table_schema
           missing_table table_schema.table_name
-          return false
+          result = false
         end
-        true
+        result
       end
 
   private

@@ -9,7 +9,11 @@ module Gauge
       it_behaves_like "any database object validator"
 
       describe '#validate' do
-        before { create_data_column_stubs }
+        before do
+          create_data_column_stubs
+          @schema = @data_column
+          @dba = @db_column
+        end
 
         context "when the actual column type is different from defined in metadata" do
           before do
