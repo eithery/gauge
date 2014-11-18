@@ -68,8 +68,6 @@ module Gauge
           check_for(dbo_schema, dba) if respond_to? :check_for
         end
       end
-
-  private
     end
   end
 end

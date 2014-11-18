@@ -42,6 +42,7 @@ module Gauge
         it { should respond_to :errors }
 
         specify { validator.class.should respond_to :check_all }
+        specify { validator.class.should respond_to :check_before }
         specify { validator.class.should respond_to :check }
         specify { validator.class.should respond_to :validate }
 
