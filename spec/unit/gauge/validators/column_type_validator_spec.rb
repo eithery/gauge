@@ -6,13 +6,15 @@ module Gauge
   module Validators
     describe ColumnTypeValidator do
       let(:validator) { ColumnTypeValidator.new }
+      let(:schema) { @column_schema }
 
       it { should respond_to :validate }
       it_behaves_like "any database object validator"
 
+
       describe '#validate' do
         before do
-          @dba = @db_column = double('db_column')
+          @db_column = double('db_column')
           @db_column.stub(:[]).with(:db_type).and_return(:nvarchar)
         end
 
@@ -23,8 +25,14 @@ module Gauge
 
         context "when the actual column type is the same as defined in metadata" do
           before { @column_schema = Schema::DataColumnSchema.new(:total_amount, type: :string) }
-          specify { no_validation_errors }
+          specify { no_validation_errors { |schema, dba| validator.validate(schema, dba) } }
         end
+      end
+
+  private
+
+      def dba
+        @db_column
       end
     end
   end

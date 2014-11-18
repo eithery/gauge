@@ -5,20 +5,6 @@ module Gauge
   module Validators
     module ValidatorSpecHelper
 
-      def create_dba_stubs
-        @dba = double('dba', table_exists?: true, column_exists?: true, column: @db_column)
-      end
-
-
-      def create_data_column_stubs
-        @db_column = double('db_column')
-        @db_column.stub(:[]).with(:allow_null)
-          .and_return(false, false, true, false, false, true)
-        @db_column.stub(:[]).with(:db_type)
-          .and_return(:bigint, :nvarchar, :datetime, :bigint, :nvarchar, :datetime)
-      end
-
-
       def stub_validator(validator_class)
         validator = validator_class.new
         validator_class.stub(:new).and_return(validator)
@@ -34,6 +20,21 @@ module Gauge
       end
 
 
+      def should_append_error(error_message)
+        validator.errors.should_receive(:<<).with(error_message)
+        validator.validate(schema, dba)
+      end
+
+
+      def no_validation_errors
+        expect { yield(schema, dba) }.not_to change { validator.errors.count }
+
+        validator.errors.should_not_receive(:<<)
+        yield schema, dba
+        validator.errors.should be_empty
+      end
+
+
       shared_examples_for "any database object validator" do
         subject { validator }
 
@@ -46,28 +47,6 @@ module Gauge
 
         specify { validator.errors.should_not be_nil }
         specify { validator.errors.should be_empty }
-      end
-
-
-      shared_examples_for "validation passed successfully" do
-        specify "errors collection remains empty" do
-          no_validation_errors
-        end
-      end
-
-
-      def should_append_error(error_message)
-        validator.errors.should_receive(:<<).with(error_message)
-        validator.validate(@column_schema, @dba)
-      end
-
-
-      def no_validation_errors
-        expect { validator.validate(@column_schema, @dba) }.not_to change { validator.errors.count }
-
-        validator.errors.should_not_receive(:<<)
-        validator.validate(@column_schema, @dba)
-        validator.errors.should be_empty
       end
     end
   end

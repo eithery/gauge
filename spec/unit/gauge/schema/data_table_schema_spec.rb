@@ -29,11 +29,11 @@ module Gauge
 
       describe '#table_name' do
         context "when data table is defined in default SQL schema" do
-          specify { dbo_table_schema.table_name.should == '[dbo].[master_accounts]' }
+          specify { dbo_table_schema.table_name.should == 'dbo.master_accounts' }
         end
 
         context "when data table is defined in custom SQL schema" do
-          specify { ref_table_schema.table_name.should == '[ref].[source_firms]' }
+          specify { ref_table_schema.table_name.should == 'ref.source_firms' }
         end
       end
 

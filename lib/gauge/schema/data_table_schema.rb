@@ -20,7 +20,7 @@ module Gauge
 
 
       def table_name
-        "[#{sql_schema}].[#{local_name}]"
+        "#{sql_schema}.#{local_name}"
       end
 
 

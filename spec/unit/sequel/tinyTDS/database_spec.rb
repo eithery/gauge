@@ -17,7 +17,7 @@ module Sequel
 
       describe '#table_exists?' do
         before do
-          create_data_table_stubs
+          @table_schema = Gauge::Schema::DataTableSchema.new(:master_accounts, sql_schema: :ref)
           database.stub(:tables).and_return([:master_accounts, :customers])
         end
 
