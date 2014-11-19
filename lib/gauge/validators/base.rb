@@ -9,9 +9,8 @@ module Gauge
       include ConsoleListener
 
       def self.check_all(validator_name, &block)
-        validator_type = "Gauge::Validators::#{validator_name.to_s.singularize.camelize}Validator".constantize
         define_method(:do_check_all) do |dbo_schema, dba|
-          validator = validator_type.new
+          validator = validator_for validator_name
           block.call(dbo_schema).each do |child_schema|
             validator.errors.clear
             validator.check child_schema, dba
@@ -22,10 +21,9 @@ module Gauge
 
 
       def self.check_before(validator_name, options={})
-        validator_type = "Gauge::Validators::#{validator_name.to_s.singularize.camelize}Validator".constantize
         define_method(:do_check_before) do |dbo_schema, dba|
           result = true
-          validator = validator_type.new
+          validator = validator_for validator_name
           result = validator.do_validate(dbo_schema, dba)
           errors.concat validator.errors
           result
@@ -34,12 +32,9 @@ module Gauge
 
 
       def self.check(*validators, &block)
-        validator_types = validators.map do |val|
-          "Gauge::Validators::#{val.to_s.singularize.camelize}Validator".constantize
-        end
         define_method(:do_check) do |dbo_schema, dba|
-          validator_types.each do |val_type|
-            validator = val_type.new
+          validators.each do |validator_name|
+            validator = validator_for validator_name
             actual_dba = block ? block.call(dbo_schema, dba) : dba
             validator.do_validate(dbo_schema, actual_dba)
             errors.concat validator.errors
@@ -67,6 +62,13 @@ module Gauge
           do_check_all(dbo_schema, dba) if respond_to? :do_check_all
           do_check(dbo_schema, dba) if respond_to? :do_check
         end
+      end
+
+  private
+
+      def validator_for(validator_name)
+        validator_type = "Gauge::Validators::#{validator_name.to_s.singularize.camelize}Validator".constantize
+        validator_type.new
       end
     end
   end

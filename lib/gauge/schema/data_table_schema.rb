@@ -7,6 +7,7 @@ require 'gauge'
 module Gauge
   module Schema
     class DataTableSchema
+      attr_accessor :database
       attr_reader :columns
 
       def initialize(table_name, options={}, &block)

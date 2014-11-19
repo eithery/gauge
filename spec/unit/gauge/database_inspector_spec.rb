@@ -83,17 +83,6 @@ end
 
 
 #      describe '#check' do
-#        before do
-#          stub_db_adapter
-#          validator.stub(:info)
-#        end
-
-#        it "displays database validation header message" do
-#          DB::Adapter.stub(:session)
-#          allow(validator).to receive(:info).and_call_original
-#          expect { validator.check(database_schema) }.to output(/inspecting 'accounts_profile' database/i).to_stdout
-#        end
-
 #        it "runs within data adapter session" do
 #          DB::Adapter.should_receive(:session).with('accounts_db_name')
 #          validator.check database_schema

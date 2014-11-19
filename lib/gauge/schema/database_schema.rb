@@ -16,6 +16,11 @@ module Gauge
 			end
 
 
+			def database
+				self
+			end
+
+
 			def database_name
 				@database_name.to_s
 			end

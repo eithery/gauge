@@ -35,6 +35,7 @@ module Gauge
 
       def self.define_table(*args, &block)
         table_schema = DataTableSchema.new(*args, &block)
+        table_schema.database = current_db_schema
         current_db_schema.tables[table_schema.to_key] = table_schema
       end
 
@@ -44,8 +45,8 @@ module Gauge
       end
 
 
-      def self.database?(dbo)
-        databases.include?(dbo.to_sym) || databases.values.any? { |db_schema| dbo == db_schema.sql_name }
+      def self.database?(dbo_name)
+        databases.include?(dbo_name.to_sym) || databases.values.any? { |db_schema| dbo_name == db_schema.sql_name }
       end
 
 

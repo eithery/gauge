@@ -23,7 +23,10 @@ module Gauge
       Schema::Repo.load
       @args.each do |dbo|
         validator = validator_for dbo
-        validator.check(Schema::Repo.schema dbo) unless validator.nil?
+        schema = Schema::Repo.schema dbo
+        DB::Adapter.session(schema.database.sql_name) do |dba|
+          validator.check(schema, dba) unless validator.nil?
+        end
       end
     end
 
@@ -37,22 +40,3 @@ private
     end
   end
 end
-
-
-#      def perform_check(database_schema)
-#        info "Inspecting '#{database_schema.database_name.to_s}' database ..."
-#        DB::Adapter.session(database_schema.sql_name) do |dba|
-#          database_schema.tables.values.each { |table| validate table, dba }
-#        end
-#      end
-
-#      def perform_check(table_schema)
-#        DB::Adapter.session(table_schema.database_name) { |dba| validate(table_schema, dba) }
-#      end
-#      def validate(table_schema, dba)
-#        log "Check #{table_schema.table_name} data table" do
-#          self.errors.clear
-#          table_schema.columns.each { |col| super(col, dba) }
-#          self.errors
-#        end
-#      end

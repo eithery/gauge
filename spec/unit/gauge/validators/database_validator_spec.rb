@@ -6,7 +6,13 @@ module Gauge
   module Validators
     describe DatabaseValidator do
       let(:validator) { DatabaseValidator.new }
-      let(:dba) { double('dba') }
+      let(:db_column) do
+        db_column = double('db_column')
+        db_column.stub(:[]).with(:allow_null).and_return(false)
+        db_column.stub(:[]).with(:db_type).and_return(:bigint)
+        db_column
+      end
+      let(:dba) { double('dba', table_exists?: true, column_exists?: true, column: db_column) }
       let(:schema) do
         db_schema = Schema::DatabaseSchema.new(:test_db)
         tables = %w(master_accounts customers primary_reps).map do |table_name|
@@ -21,6 +27,13 @@ module Gauge
 
 
       describe '#check' do
+        before do
+          validator.stub(:info)
+          DataTableValidator.any_instance.stub(:log) do |message, &block|
+            block.call
+          end
+        end
+
         it "creates validator to check data tables" do
           stub_table_validator = double('table_validator', check: true, errors: [])
           DataTableValidator.should_receive(:new).once.and_return(stub_table_validator)
@@ -31,6 +44,11 @@ module Gauge
           stub_validator(DataTableValidator).should_receive(:check)
             .with(instance_of(Schema::DataTableSchema), dba).exactly(3).times
           validator.check schema, dba
+        end
+
+        it "displays database validation header message" do
+          allow(validator).to receive(:info).and_call_original
+          expect { validator.check(schema, dba) }.to output(/inspecting 'test_db' database/i).to_stdout
         end
       end
     end
