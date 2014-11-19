@@ -9,7 +9,7 @@ module Gauge
       let(:schema) { Schema::DataColumnSchema.new(:account_number) }
       let(:dba) { double('dba') }
 
-      it { should respond_to :validate }
+      it { should respond_to :do_validate }
       it_behaves_like "any database object validator"
 
 
@@ -17,8 +17,8 @@ module Gauge
         context "when data column exists in the table" do
           before { dba.stub(:column_exists?).and_return(true) }
 
-          specify { no_validation_errors { |schema, dba| validator.validate(schema, dba) } }
-          specify { validator.validate(schema, dba).should be true }
+          specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) } }
+          specify { validator.do_validate(schema, dba).should be true }
         end
 
 
@@ -26,7 +26,7 @@ module Gauge
           before { dba.stub(:column_exists?).and_return(false) }
 
           it { should_append_error(/missing '(.*)account_number(.*)' data column/i) }
-          specify { validator.validate(schema, dba).should be false }
+          specify { validator.do_validate(schema, dba).should be false }
         end        
       end
     end

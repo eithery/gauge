@@ -14,7 +14,7 @@ module Gauge
       end
 
       it_behaves_like "any database object validator"
-      it { should respond_to :check, :check_before, :check_all }
+      it { should respond_to :check, :do_check_before, :do_check_all }
 
 
       describe '#check' do
@@ -30,14 +30,14 @@ module Gauge
 
 
         it "creates validator to check missing data table" do
-          stub_missing_table_validator = double('missing_table_validator', check: true, errors: [], validate: false)
+          stub_missing_table_validator = double('missing_table_validator', check: true, errors: [], do_validate: false)
           MissingTableValidator.should_receive(:new).once.and_return(stub_missing_table_validator)
           validator.check schema, dba
         end
 
 
         it "always performs check for missing data table" do
-          stub_validator(MissingTableValidator).should_receive(:validate).with(schema, dba)
+          stub_validator(MissingTableValidator).should_receive(:do_validate).with(schema, dba)
           validator.check schema, dba
         end
 

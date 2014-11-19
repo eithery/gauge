@@ -10,7 +10,7 @@ module Gauge
       let(:dba) { double('dba', column: @db_column, column_exists?: true) }
 
       it_behaves_like "any database object validator"
-      it { should respond_to :check_before, :check_for }
+      it { should respond_to :do_check_before, :do_check }
 
 
       describe '#check' do
@@ -21,7 +21,7 @@ module Gauge
         end
 
         it "always performs check for missing data column" do
-          stub_validator(MissingColumnValidator).should_receive(:validate).with(schema, dba)
+          stub_validator(MissingColumnValidator).should_receive(:do_validate).with(schema, dba)
           validator.check schema, dba
         end
 
@@ -30,12 +30,12 @@ module Gauge
           before { dba.stub(:column_exists?).and_return(true) }
 
           it "performs data column type validation" do
-            stub_validator(ColumnTypeValidator).should_receive(:validate).with(schema, @db_column)
+            stub_validator(ColumnTypeValidator).should_receive(:do_validate).with(schema, @db_column)
             validator.check schema, dba
           end
 
           it "performs data column nullability check" do
-            stub_validator(ColumnNullabilityValidator).should_receive(:validate).with(schema, @db_column)
+            stub_validator(ColumnNullabilityValidator).should_receive(:do_validate).with(schema, @db_column)
             validator.check schema, dba
           end
         end
@@ -45,12 +45,12 @@ module Gauge
           before { dba.stub(:column_exists?).and_return(false) }
 
           it "does not perform data column type validation" do
-            stub_validator(ColumnTypeValidator).should_not_receive(:validate)
+            stub_validator(ColumnTypeValidator).should_not_receive(:do_validate)
             validator.check schema, dba
           end
 
           it "does not perform data column nullability check" do
-            stub_validator(ColumnNullabilityValidator).should_not_receive(:validate)
+            stub_validator(ColumnNullabilityValidator).should_not_receive(:do_validate)
             validator.check schema, dba
           end
         end
