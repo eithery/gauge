@@ -15,8 +15,9 @@ module Gauge
       let(:dba) { double('dba', table_exists?: true, column_exists?: true, column: db_column) }
       let(:schema) do
         db_schema = Schema::DatabaseSchema.new(:test_db)
-        tables = %w(master_accounts customers primary_reps).map do |table_name|
-          Schema::DataTableSchema.new(table_name.to_sym)
+        tables = {}
+        %w(master_accounts customers primary_reps).map do |table_name|
+          tables[table_name.to_sym] = Schema::DataTableSchema.new(table_name.to_sym)
         end
         db_schema.stub(:tables).and_return tables
         db_schema

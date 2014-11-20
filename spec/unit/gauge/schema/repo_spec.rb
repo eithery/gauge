@@ -79,7 +79,7 @@ module Gauge
         before { Repo.stub(:current_db_schema).and_return(stub_db_schema) }
 
         it "creates data table metadata definition" do
-          table_schema = double('participants', to_key: :participants)
+          table_schema = double('participants', to_key: :participants, :database= => stub_db_schema)
           DataTableSchema.should_receive(:new).with(:participants).and_return(table_schema)
           Repo.define_table(:participants)
         end
@@ -181,9 +181,7 @@ module Gauge
 
 
         context "when metadata for passed db object name is not found" do
-          it "raises an error" do
-            expect { Repo.schema 'unknown_db_object' }.to raise_error(/metadata for '(.*)' is not found/i)
-          end
+          specify { Repo.schema('unknown_db_object').should be_nil }
         end
       end
     end

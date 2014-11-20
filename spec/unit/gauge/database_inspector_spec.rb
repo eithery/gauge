@@ -5,7 +5,7 @@ require 'spec_helper'
 module Gauge
   describe DatabaseInspector do
     let(:inspector) { DatabaseInspector.new({}, {}, @args) }
-    let(:table_schema_stub) { double('primary_reps') }
+    let(:table_schema) { Schema::DataTableSchema.new(:primary_reps) }
 
     before { @args = [] }
     subject { inspector }
@@ -24,15 +24,17 @@ module Gauge
 
     describe '#check' do
       before do
+        stub_db_adapter
         @db_schema = Schema::DatabaseSchema.new(:rep_profile, sql_name: 'RepProfile_DB')
-        @db_schema.tables[:dbo_primary_reps] = table_schema_stub
+        table_schema.database = @db_schema
+        @db_schema.tables[:dbo_primary_reps] = table_schema
         Schema::Repo.databases[:rep_profile] = @db_schema
         Schema::Repo.stub(:load)
       end
 
       it "performs validation for each data object passed as an argument" do
-        @args = ['rep_profile', 'books_and_records_db']
-        inspector.should_receive(:validator_for).with(/rep_profile|books_and_records_db/).twice
+        @args = ['rep_profile', 'primary_reps']
+        inspector.should_receive(:validator_for).with(/rep_profile|primary_reps/).twice
         inspector.check
       end
 
@@ -50,7 +52,7 @@ module Gauge
         end 
 
         it "performs database structure check using DatabaseValidator class" do
-          @validator.should_receive(:check).with(@db_schema)
+          @validator.should_receive(:check).with(@db_schema, instance_of(Sequel::TinyTDS::Database))
           inspector.check
         end
       end
@@ -63,7 +65,7 @@ module Gauge
         end 
 
         it "performs data table structure check using DataTableValidator class" do
-          @validator.should_receive(:check).with(table_schema_stub)
+          @validator.should_receive(:check).with(table_schema, instance_of(Sequel::TinyTDS::Database))
           inspector.check
         end
       end

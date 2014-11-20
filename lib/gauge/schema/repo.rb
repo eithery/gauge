@@ -60,9 +60,7 @@ module Gauge
 
       def self.schema(dbo_name)
         return database_schema dbo_name if database? dbo_name
-        return table_schema dbo_name if table? dbo_name
-
-        raise "Database metadata for '#{dbo_name}' is not found."
+        table_schema dbo_name if table? dbo_name
       end
 
 private
