@@ -80,7 +80,7 @@ module Gauge
 
         it "creates data table metadata definition" do
           table_schema = double('participants', to_key: :participants, :database= => stub_db_schema)
-          DataTableSchema.should_receive(:new).with(:participants).and_return(table_schema)
+          DataTableSchema.should_receive(:new).with(:participants, hash_including(:database)).and_return(table_schema)
           Repo.define_table(:participants)
         end
 

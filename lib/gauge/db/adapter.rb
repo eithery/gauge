@@ -6,9 +6,9 @@ require 'gauge'
 module Gauge
   module DB
     class Adapter
-      def self.session(database_name)
-        Sequel.tinytds(dataserver: Connection.server, database: database_name, user: Connection.user,
-          password: Connection.password) do |dba|
+      def self.session(schema)
+        Sequel.tinytds(dataserver: Connection.server, database: schema.database.sql_name,
+          user: Connection.user, password: Connection.password) do |dba|
           dba.test_connection
           yield dba
         end

@@ -25,7 +25,7 @@ module Gauge
         validator = validator_for dbo
         schema = Schema::Repo.schema dbo
         unless schema.nil?
-          DB::Adapter.session(schema.database.sql_name) do |dba|
+          DB::Adapter.session schema do |dba|
             validator.check(schema, dba) unless validator.nil?
           end
         else

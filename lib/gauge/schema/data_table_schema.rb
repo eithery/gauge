@@ -7,7 +7,6 @@ require 'gauge'
 module Gauge
   module Schema
     class DataTableSchema
-      attr_accessor :database
       attr_reader :columns
 
       def initialize(table_name, options={}, &block)
@@ -32,6 +31,11 @@ module Gauge
 
       def sql_schema
         @options[:sql_schema] || :dbo
+      end
+
+
+      def database
+        @options[:database]
       end
 
 

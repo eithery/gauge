@@ -33,9 +33,9 @@ module Gauge
       end
 
 
-      def self.define_table(*args, &block)
-        table_schema = DataTableSchema.new(*args, &block)
-        table_schema.database = current_db_schema
+      def self.define_table(table_name, options={}, &block)
+        options[:database] = current_db_schema
+        table_schema = DataTableSchema.new(table_name, options, &block)
         current_db_schema.tables[table_schema.to_key] = table_schema
       end
 
