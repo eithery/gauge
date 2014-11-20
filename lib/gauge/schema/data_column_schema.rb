@@ -7,8 +7,6 @@ require 'gauge'
 module Gauge
 	module Schema
 		class DataColumnSchema
-			attr_accessor :table_name
-
 			def initialize(column_name, options={}, &block)
 				@column_name = column_name
 				@options = options
@@ -20,6 +18,11 @@ module Gauge
 			def column_name
 				return @column_name.to_s unless @column_name.blank?
 				name_from_ref
+			end
+
+
+			def table_name
+				@options[:table].to_s
 			end
 
 

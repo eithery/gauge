@@ -9,11 +9,12 @@ module Gauge
       subject { db_schema }
 
       it { should respond_to :database_name, :sql_name }
+      it { should respond_to :database_schema }
       it { should respond_to :tables, :to_key }
 
 
       describe '#database_name' do
-        it { db_schema.database_name.should == 'rep_profile' }
+        specify { db_schema.database_name.should == 'rep_profile' }
       end
 
 
@@ -29,6 +30,11 @@ module Gauge
           specify { db_schema.sql_name.should == 'RepProfile_DB' }
           specify { db_schema.sql_name.should_not == db_schema.database_name }
         end
+      end
+
+
+      describe '#database_schema' do
+        specify { db_schema.database_schema.should == db_schema }
       end
 
 

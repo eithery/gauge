@@ -7,7 +7,6 @@ module Gauge
   module DB
     class Connection
 
-      # Configures DB connection.
       def self.configure(options)
         @@server = options[:server]
         @@user = options[:user]
@@ -15,13 +14,11 @@ module Gauge
       end
 
 
-      # Server name.
       def self.server
         @@server
       end
 
 
-      # User name.
       def self.user
         @@user
       end

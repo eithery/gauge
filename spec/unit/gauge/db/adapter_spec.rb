@@ -16,7 +16,7 @@ module Gauge
         end
 
         it "uses tinyTDS database adapter" do
-          Sequel.should_receive(:tinytds).with hash_including(database: @db_schema.sql_name)
+          Sequel.should_receive(:tinytds).with hash_including(database: @db_schema.database_schema.sql_name)
           Adapter.session(@db_schema)
         end
 

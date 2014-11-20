@@ -9,7 +9,8 @@ module Gauge
       let(:ref_column) { DataColumnSchema.new(nil, ref: 'br.primary_reps') }
       subject { column }
 
-      it { should respond_to :column_name, :column_type, :data_type }
+      it { should respond_to :column_name }
+      it { should respond_to :column_type, :data_type }
       it { should respond_to :table_name }
       it { should respond_to :allow_null? }
       it { should respond_to :to_key }
@@ -42,6 +43,19 @@ module Gauge
               expect { @no_name_column.column_name }.to raise_error(/column name is not specified/)
             end
           end
+        end
+      end
+
+
+      describe '#table_name' do
+        context "when table name is explicitly passed in constructor arguments" do
+          before { @column = DataColumnSchema.new(:account_number, table: :master_accounts) }
+          specify { @column.table_name.should == 'master_accounts' }
+        end
+
+        context "when no table names passed in constructor arguments" do
+          before { @column = DataColumnSchema.new(:account_number) }
+          specify { @column.table_name.should be_empty }
         end
       end
 

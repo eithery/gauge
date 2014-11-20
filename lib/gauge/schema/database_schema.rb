@@ -16,7 +16,7 @@ module Gauge
 			end
 
 
-			def database
+			def database_schema
 				self
 			end
 

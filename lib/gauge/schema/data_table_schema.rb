@@ -34,7 +34,7 @@ module Gauge
       end
 
 
-      def database
+      def database_schema
         @options[:database]
       end
 
@@ -49,10 +49,9 @@ module Gauge
       end
 
 
-      def col(*args)
-        column = DataColumnSchema.new(*args)
-        column.table_name = local_name
-        columns << column
+      def col(column_name, options={}, &block)
+        options[:table] = local_name
+        columns << DataColumnSchema.new(column_name, options, &block)
       end
 
 

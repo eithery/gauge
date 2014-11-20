@@ -8,7 +8,7 @@ describe Object do
 
 
   describe '#database' do
-    it "Delegates creating new database schema to metadata repo" do
+    it "Delegates creating a new database schema to metadata repo" do
       Gauge::Schema::Repo.should_receive(:define_database).with(:rep_profile, hash_including(:sql_name))
       database :rep_profile, sql_name: 'RepProfile'
     end
@@ -20,7 +20,7 @@ describe Object do
       Gauge::Schema::Repo.should_receive(:define_table).with(:primary_reps)
       table :primary_reps do
         col :first_name
-        col :last_name
+        col :last_name, required: true
       end
     end
   end

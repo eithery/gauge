@@ -8,12 +8,11 @@ module Gauge
       subject { Repo }
       let(:database_schema) do
         db_schema = DatabaseSchema.new(:test_db, sql_name: 'TestDB')
-        db_schema.tables[:dbo_primary_reps] = double('primary_reps')
-        db_schema.tables[:ref_contract_types] = double('contract_types')
+        db_schema.tables[:dbo_primary_reps] = DataTableSchema.new(:primary_reps, database: db_schema)
+        db_schema.tables[:ref_contract_types] =
+          DataTableSchema.new(:contract_types, sql_schema: :ref, database: db_schema)
         db_schema
       end
-      let(:stub_db_schema) { db_schema = double('blue_troll', to_key: :blue_troll, tables: {}) }        
-
       let(:valid_dbo_table_names) { [:primary_reps, 'primary_reps', 'Primary_REPS', '[primary_reps]',
         'dbo.primary_reps', '[dbo].[primary_reps]']}
       let(:valid_ref_table_names) { ['ref.contract_types', '[ref].[contract_types]'] }
@@ -63,31 +62,33 @@ module Gauge
 
 
       describe '.define_database' do
-        it "creates database metadata definition" do
-          DatabaseSchema.should_receive(:new).with(:blue_troll, hash_including(:sql_name)).and_return(stub_db_schema)
-          Repo.define_database(:blue_troll, sql_name: 'BlueTroll')
-        end
+        before { Repo.clear }
 
         it "registers database metadata in the repository" do
-          Repo.define_database(:blue_troll, sql_name: 'BlueTroll')
+          expect { Repo.define_database(:blue_troll, sql_name: 'BlueTroll') }
+            .to change { Repo.databases.count }.from(0).to(1)
           Repo.databases.should include(:blue_troll)
         end
       end
 
 
       describe '.define_table' do
-        before { Repo.stub(:current_db_schema).and_return(stub_db_schema) }
+        before do
+          @db_schema = DatabaseSchema.new(:blue_troll)
+          Repo.stub(:current_db_schema).and_return(@db_schema)
+        end
 
         it "creates data table metadata definition" do
-          table_schema = double('participants', to_key: :participants, :database= => stub_db_schema)
-          DataTableSchema.should_receive(:new).with(:participants, hash_including(:database)).and_return(table_schema)
+          table_schema = double('participants', to_key: :participants, :database= => @db_schema)
+          DataTableSchema.should_receive(:new).with(:participants, hash_including(database: @db_schema))
+            .and_return(table_schema)
           Repo.define_table(:participants)
         end
 
         it "registers data table metadata definition in the database metadata" do
           expect { Repo.define_table(:participants) }
-            .to change { stub_db_schema.tables.count }.from(0).to(1)
-          stub_db_schema.tables.should include(:dbo_participants)
+            .to change { @db_schema.tables.count }.from(0).to(1)
+          @db_schema.tables.should include(:dbo_participants)
         end
       end
 
@@ -167,7 +168,6 @@ module Gauge
           end
         end
 
-
         context "when passed db object name is an existing data table name" do
           it "returns a valid table schema" do
             valid_dbo_table_names.each do |table_name|
@@ -178,7 +178,6 @@ module Gauge
             end
           end
         end
-
 
         context "when metadata for passed db object name is not found" do
           specify { Repo.schema('unknown_db_object').should be_nil }

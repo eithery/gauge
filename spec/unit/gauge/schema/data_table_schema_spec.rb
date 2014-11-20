@@ -17,12 +17,13 @@ module Gauge
         end
       end
       let(:table_schema) { dbo_table_schema }
-      let(:stub_column_schema) { double('column_schema', id?: false, :table_name= => 'master_accounts') }
+      let(:column_schema) { DataColumnSchema.new(:office_code, table: 'master_accounts') }
 
       subject { dbo_table_schema }
 
       it { should respond_to :table_name, :local_name }
-      it { should respond_to :sql_schema, :columns }
+      it { should respond_to :sql_schema, :database_schema }
+      it { should respond_to :columns }
       it { should respond_to :to_key, :contains? }
       it { should respond_to :col, :timestamps }
 
@@ -56,6 +57,21 @@ module Gauge
 
         context "when data table is defined in custom SQL schema" do
           specify { ref_table_schema.sql_schema.should == :ref }
+        end
+      end
+
+
+      describe '#database_schema' do
+        before { @database = DatabaseSchema.new(:test_db) }
+
+        context "when database schema is passed in constructor args" do
+          before { @table_schema = DataTableSchema.new(:master_accounts, database: @database)}
+          specify { @table_schema.database_schema.should == @database }
+        end
+
+        context "when no database schema passed in constructors args" do
+          before { @table_schema = DataTableSchema.new(:master_accounts) }
+          specify { @table_schema.database_schema.should be_nil }
         end
       end
 
@@ -171,15 +187,14 @@ module Gauge
         before { table_schema }
 
         it "creates new data column schema" do
-          DataColumnSchema.should_receive(:new).with(:office_code, hash_including(:type))
-            .and_return(stub_column_schema)
+          DataColumnSchema.should_receive(:new).with(:office_code, hash_including(type: :string))
           table_schema.col :office_code, type: :string
         end
 
         it "adds the new column schema to columns collection" do
-          DataColumnSchema.stub(:new).and_return(stub_column_schema)
+          DataColumnSchema.stub(:new).and_return(column_schema)
           expect { table_schema.col :office_code }.to change { table_schema.columns.count }.by(1)
-          table_schema.columns.should include(stub_column_schema)
+          table_schema.columns.should include(column_schema)
         end
       end
 
@@ -188,7 +203,7 @@ module Gauge
         before { table_schema }
 
         it "creates 5 new data column schema instances" do
-          DataColumnSchema.should_receive(:new).at_least(5).times.and_return(stub_column_schema)
+          DataColumnSchema.should_receive(:new).at_least(5).times.and_return(column_schema)
           table_schema.timestamps
         end
 

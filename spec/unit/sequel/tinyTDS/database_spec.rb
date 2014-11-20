@@ -6,11 +6,7 @@ module Sequel
   module TinyTDS
     describe Database do
       let(:database) { Database.new }
-      let(:column_schema) do
-        col = Gauge::Schema::DataColumnSchema.new(:account_number)
-        col.table_name = :customers
-        col
-      end
+      let(:column_schema) { Gauge::Schema::DataColumnSchema.new(:account_number, table: :customers) }
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column) }
 
       it { should respond_to :table_exists?, :column_exists?, :column }
