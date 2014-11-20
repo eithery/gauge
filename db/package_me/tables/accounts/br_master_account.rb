@@ -32,6 +32,10 @@ table :br_master_account do
   col :is_erisa_sponsored_plan
   col :is_annuity_exchanged
   col :annuity_exchanged, type: :date
+  col :has_owner_finra_member
+  col :has_owner_public_company_policy_maker
+  col :owner_public_company_name
+  col :has_owner_foreign_political_figure
 
   col :status, dbtype: :smallint, required: true, default: 1, check: -1..1
   col :statusChanged, type: :datetime
