@@ -13,13 +13,12 @@ table :br_master_account do
 
   col :agent_code, len: 10, index: true
   col :office_code, len: 10
-  col :division_code, len: 10
 
   col :trustName
   col :comments, len: :max
 
-#  col :ref => :investment_time_horizon, schema: :ref
-#  col :ref => :risk_tolerance, schema: :ref
+  col :ref => 'ref.investment_time_horizon'
+  col :ref => 'risk_tolerance'
 
   col :has_documents_in_order
   col :documents_in_order_by
@@ -31,7 +30,7 @@ table :br_master_account do
 
   col :is_erisa_sponsored_plan
   col :is_annuity_exchanged
-  col :annuity_exchanged, type: :date
+  col :annuity_exchanged, type: :datetime
   col :has_owner_finra_member
   col :has_owner_public_company_policy_maker
   col :owner_public_company_name
