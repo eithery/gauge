@@ -6,7 +6,7 @@ module Gauge
   module Schema
     describe DataColumnSchema do
       let(:column) { DataColumnSchema.new(:account_number, type: :string, required: true) }
-      let(:ref_column) { DataColumnSchema.new(nil, ref: 'br.primary_reps') }
+      let(:ref_column) { DataColumnSchema.new(:ref => 'br.primary_reps') }
       subject { column }
 
       it { should respond_to :column_name }
@@ -32,13 +32,16 @@ module Gauge
 
         context "when no name passed in constructors arguments" do
           context "and column attributes contain the ref to another table" do
+            before { @ref_column = DataColumnSchema.new(:ref => :risk_tolerance, schema: :ref) }
+
             it "concludes the column name based on the ref" do
               ref_column.column_name.should == 'primary_rep_id'
+              @ref_column.column_name.should == 'risk_tolerance_id'
             end
           end
 
           context "and no refs to another table defined" do
-            before { @no_name_column = DataColumnSchema.new(nil) }
+            before { @no_name_column = DataColumnSchema.new }
             specify do
               expect { @no_name_column.column_name }.to raise_error(/column name is not specified/)
             end
@@ -75,7 +78,7 @@ module Gauge
             specify { ref_column.column_type.should == :id }
           end
 
-          context "and column is explicitly marked as id" do
+          context "and column is defined as surrogate id" do
             before { @id_column = DataColumnSchema.new(:master_account_id, id: true) }
             specify { @id_column.column_type.should == :id }
           end
@@ -141,17 +144,17 @@ module Gauge
         end
 
         context "when the column is defined as identity column" do
-          before { @column = DataColumnSchema.new(nil, id: true) }
+          before { @column = DataColumnSchema.new(id: true) }
           it { should be false }
         end
 
         context "when the column defined as business identity column" do
-          before { @column = DataColumnSchema.new(nil, business_id: true) }
+          before { @column = DataColumnSchema.new(business_id: true) }
           it { should be false }
         end
 
         context "when the column is defined as required" do
-          before { @column = DataColumnSchema.new(nil, required: true) }
+          before { @column = DataColumnSchema.new(required: true) }
           it { should be false }
         end
       end

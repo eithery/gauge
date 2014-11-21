@@ -7,9 +7,9 @@ require 'gauge'
 module Gauge
 	module Schema
 		class DataColumnSchema
-			def initialize(column_name, options={}, &block)
-				@column_name = column_name
-				@options = options
+			def initialize(*args, &block)
+				@column_name = unsplat_name *args
+				@options = unsplat_options *args
         instance_eval(&block) if block
 				validate_column_type
 			end
@@ -62,7 +62,7 @@ module Gauge
 			def name_from_ref
 				raise "Data column name is not specified." unless contains_ref_id?
 				ref_name = @options[:ref]
-				ref_name.split('.').last.singularize + '_id'
+				ref_name.to_s.split('.').last.singularize + '_id'
 			end
 
 
@@ -117,6 +117,17 @@ module Gauge
 			def validate_column_type
 				col_type = @options[:type]
 				raise ArgumentError.new('Invalid column type.') unless col_type.nil? || type_map.include?(col_type.to_sym)
+			end
+
+
+			def unsplat_name(*args)
+				return args.first.to_s unless args.first.is_a? Hash
+			end
+
+
+			def unsplat_options(*args)
+				args.each { |arg| return arg if arg.is_a? Hash }
+				{}
 			end
 		end
 	end

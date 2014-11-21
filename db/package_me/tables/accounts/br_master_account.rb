@@ -18,8 +18,8 @@ table :br_master_account do
   col :trustName
   col :comments, len: :max
 
-  col :ref => :investment_time_horizon, schema: :ref
-  col :ref => :risk_tolerance, schema: :ref
+#  col :ref => :investment_time_horizon, schema: :ref
+#  col :ref => :risk_tolerance, schema: :ref
 
   col :has_documents_in_order
   col :documents_in_order_by
