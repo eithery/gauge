@@ -14,7 +14,7 @@ module Gauge
           block.call(dbo_schema).each do |child_schema|
             validator.errors.clear
             validator.check child_schema, dba
-            errors.concat validator.errors
+            collect_errors validator
           end
         end
       end
@@ -25,7 +25,7 @@ module Gauge
           result = true
           validator = validator_for validator_name
           result = validator.do_validate(dbo_schema, dba)
-          errors.concat validator.errors
+          collect_errors validator
           result
         end
       end
@@ -37,7 +37,7 @@ module Gauge
             validator = validator_for validator_name
             actual_dba = block ? block.call(dbo_schema, dba) : dba
             validator.do_validate(dbo_schema, actual_dba)
-            errors.concat validator.errors
+            collect_errors validator
           end
         end
       end
@@ -69,6 +69,11 @@ module Gauge
       def validator_for(validator_name)
         validator_type = "Gauge::Validators::#{validator_name.to_s.singularize.camelize}Validator".constantize
         validator_type.new
+      end
+
+
+      def collect_errors(validator)
+        errors.concat validator.errors
       end
     end
   end

@@ -34,7 +34,6 @@ module Gauge
       before do
         @db_inspector = DatabaseInspector.new(global_options, options, args)
         @db_inspector.stub(:error)
-        Schema::Repo.stub(:load)
       end
       it "delegates call to DatabaseInspector instance" do
         DatabaseInspector.should_receive(:new).with(global_options, options, args).and_return(@db_inspector)

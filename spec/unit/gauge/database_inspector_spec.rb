@@ -5,6 +5,11 @@ require 'spec_helper'
 module Gauge
   describe DatabaseInspector do
     let(:inspector) { DatabaseInspector.new({}, {}, @args) }
+    let(:db_schema) { Schema::Repo.databases[:test_db] = Schema::DatabaseSchema.new(:test_db) }
+    let(:table_schema) do
+      table_schema = Schema::DataTableSchema.new(:primary_reps, database: db_schema)
+      db_schema.tables[:dbo_primary_reps] = table_schema
+    end
 
     before { @args = [] }
     subject { inspector }
@@ -24,34 +29,49 @@ module Gauge
     describe '#check' do
       before do
         stub_db_adapter
-        @db_schema = Schema::DatabaseSchema.new(:rep_profile, sql_name: 'RepProfile_DB')
-        @table_schema = Schema::DataTableSchema.new(:primary_reps, database: @db_schema)
-        @db_schema.tables[:dbo_primary_reps] = @table_schema
-        Schema::Repo.databases[:rep_profile] = @db_schema
-        Schema::Repo.stub(:load)
-      end
-
-      it "performs validation for each data object passed as an argument" do
-        @args = ['rep_profile', 'primary_reps']
-        inspector.should_receive(:validator_for).with(/rep_profile|primary_reps/).twice
-        inspector.check
+        @args = ['test_db']
       end
 
       it "displays an error when no arguments specified" do
-        @args = []
+        @args.clear
         inspector.should_receive(:error).with(/no database objects specified/i)
         inspector.check
       end
 
+      it "performs validation for each data object passed as an argument" do
+        @args  << 'primary_reps'
+        inspector.should_receive(:validator_for).with(/test_db|primary_reps/).twice
+        inspector.check
+      end
+
+      it "runs within data adapter session" do
+        DB::Adapter.should_receive(:session).with(db_schema)
+        inspector.check
+      end
+
+
+      context "in metadata repository context" do
+        before { db_schema }
+
+        it "loads metadata for all database objects" do
+          Validators::DatabaseValidator.any_instance.stub(:info)
+          Schema::Repo.should_receive :load
+          inspector.check
+        end
+
+        it "retrieves schema containing metadata for the data object passed as an argument" do
+          inspector.stub(:error)
+          Schema::Repo.should_receive(:schema).with('test_db')
+          inspector.check
+        end
+      end
+
 
       context "when at least one argument is a database name" do
-        before do
-          @validator = stub_validator Validators::DatabaseValidator
-          @args = ['rep_profile']
-        end 
+        before { @validator = stub_validator Validators::DatabaseValidator }
 
         it "performs database structure check using DatabaseValidator class" do
-          @validator.should_receive(:check).with(@db_schema, instance_of(Sequel::TinyTDS::Database))
+          @validator.should_receive(:check).with(db_schema, instance_of(Sequel::TinyTDS::Database))
           inspector.check
         end
       end
@@ -64,7 +84,7 @@ module Gauge
         end 
 
         it "performs data table structure check using DataTableValidator class" do
-          @validator.should_receive(:check).with(@table_schema, instance_of(Sequel::TinyTDS::Database))
+          @validator.should_receive(:check).with(table_schema, instance_of(Sequel::TinyTDS::Database))
           inspector.check
         end
       end
@@ -81,17 +101,3 @@ module Gauge
     end
   end
 end
-
-
-#      describe '#check' do
-#        it "runs within data adapter session" do
-#          DB::Adapter.should_receive(:session).with('accounts_db_name')
-#          validator.check database_schema
-#        end
-#        it "runs within data adapter session" do
-#          DB::Adapter.should_receive(:session).with('rep_profile')
-#          validator.check(table_schema)
-#        end
-#      end
-#    end
-#  end

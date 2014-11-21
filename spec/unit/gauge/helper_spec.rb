@@ -6,7 +6,6 @@ module Gauge
   describe Helper do
     it { should respond_to :application_info }
 
-
     shared_examples_for "displaying application header" do
       it "displays name, version and copyright info" do
         helper.should_receive(:info).with(/^Database Gauge. Version \d\.\d\.\d/)
