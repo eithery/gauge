@@ -22,7 +22,7 @@ module Gauge
 
 
 			def table_name
-				@options[:table].to_s
+				@table_name.to_s
 			end
 
 
@@ -55,6 +55,11 @@ module Gauge
 
 			def id?
 				@options[:id] == true
+			end
+
+
+			def in_table(table_name)
+				@table_name = table_name
 			end
 
 	private

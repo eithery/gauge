@@ -15,6 +15,7 @@ module Gauge
       it { should respond_to :allow_null? }
       it { should respond_to :to_key }
       it { should respond_to :id? }
+      it { should respond_to :in_table }
 
 
       describe '#initialize' do
@@ -51,12 +52,15 @@ module Gauge
 
 
       describe '#table_name' do
-        context "when table name is explicitly passed in constructor arguments" do
-          before { @column = DataColumnSchema.new(:account_number, table: :master_accounts) }
-          specify { @column.table_name.should == 'master_accounts' }
+        context "when column schema is created by data table schema" do
+          before do
+            @table_schema = DataTableSchema.new(:customers)
+            @table_schema.col :account_number
+          end
+          specify { @table_schema.columns.last.table_name.should == 'customers' }
         end
 
-        context "when no table names passed in constructor arguments" do
+        context "when column schema is created explicitly" do
           before { @column = DataColumnSchema.new(:account_number) }
           specify { @column.table_name.should be_empty }
         end
@@ -176,6 +180,14 @@ module Gauge
         context "when column schema does not define surrogate id" do
           before { @not_id_column = DataColumnSchema.new(:product_id) }
           specify { @not_id_column.should_not be_id }
+        end
+      end
+
+
+      describe '#in_table' do
+        it "sets table name for the data column" do
+          column.in_table 'customers'
+          column.table_name.should == 'customers'
         end
       end
     end

@@ -17,7 +17,6 @@ module Gauge
         end
       end
       let(:table_schema) { dbo_table_schema }
-      let(:column_schema) { DataColumnSchema.new(:office_code, table: 'master_accounts') }
 
       subject { dbo_table_schema }
 
@@ -184,17 +183,32 @@ module Gauge
 
 
       describe '#col' do
-        before { table_schema }
+        before do
+          table_schema
+          @column_schema = double('column_schema', in_table: 'master_accounts')
+        end
 
         it "creates new data column schema" do
           DataColumnSchema.should_receive(:new).with(:office_code, hash_including(type: :string))
+            .and_return(@column_schema)
           table_schema.col :office_code, type: :string
         end
 
         it "adds the new column schema to columns collection" do
-          DataColumnSchema.stub(:new).and_return(column_schema)
+          DataColumnSchema.stub(:new).and_return(@column_schema)
           expect { table_schema.col :office_code }.to change { table_schema.columns.count }.by(1)
-          table_schema.columns.should include(column_schema)
+          table_schema.columns.should include(@column_schema)
+        end
+
+        it "sets data table attribute for newly created data column" do
+          table_schema.col :office_code, type: :string
+          last_column_should_have_table_name
+
+          table_schema.col :ref => 'ref.risk_tolerance'
+          last_column_should_have_table_name
+
+          table_schema.col :ref => :investment_time_horizon, schema: :ref
+          last_column_should_have_table_name
         end
       end
 
@@ -203,13 +217,20 @@ module Gauge
         before { table_schema }
 
         it "creates 5 new data column schema instances" do
-          DataColumnSchema.should_receive(:new).at_least(5).times.and_return(column_schema)
+          @column_schema = DataColumnSchema.new(:office_code, table: 'master_accounts')
+          DataColumnSchema.should_receive(:new).at_least(5).times.and_return(@column_schema)
           table_schema.timestamps
         end
 
         it "adds 5 new column schema instances to columns collection" do
           expect { table_schema.timestamps }.to change { table_schema.columns.count }.by(5)
         end
+      end
+
+  private
+
+      def last_column_should_have_table_name
+        table_schema.columns.last.table_name.should == table_schema.local_name
       end
     end
   end
