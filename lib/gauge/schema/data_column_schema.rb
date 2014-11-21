@@ -28,8 +28,9 @@ module Gauge
 
 			def column_type
 				type = @options[:type]
-				return :id if contains_ref_id?
 				return type.to_sym unless type.nil?
+
+				return :id if contains_ref_id?
 				return :bool if bool?
 				return :datetime if datetime?
 				return :date if date?
@@ -100,6 +101,7 @@ module Gauge
 				{
 					id: :bigint,
 					int: :int,
+					short: :smallint,
 					long: :bigint,
 					string: :nvarchar,
 					char: :nchar,

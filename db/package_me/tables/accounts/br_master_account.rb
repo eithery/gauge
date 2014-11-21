@@ -36,7 +36,7 @@ table :br_master_account do
   col :owner_public_company_name
   col :has_owner_foreign_political_figure
 
-  col :status, dbtype: :smallint, required: true, default: 1, check: -1..1
+  col :status, type: :short, required: true, default: 1, check: -1..1
   col :statusChanged, type: :datetime
   col :statusChangedBy
   col :changeStatusReasonId, :ref => :accountActivationReasons
