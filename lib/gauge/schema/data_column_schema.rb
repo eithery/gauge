@@ -44,6 +44,11 @@ module Gauge
 			end
 
 
+			def length
+				@options[:len] || 256
+			end
+
+
 			def allow_null?
 				!(identity? || @options[:required])
 			end
