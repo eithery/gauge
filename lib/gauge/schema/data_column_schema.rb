@@ -33,6 +33,7 @@ module Gauge
 				return :bool if bool?
 				return :datetime if datetime?
 				return :date if date?
+				return :id if id?
 				:string
 			end
 

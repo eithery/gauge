@@ -75,6 +75,11 @@ module Gauge
             specify { ref_column.column_type.should == :id }
           end
 
+          context "and column is explicitly marked as id" do
+            before { @id_column = DataColumnSchema.new(:master_account_id, id: true) }
+            specify { @id_column.column_type.should == :id }
+          end
+
           context "and column name contains 'is', 'has', or 'allow' prefix" do
             before do
               @bool_columns = ['is_visible', 'has_accounts', 'allow_delete'].map do |col_name|
