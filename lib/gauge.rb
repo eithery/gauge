@@ -1,36 +1,15 @@
 # Eithery Lab., 2014.
-# Contains all requires for Database Gauge applicaion.
+# Loaded files for the applicaion.
 require 'active_support/core_ext/string'
 require 'active_support/core_ext/string/inflections'
-
-require 'gauge/console_listener'
-require 'gauge/database_inspector'
-require 'gauge/db/adapter'
-require 'gauge/db/connection'
-require 'gauge/formatters/formatter_base'
-require 'gauge/formatters/console_formatter'
-require 'gauge/helper'
-require 'gauge/schema/repo'
-require 'gauge/schema/data_column_schema'
-require 'gauge/schema/data_table_schema'
-require 'gauge/schema/database_schema'
-require 'gauge/shell'
-require 'gauge/validators/base'
-require 'gauge/validators/missing_table_validator'
-require 'gauge/validators/missing_column_validator'
-require 'gauge/validators/column_nullability_validator'
-require 'gauge/validators/column_type_validator'
-require 'gauge/validators/column_length_validator'
-require 'gauge/validators/data_column_validator'
-require 'gauge/validators/data_table_validator'
-require 'gauge/validators/database_validator'
-require 'gauge/version'
-
-require 'ext/ruby/object'
-require 'sequel/tinytds/database'
 
 require 'gli'
 require 'rainbow'
 require 'rainbow/ext/string'
 require 'rexml/document'
 require 'sequel'
+
+load_path = File.expand_path(File.dirname(__FILE__) + '/../lib')
+Dir["#{load_path}/gauge/**/*.rb"].each { |f| require f }
+Dir["#{load_path}/ext/ruby/*.rb"].each { |f| require f }
+Dir["#{load_path}/sequel/tinytds/*.rb"].each { |f| require f }
