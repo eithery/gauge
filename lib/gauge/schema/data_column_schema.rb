@@ -7,6 +7,9 @@ require 'gauge'
 module Gauge
 	module Schema
 		class DataColumnSchema
+			DEFAULT_VARCHAR_LENGTH = 256
+			DEFAULT_ISO_CODE_LENGTH = 2
+
 			def initialize(*args, &block)
 				@column_name = unsplat_name *args
 				@options = unsplat_options *args
@@ -45,7 +48,9 @@ module Gauge
 
 
 			def length
-				@options[:len] || 256
+				return @options[:len] || DEFAULT_VARCHAR_LENGTH if string_type?
+				return DataColumnSchema::DEFAULT_ISO_CODE_LENGTH if iso_code_type?
+				nil
 			end
 
 
@@ -140,6 +145,16 @@ module Gauge
 			def unsplat_options(*args)
 				args.each { |arg| return arg if arg.is_a? Hash }
 				{}
+			end
+
+
+			def string_type?
+				column_type == :string || column_type == :char
+			end
+
+
+			def iso_code_type?
+				column_type == :us_state || column_type == :country
 			end
 		end
 	end

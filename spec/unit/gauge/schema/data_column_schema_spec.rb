@@ -12,6 +12,7 @@ module Gauge
       it { should respond_to :column_name }
       it { should respond_to :column_type, :data_type }
       it { should respond_to :table_name }
+      it { should respond_to :length }
       it { should respond_to :allow_null? }
       it { should respond_to :to_key }
       it { should respond_to :id? }
@@ -160,6 +161,57 @@ module Gauge
         context "when the column is defined as required" do
           before { @column = DataColumnSchema.new(required: true) }
           it { should be false }
+        end
+      end
+
+
+      describe '#length' do
+        subject { @column.length }
+
+        context "when column length is defined in metadata" do
+          context "as integer value" do
+            before { @column = DataColumnSchema.new(:rep_code, len: 10) }
+            it "equals to predefined length value" do
+              @column.length.should == 10
+            end
+          end
+
+          context "as maximum available value" do
+            before { @column = DataColumnSchema.new(:description, len: :max) }
+            it { should == :max }
+          end
+        end
+
+
+        context "when no column length defined" do
+          context "for string type columns" do
+            before do
+              @string_column = DataColumnSchema.new(:last_name, type: :string)
+              @char_column = DataColumnSchema.new(:trade_type, type: :char)
+            end
+
+            it "equals to default nvarchar column type value" do
+              @string_column.length.should == DataColumnSchema::DEFAULT_VARCHAR_LENGTH
+              @char_column.length.should == DataColumnSchema::DEFAULT_VARCHAR_LENGTH
+            end
+          end
+
+          context "for non string column types" do
+            before { @column = DataColumnSchema.new(:created, type: :datetime) }
+            it { should be_nil }
+          end
+
+          context "for country and US state types" do
+            before do
+              @country_column = DataColumnSchema.new(:country_code, type: :country)
+              @us_state_column = DataColumnSchema.new(:state_code, type: :us_state)
+            end
+
+            it "equals to default value of ISO state/country code" do
+              @country_column.length.should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH
+              @us_state_column.length.should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH
+            end
+          end
         end
       end
 
