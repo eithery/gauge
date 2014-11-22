@@ -18,6 +18,7 @@ module Gauge
           @db_column = double('db_column')
           @db_column.stub(:[]).with(:allow_null).and_return(true)
           @db_column.stub(:[]).with(:db_type).and_return(:nvarchar)
+          @db_column.stub(:[]).with(:max_chars).and_return(Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH)
         end
 
         it "always performs check for missing data column" do

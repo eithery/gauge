@@ -22,6 +22,7 @@ module Gauge
           @db_column = double('db_column')
           @db_column.stub(:[]).with(:allow_null).and_return(true, true, false, true, true, false)
           @db_column.stub(:[]).with(:db_type).and_return(:nvarchar, :nvarchar, :bigint, :nvarchar, :nvarchar, :bigint)
+          @db_column.stub(:[]).with(:max_chars).and_return(Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH)
           @dba = double('dba', table_exists?: true, column_exists?: true, column: @db_column)
           validator.stub(:log) do |message, &block|
             block.call
