@@ -12,7 +12,7 @@ module Gauge
       it { should respond_to :column_name }
       it { should respond_to :column_type, :data_type }
       it { should respond_to :table_name }
-      it { should respond_to :length }
+      it { should respond_to :length, :char_column? }
       it { should respond_to :allow_null? }
       it { should respond_to :to_key }
       it { should respond_to :id? }
@@ -136,6 +136,25 @@ module Gauge
           [:xml].should be_converted_to(:xml)
           [:blob].should be_converted_to(:varbinary)
           [:binary].should be_converted_to(:binary)
+        end
+      end
+
+
+      describe '#char_column?' do
+        context "when the column type is one of character types" do
+          before do
+            @char_columns = [:string, :char, :us_state, :country]
+              .map { |t| DataColumnSchema.new(:col_name, type: t) }
+          end
+          specify { @char_columns.each { |col| col.should be_char_column }}
+        end
+
+        context "when the column type is not character" do
+          before do
+            @non_char_columns = [:id, :long, :datetime, :money, :enum]
+              .map { |t| DataColumnSchema.new(:col_name, type: t)}
+          end
+          specify { @non_char_columns.each { |col| col.should_not be_char_column }}
         end
       end
 
