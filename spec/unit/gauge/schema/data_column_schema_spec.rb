@@ -13,7 +13,7 @@ module Gauge
       it { should respond_to :column_type, :data_type }
       it { should respond_to :table_name }
       it { should respond_to :length, :char_column? }
-      it { should respond_to :allow_null? }
+      it { should respond_to :allow_null?, :default_value }
       it { should respond_to :to_key }
       it { should respond_to :id? }
       it { should respond_to :in_table }
@@ -230,6 +230,35 @@ module Gauge
               @country_column.length.should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH
               @us_state_column.length.should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH
             end
+          end
+        end
+      end
+
+
+      describe '#default_value' do
+        subject { @column_schema.default_value }
+
+        context "when defined explicitly in column attributes" do
+          context "for enumeration (integer) data columns" do
+            before { @column_schema = DataColumnSchema.new(:account_status, required: true, default: 1) }
+            it { should be 1 }
+          end
+
+          context "for boolean data columns" do
+            before { @column_schema = DataColumnSchema.new(:is_active, required: true, default: true) }
+            it { should be true }
+          end
+        end
+
+        context "when it is not defined in column attributes" do
+          context "for boolean required columns" do
+            before { @column_schema = DataColumnSchema.new(:is_restricted, required: true) }
+            it { should be false }
+          end
+
+          context "for other columns" do
+            before { @column_schema = DataColumnSchema.new(:rep_code) }
+            it { should be nil }
           end
         end
       end

@@ -64,6 +64,11 @@ module Gauge
 			end
 
 
+			def default_value
+				@options[:default] || default_for_required_bool
+			end
+
+
 			def to_key
 				column_name.downcase.to_sym
 			end
@@ -155,6 +160,11 @@ module Gauge
 
 			def iso_code_type?
 				column_type == :us_state || column_type == :country
+			end
+
+
+			def default_for_required_bool
+				return false if column_type == :bool && !allow_null?
 			end
 		end
 	end
