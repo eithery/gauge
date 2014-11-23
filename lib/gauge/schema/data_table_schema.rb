@@ -58,13 +58,13 @@ module Gauge
 
       def timestamps(options={})
         {
-          created: :datetime,
-          created_by_column(options) => :string,
-          modified: :datetime,
-          modified_by_column(options) => :string,
-          version: :long
+          created: { type: :datetime },
+          created_by_column(options) => { type: :string },
+          modified: { type: :datetime },
+          modified_by_column(options) => { type: :string },
+          version: { type: :long, default: 0 }
         }
-        .each { |name, type| col name, type: type, required: true }
+        .each { |name, options| col name, type: options[:type], required: true, default: options[:default] }
       end
 
 private
