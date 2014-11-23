@@ -19,17 +19,17 @@ module Gauge
           before { @column_schema = Schema::DataColumnSchema.new(:account_status, required: true, default: 1) }
 
           context "with matched column default constraint" do
-            before { @db_column.stub(:[]).with(:ruby_default).and_return(1) }
+            before { stub_column_default 1 }
             specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
           end
 
           context "with the column default constraint mismatch" do
-            before { @db_column.stub(:[]).with(:ruby_default).and_return(0) }
+            before { stub_column_default 0 }
             it { should_append_error(mismatch_message :account_status, 1, 0) }
           end
 
           context "with missing column default constraint" do
-            before { @db_column.stub(:[]).with(:ruby_default).and_return(nil) }
+            before { stub_column_default nil }
             it { should_append_error(mismatch_message :account_status, 1, nil) }
           end
         end
@@ -39,17 +39,17 @@ module Gauge
           before { @column_schema = Schema::DataColumnSchema.new(:is_active, required: true, default: true) }
 
           context "with matched column default constraint" do
-            before { @db_column.stub(:[]).with(:ruby_default).and_return(1) }
+            before { stub_column_default 1 }
             specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
           end
 
           context "with the column default constraint mismatch" do
-            before { @db_column.stub(:[]).with(:ruby_default).and_return(0) }
+            before { stub_column_default 0 }
             it { should_append_error(mismatch_message :is_active, true, false) }
           end
 
           context "with missing column default constraint" do
-            before { @db_column.stub(:[]).with(:ruby_default).and_return(nil) }
+            before { stub_column_default nil }
             it { should_append_error(mismatch_message :is_active, true, nil) }
           end
         end
@@ -59,12 +59,12 @@ module Gauge
           before { @column_schema = Schema::DataColumnSchema.new(:rep_code) }
 
           context "but the column has default constraint" do
-            before { @db_column.stub(:[]).with(:ruby_default).and_return('151045') }
+            before { stub_column_default '151045' }
             it { should_append_error(mismatch_message :rep_code, nil, '151045') }
           end
 
           context "and the column also does not have default constraint" do
-            before { @db_column.stub(:[]).with(:ruby_default).and_return(nil) }
+            before { stub_column_default nil }
             specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
           end
         end
@@ -74,6 +74,11 @@ module Gauge
 
       def dba
         @db_column
+      end
+
+
+      def stub_column_default(default_value)
+        @db_column.stub(:[]).with(:ruby_default).and_return(default_value)
       end
 
 
