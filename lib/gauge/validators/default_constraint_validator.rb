@@ -43,7 +43,7 @@ module Gauge
 
       def constraint_mismatch_message(expected_value, actual_value)
         "' should have '".color(:red) + expected_value.to_s.color(:red).bright +
-        "' default value but actually has '".color(:red) + actual_value.to_s.color(:red).bright +
+        "' as default value but actually has '".color(:red) + actual_value.to_s.color(:red).bright +
         "'.".color(:red)
       end
 

@@ -105,7 +105,7 @@ module Gauge
 
 
       def constraint_mismatch_message(expected_value, actual_value)
-        "should have '(.*)#{expected_value.to_s}(.*)' default value but actually has " +
+        "should have '(.*)#{expected_value.to_s}(.*)' as default value but actually has " +
         "'(.*)#{actual_value.to_s}(.*)'"
       end
 
