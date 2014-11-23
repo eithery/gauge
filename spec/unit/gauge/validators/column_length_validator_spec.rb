@@ -13,9 +13,7 @@ module Gauge
 
 
       describe '#validate' do
-        before do
-          @db_column = double('db_column')
-        end
+        before { @db_column = double('db_column') }
 
         context "for character columns" do
           context "with specified normal length" do
