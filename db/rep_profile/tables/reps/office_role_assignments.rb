@@ -3,7 +3,7 @@
 # Contains office role assignments.
 
 table :officeRoleAssignments do
-  col :name
+  col :name, unique: true
   col :description, len: :max
   col :primaryRepId, :ref => :primaryReps
   col :officeRoleId, :ref => :officeRoles, required: true

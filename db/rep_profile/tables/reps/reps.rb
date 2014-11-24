@@ -3,10 +3,10 @@
 # Contains all reps.
 
 table :reps do
-  col :code, len: 10, required: true, unique: true, business_id: true
+  col :code, len: 10, business_id: true
   col :name, index: true
   col :officeId, :ref => :offices, required: true
   col :description, len: :max
 
-  timestamps casing: :camel
+  timestamps naming: :camel, dates: :short
 end
