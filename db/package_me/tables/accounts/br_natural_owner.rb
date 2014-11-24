@@ -76,5 +76,5 @@ table :br_natural_owner do
 	col :assets_held_away_total, type: :money
 	col :last_cip_at
 
-	timestamps
+	timestamps dates: :short
 end

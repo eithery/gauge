@@ -51,5 +51,5 @@ table :br_master_account do
   col :suppression_reason_id, :ref => :supTrigReasons
   col :established_on, type: :datetime
 
-  timestamps
+  timestamps dates: :short
 end

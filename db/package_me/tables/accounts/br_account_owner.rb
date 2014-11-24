@@ -14,5 +14,5 @@ table :br_account_owner do
 	col :last_bnr_at
 	col :next_bnr_due, type: :datetime
 
-	timestamps
+	timestamps dates: :short
 end
