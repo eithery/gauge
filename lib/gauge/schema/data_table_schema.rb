@@ -58,9 +58,9 @@ module Gauge
 
       def timestamps(options={})
         {
-          created: { type: :datetime },
+          created_at_column(options) => { type: :datetime },
           created_by_column(options) => { type: :string },
-          modified: { type: :datetime },
+          modified_at_column(options) => { type: :datetime },
           modified_by_column(options) => { type: :string },
           version: { type: :long, default: 0 }
         }
@@ -74,13 +74,23 @@ private
       end
 
 
+      def created_at_column(options)
+        options[:dates] == :short ? :created : :created_at
+      end
+
+
       def created_by_column(options)
-        options[:casing] == :camel ? :createdBy : :created_by
+        options[:naming] == :camel ? :createdBy : :created_by
+      end
+
+
+      def modified_at_column(options)
+        options[:dates] == :short ? :modified : :modified_at
       end
 
 
       def modified_by_column(options)
-        options[:casing] == :camel ? :modifiedBy : :modified_by
+        options[:naming] == :camel ? :modifiedBy : :modified_by
       end
 
 

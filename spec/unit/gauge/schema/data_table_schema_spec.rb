@@ -139,7 +139,7 @@ module Gauge
         context "when table definition contains timestamps" do
           context "in default case" do
             before do
-              @table_with_timestamps = DataTableSchema.new(:customers) { timestamps }
+              @table_with_timestamps = DataTableSchema.new(:customers) { timestamps dates: :short }
             end
 
             it "should contain 4 timestamp columns and id" do
@@ -156,7 +156,7 @@ module Gauge
           context "in camel case" do
             before do
               @table_with_timestamps = DataTableSchema.new(:customers) do
-                timestamps casing: :camel
+                timestamps naming: :camel, dates: :short
               end
             end
             it "should contain 4 timestamp columns named in camel case and id" do
@@ -225,12 +225,35 @@ module Gauge
         it "adds 5 new column schema instances to columns collection" do
           expect { table_schema.timestamps }.to change { table_schema.columns.count }.by(5)
         end
+
+        context "with default date naming convention" do
+          specify { columns_should_be_added(:created_at, :modified_at) { table_schema.timestamps }}
+        end
+
+        context "with 'short' date naming convention" do
+          specify { columns_should_be_added(:created, :modified) { table_schema.timestamps dates: :short }}
+        end
+
+        context "with default naming convention for string columns" do
+          specify { columns_should_be_added(:created_by, :modified_by) { table_schema.timestamps }}
+        end
+
+        context "with 'camel' column naming convention for string columns" do
+          specify { columns_should_be_added(:createdBy, :modifiedBy) { table_schema.timestamps naming: :camel }}
+        end
       end
 
   private
 
       def last_column_should_have_table_name
         table_schema.columns.last.table_name.should == table_schema.local_name
+      end
+
+
+      def columns_should_be_added(*columns)
+        columns.each { |col| table_schema.should_not contain_column(col) }
+        yield
+        columns.each { |col| table_schema.should contain_column(col) }
       end
     end
   end
