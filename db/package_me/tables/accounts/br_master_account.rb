@@ -28,13 +28,13 @@ table :br_master_account do
   col :restriction_entered, type: :datetime
   col :restriction_entered_by
 
-  col :is_erisa_sponsored_plan
-  col :is_annuity_exchanged
-  col :annuity_exchanged, type: :datetime
   col :has_owner_finra_member
   col :has_owner_public_company_policy_maker
   col :owner_public_company_name
   col :has_owner_foreign_political_figure
+  col :is_erisa_sponsored_plan
+  col :is_annuity_exchanged
+  col :annuity_exchanged, type: :datetime
 
   col :status, type: :short, required: true, default: 1, check: -1..1
   col :statusChanged, type: :datetime
