@@ -1,0 +1,9 @@
+# Data table definition file.
+# [msh].[direct_supervisions]
+# Defines direct supervisor-subordinate relationships.
+
+table :direct_supervisions, sql_schema: :msh do
+  col :subordinate_id, :ref => :primaryReps, required: true, business_id: true
+  col :supervisor_id, :ref => :officeRoleAssignments, required: true, business_id: true
+  col :ref => :supervision_types, required: true
+end
