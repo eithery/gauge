@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[br_master_account]
+# dbo.br_master_account
 # Master accounts.
 
 table :br_master_account do
