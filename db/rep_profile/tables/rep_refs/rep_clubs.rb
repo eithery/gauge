@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[repClubs]
+# dbo.repClubs
 # Contains rep clubs and awards records.
 
 table :repClubs do

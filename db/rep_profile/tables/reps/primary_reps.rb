@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[primary_reps]
+# dbo.primary_reps
 # Contains primary reps.
 
 table :primaryReps do
@@ -13,5 +13,5 @@ table :primaryReps do
   col :carryDeficit, type: :bool, required: true
   col :balanceForward, type: :bool, required: true
   col :affiliationDate, required: true
-  col :status, type: :byte, function: { name: :get_rep_status, params: [:id, 'getdate()'] }
+  col :status, type: :byte, computed: { function: :get_rep_status, params: [:id, 'getdate()'] }
 end

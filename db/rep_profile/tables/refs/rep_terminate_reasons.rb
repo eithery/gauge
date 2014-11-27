@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[repTerminateReasons]
+# dbo.repTerminateReasons
 # Contains available rep termination reasons.
 
 table :repTerminateReasons do

@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[secondaryReps]
+# dbo.secondaryReps
 # Contains secondary rep codes for reps.
 
 table :secondaryReps do

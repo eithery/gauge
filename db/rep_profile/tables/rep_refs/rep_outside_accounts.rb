@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[repOutsideAccounts]
+# dbo.repOutsideAccounts
 # Contains outside accounts for reps.
 
 table :repOutsideAccounts do

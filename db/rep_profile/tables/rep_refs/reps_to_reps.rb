@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[reps2Reps]
+# dbo.reps2Reps
 # Represents many-to-many relationships between reps related to reporting visibility purposes.
 
 table :reps2Reps do

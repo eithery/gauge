@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[paymentTypes]
+# dbo.paymentTypes
 # Contains available payment types for reps.
 
 table :paymentTypes do

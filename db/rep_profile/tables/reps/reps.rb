@@ -1,6 +1,7 @@
 # Data table definition file.
-# [dbo].[reps]
+# dbo.reps
 # Contains all reps.
+# Represents the base data table for primary reps and secondary reps.
 
 table :reps do
   col :code, len: 10, business_id: true

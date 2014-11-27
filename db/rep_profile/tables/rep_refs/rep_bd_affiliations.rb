@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[rep_bd_affiliations]
+# dbo.rep_bd_affiliations
 # Contains broker/dealer affiliations for the rep.
 
 table :rep_bd_affiliations do

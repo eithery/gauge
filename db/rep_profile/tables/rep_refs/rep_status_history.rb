@@ -1,10 +1,10 @@
 # Data table definition file.
-# [dbo].[repStatusHistory]
+# dbo.repStatusHistory
 # Contains rep status history records.
 
 table :repStatusHistory do
   col :repId, :ref => :primaryReps, index: true
-  col :status, :ref => :repStatuses, required: true, check: 1..255
+  col :status, :ref => :repStatuses, required: true
   col :startDate
   col :endDate
   col :stopPaymentDate

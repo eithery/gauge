@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[repContinuingEducations]
+# dbo.repContinuingEducations
 # Contains continuing education records for reps.
 
 table :repContinuingEducations do

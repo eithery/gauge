@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[repStatuses]
+# dbo.repStatuses
 # Contains available rep statuses.
 
 table :repStatuses do

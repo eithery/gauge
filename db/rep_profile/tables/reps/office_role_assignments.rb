@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[officeRoleAssignments]
+# dbo.officeRoleAssignments
 # Contains office role assignments.
 
 table :officeRoleAssignments do

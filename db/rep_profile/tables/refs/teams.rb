@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[teams]
+# dbo.teams
 # Contains available rep teams.
 
 table :teams do

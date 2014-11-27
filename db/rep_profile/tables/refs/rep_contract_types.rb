@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[repContractTypes]
+# dbo.repContractTypes
 # Contains available rep contract types.
 
 table :repContractTypes do

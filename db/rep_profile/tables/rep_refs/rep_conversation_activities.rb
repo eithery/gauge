@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[rep_conversation_activities]
+# dbo.rep_conversation_activities
 # Contains rep conversation activities.
 
 table :rep_conversation_activities do

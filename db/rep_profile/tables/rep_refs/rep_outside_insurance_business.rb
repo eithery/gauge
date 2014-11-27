@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[repOutsideInsuranceBusiness]
+# dbo.repOutsideInsuranceBusiness
 # Contains outside insurance business information for reps.
 
 table :repOutsideInsuranceBusiness do

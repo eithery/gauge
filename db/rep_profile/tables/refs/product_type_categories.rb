@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[productTypeCategories]
+# dbo.productTypeCategories
 # Contains available product type categories for rep splits.
 
 table :productTypeCategories do

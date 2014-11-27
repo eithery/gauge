@@ -1,5 +1,5 @@
 # Data table definition file.
-# [dbo].[insuranceTypes]
+# dbo.insuranceTypes
 # Contains available rep insurance types.
 
 table :insuranceTypes do
