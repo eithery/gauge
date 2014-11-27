@@ -67,6 +67,10 @@ module Gauge
         .each { |name, options| col name, type: options[:type], required: true, default: options[:default] }
       end
 
+
+      def index(columns, options={})
+      end
+
 private
 
       def has_id?

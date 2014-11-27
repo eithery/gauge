@@ -25,6 +25,7 @@ module Gauge
       it { should respond_to :columns }
       it { should respond_to :to_key, :contains? }
       it { should respond_to :col, :timestamps }
+      it { should respond_to :index }
 
 
       describe '#table_name' do
@@ -241,6 +242,10 @@ module Gauge
         context "with 'camel' column naming convention for string columns" do
           specify { columns_should_be_added(:createdBy, :modifiedBy) { table_schema.timestamps naming: :camel }}
         end
+      end
+
+
+      describe '#index' do
       end
 
   private
