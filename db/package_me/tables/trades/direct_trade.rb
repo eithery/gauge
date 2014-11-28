@@ -6,7 +6,6 @@ table :direct_trade do
   col :id, type: :long, required: true, default: :uid, unique: true
   col :trade_id, type: :int, id: true, business_id: true, identity: { seed: 200 }
   col :tran_type, :ref => :trans_type, len: 18, required: true
-  col :origin, type: :enum, check: 0..1
   col :account_num, len: 20, required: true
   col :ref => :source_firms
   col :source_firm_code, computed: { function: :getSourceFirmCode, params: :source_firm_id }
@@ -70,7 +69,11 @@ table :direct_trade do
   col :stp_load_id, type: :long
   col :comments, len: :max
 
-  timestamps dates: :short, naming: :camel
+  col :created, type: :datetime
+  col :createdBy
+  col :modified, type: :datetime
+  col :modifiedBy
+  col :version, type: :long, required: true, default: 0
 
   index [:batch_id, :bank_comm]
   index [:batch_id, :rep_comm]

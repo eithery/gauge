@@ -7,7 +7,7 @@ table :br_natural_owner do
   col :natural_owner_type_id, :ref => :br_natural_owner_type, required: true
   col :alpha_code, len: 25
   col :display_name, computed: { sql: "case when natural_owner_type_id = 1 then dba else (last_name + ' ' + first_name) end",
-    persisted: true }, len: 321, index: true
+    persisted: true }, index: true
 
   col :tax_id, len: 16, business_id: true
   col :tax_id_type, type: :enum, business_id: true, check: 0..5

@@ -6,7 +6,7 @@ table :customer_financial_info, sql_schema: :br do
   col :customer_id, :ref => :br_natural_owner, business_id: true
   col :ref => 'ref.financial_info', business_id: true
   col :level_value, type: :int, check: '>= 0'
-  col :percent_value, type: :percent, check: '>= 0'
+  col :percent_value, type: :byte, check: 0..100
   col :amount_value, type: :money
   col :comment
 end

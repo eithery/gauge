@@ -12,7 +12,7 @@ table :trans_type do
   col :seq, type: :int, required: true
   col :haircut, type: :percent, required: true, default: 1.0
   col :allowMultipleTradeAllocations, type: :bool, required: true
-  col :zeroAmount, type: :enum, required: true, check: 0..3
+  col :zeroAmount, type: :enum, required: true, check: 0..3, default: 0
   col :tag, len: 2
   col :stp_support, type: :bool, required: true
   col :stp_ordinal, type: :int

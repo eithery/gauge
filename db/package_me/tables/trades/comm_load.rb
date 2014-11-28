@@ -31,7 +31,7 @@ table :comm_load do
   col :load_date
   col :trade_date
   col :settle_date
-  col :issue_date
+  col :issue_date, type: :datetime
 
   col :gross_amount, type: :money
   col :comm_rate, type: :percent
