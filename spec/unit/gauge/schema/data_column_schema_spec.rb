@@ -17,6 +17,7 @@ module Gauge
       it { should respond_to :to_key }
       it { should respond_to :id? }
       it { should respond_to :in_table }
+      it { should respond_to :computed? }
 
 
       describe '#initialize' do
@@ -39,6 +40,14 @@ module Gauge
             it "concludes the column name based on the ref" do
               ref_column.column_name.should == 'primary_rep_id'
               @ref_column.column_name.should == 'risk_tolerance_id'
+            end
+          end
+
+          context "and column is defined as id" do
+            before { @id_column = DataColumnSchema.new(id: true) }
+
+            it "interprets the column name as id" do
+              @id_column.column_name.should == 'id'
             end
           end
 
@@ -80,12 +89,26 @@ module Gauge
 
         context "when no type attribute is defined" do
           context "and column attributes contain the ref to another table" do
-            specify { ref_column.column_type.should == :id }
+            context "and no column length defined" do
+              specify { ref_column.column_type.should == :id }
+            end
+
+            context "and column length is defined" do
+              before { @ref_column = DataColumnSchema.new(:trade_type_code, len: 10, :ref => :trade_types) }
+              specify { @ref_column.column_type.should == :string }
+            end
           end
 
           context "and column is defined as surrogate id" do
-            before { @id_column = DataColumnSchema.new(:master_account_id, id: true) }
-            specify { @id_column.column_type.should == :id }
+            context "and no column length defined" do
+              before { @id_column = DataColumnSchema.new(:master_account_id, id: true) }
+              specify { @id_column.column_type.should == :id }
+            end
+
+            context "and column length is defined" do
+              before { @id_column = DataColumnSchema.new(:batch_code, len: 10, id: true) }
+              specify { @id_column.column_type.should == :string }
+            end
           end
 
           context "and column name contains 'is', 'has', or 'allow' prefix" do
@@ -288,6 +311,20 @@ module Gauge
         it "sets table name for the data column" do
           column.in_table 'customers'
           column.table_name.should == 'customers'
+        end
+      end
+
+
+      describe '#computed?' do
+        subject { @column_schema.computed? }
+        context "for regular columns" do
+          before { @column_schema = DataColumnSchema.new(:rep_code, len: 10) }
+          it { should be false }
+        end
+
+        context "for computed columns" do
+          before { @column_schema = DataColumnSchema.new(:source_firm_code, computed: { function: :get_source_code }) }
+          it { should be true }
         end
       end
     end
