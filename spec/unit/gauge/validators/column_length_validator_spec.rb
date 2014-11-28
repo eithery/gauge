@@ -85,6 +85,15 @@ module Gauge
             specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
           end
         end
+
+
+        context "for computed columns" do
+          before do
+            @column_schema = Schema::DataColumnSchema.new(:source_code, computed: { function: :get_source_code })
+            stub_column_length 10
+          end
+          specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+        end
       end
 
   private

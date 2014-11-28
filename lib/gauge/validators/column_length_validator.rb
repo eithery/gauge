@@ -20,6 +20,7 @@ module Gauge
   private
 
       def length_mismatch?(column_schema, length)
+        return false if column_schema.computed?
         return false unless column_schema.char_column?
         char_length_mismatch?(column_schema, length)
       end
