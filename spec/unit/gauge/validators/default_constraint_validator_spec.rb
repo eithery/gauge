@@ -68,6 +68,26 @@ module Gauge
             specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
           end
         end
+
+
+        context "when default value is integer UID" do
+          before { @column_schema = Schema::DataColumnSchema.new(:trade_id, default: :uid) }
+
+          context "with matched column default constraint" do
+            before { stub_column_default nil, 'abs(CONVERT([bigint],CONVERT([varbinary],newid())))' }
+            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+          end
+
+          context "with missing column default constraint" do
+            before { stub_column_default nil }
+            it { should_append_error(mismatch_message :trade_id, uid_value_for_mismatch, nil) }
+          end
+
+          context "with the column default constraint mismatch" do
+            before { stub_column_default 'invalid_default_value' }
+            it { should_append_error(mismatch_message :trade_id, uid_value_for_mismatch, 'invalid_default_value') }
+          end
+        end
       end
 
   private
@@ -77,8 +97,9 @@ module Gauge
       end
 
 
-      def stub_column_default(default_value)
+      def stub_column_default(default_value, native_default_value=default_value)
         @db_column.stub(:[]).with(:ruby_default).and_return(default_value)
+        @db_column.stub(:[]).with(:default).and_return(native_default_value)
       end
 
 
@@ -112,6 +133,11 @@ module Gauge
 
       def redundant_constraint_message(actual_value)
         "should NOT have default value but actually has '(.*)#{actual_value.to_s}(.*)'"
+      end
+
+
+      def uid_value_for_mismatch
+        'abs\(convert\(bigint,convert\(varbinary,newid\(\)\)\)\)'
       end
     end
   end
