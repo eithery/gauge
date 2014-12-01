@@ -34,6 +34,7 @@ module Gauge
 
       def matched?(expected_default, actual_default)
         return actual_default.to_s =~ uid_pattern if expected_default == UID
+        return actual_default.to_s =~ sql_function(expected_default) if function? expected_default
         expected_default == actual_default 
       end
 
@@ -41,6 +42,7 @@ module Gauge
       def column_default(column_schema, db_column)
         column_default_value = db_column[:ruby_default]
         column_default_value = db_column[:default] if column_default_value.nil?
+        column_default_value = column_default_value.constant if column_default_value.instance_of? Sequel::SQL::Constant
         return column_default_value unless column_schema.column_type == :bool
         return false if column_default_value == 0
         true if column_default_value == 1
@@ -51,10 +53,6 @@ module Gauge
         default_value = column_schema.default_value
         return UID if default_value == :uid
         default_value
-      end
-
-
-      def bool_column_default
       end
 
 
@@ -83,6 +81,17 @@ module Gauge
 
       def uid_pattern
         /abs\(convert\(\[bigint\],convert\(\[varbinary\],newid\(\)\)\)\)/i
+      end
+
+
+      def function?(default_value)
+        return default_value.include? :function if default_value.instance_of? Hash
+        false
+      end
+
+
+      def sql_function(default_value)
+        /#{default_value[:function]}()/i
       end
     end
   end
