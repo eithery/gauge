@@ -12,6 +12,7 @@ module Gauge
         db_column.stub(:[]).with(:db_type).and_return(:bigint)
         db_column.stub(:[]).with(:max_chars).and_return(Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH)
         db_column.stub(:[]).with(:ruby_default).and_return(nil)
+        db_column.stub(:[]).with(:default).and_return(nil)
         db_column
       end
       let(:dba) { double('dba', table_exists?: true, column_exists?: true, column: db_column) }
