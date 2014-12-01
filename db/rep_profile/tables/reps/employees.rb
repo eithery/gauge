@@ -16,7 +16,7 @@ table :employees do
   col :businessAddressId, :ref => :addresses
   col :residenceAddressId, :ref => :addresses
   col :residenceAddress2Id, :ref => :addresses
-  col :preferredMailingAddress, type: :enum, required: true, check: 0..3
+  col :preferredMailingAddress, type: :enum, required: true, check: 0..3, default: 0
   col :contactsId, :ref => :contacts
   col :description, len: :max
   col :photo, type: :blob
