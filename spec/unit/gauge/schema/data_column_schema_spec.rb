@@ -226,33 +226,29 @@ module Gauge
 
 
         context "when no column length defined" do
-          context "for string type columns" do
-            before do
-              @string_column = DataColumnSchema.new(:last_name, type: :string)
-              @char_column = DataColumnSchema.new(:trade_type, type: :char)
-            end
-
-            it "equals to default nvarchar column type value" do
-              @string_column.length.should == DataColumnSchema::DEFAULT_VARCHAR_LENGTH
-              @char_column.length.should == DataColumnSchema::DEFAULT_VARCHAR_LENGTH
-            end
+          context "for string columns" do
+            before { @column = DataColumnSchema.new(:last_name, type: :string) }
+            it { should == DataColumnSchema::DEFAULT_VARCHAR_LENGTH }
           end
 
-          context "for non string column types" do
+          context "for char columns" do
+            before { @column = DataColumnSchema.new(:trade_type, type: :char) }
+            it { should  == DataColumnSchema::DEFAULT_CHAR_LENGTH }
+          end
+
+          context "for country code columns" do
+            before { @column = DataColumnSchema.new(:country_code, type: :country) }
+            it { should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH }
+          end
+
+          context "for US state code columns" do
+            before { @column = DataColumnSchema.new(:state_code, type: :us_state) }
+            it { should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH }
+          end
+
+          context "for other column types" do
             before { @column = DataColumnSchema.new(:created, type: :datetime) }
             it { should be_nil }
-          end
-
-          context "for country and US state types" do
-            before do
-              @country_column = DataColumnSchema.new(:country_code, type: :country)
-              @us_state_column = DataColumnSchema.new(:state_code, type: :us_state)
-            end
-
-            it "equals to default value of ISO state/country code" do
-              @country_column.length.should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH
-              @us_state_column.length.should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH
-            end
           end
         end
       end

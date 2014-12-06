@@ -8,6 +8,7 @@ module Gauge
   module Schema
     class DataColumnSchema
       DEFAULT_VARCHAR_LENGTH = 256
+      DEFAULT_CHAR_LENGTH = 1
       DEFAULT_ISO_CODE_LENGTH = 2
 
       def initialize(*args, &block)
@@ -57,9 +58,7 @@ module Gauge
 
 
       def length
-        return DataColumnSchema::DEFAULT_ISO_CODE_LENGTH if iso_code_type?
-        return @options[:len] || DEFAULT_VARCHAR_LENGTH if char_column?
-        nil
+        @options[:len] || default_length
       end
 
 
@@ -177,13 +176,18 @@ module Gauge
       end
 
 
-      def iso_code_type?
-        column_type == :us_state || column_type == :country
+      def default_for_required_bool
+        return false if column_type == :bool && !allow_null?
       end
 
 
-      def default_for_required_bool
-        return false if column_type == :bool && !allow_null?
+      def default_length
+        case column_type
+          when :string    then DEFAULT_VARCHAR_LENGTH
+          when :char      then DEFAULT_CHAR_LENGTH
+          when :us_state  then DEFAULT_ISO_CODE_LENGTH
+          when :country   then DEFAULT_ISO_CODE_LENGTH
+        end
       end
     end
   end
