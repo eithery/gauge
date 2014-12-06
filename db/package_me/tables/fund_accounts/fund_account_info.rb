@@ -54,6 +54,4 @@ table :fund_account_info do
   col :created_date
   col :update_date
   col :update_user, len: 32
-
-  timestamps
 end

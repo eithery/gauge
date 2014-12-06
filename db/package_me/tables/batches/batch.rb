@@ -19,6 +19,8 @@ table :batch do
   col :user_id, len: 32
   col :manager_id, len: 32
 
+  col :created, type: :datetime
+  col :updated, type: :datetime
   col :closed, type: :datetime
   col :released, type: :datetime
   col :wire_ind, type: :short
@@ -35,6 +37,4 @@ table :batch do
   col :export_rec_user, len: 32
   col :export_rec_time, type: :datetime
   col :comment, len: :max
-
-  timestamps dates: :short
 end
