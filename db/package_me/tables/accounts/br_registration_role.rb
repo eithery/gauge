@@ -4,7 +4,7 @@
 
 table :br_registration_role do
   col :registration_role_id, id: true
-  col :registration_role_code, type: :char, len: 1, required: true, check: %w(G B T M C O N)
+  col :registration_role_code, type: :char, required: true, check: %w(G B T M C O N)
   col :name, len: 64, required: true
   col :displayName, len: 50
   col :description, len: :max

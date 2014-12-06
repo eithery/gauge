@@ -11,7 +11,7 @@ table :employees do
   col :displayName
   col :ssn, len: 16
   col :employeeCode, len: 16
-  col :gender, type: :char, len: 1, check: %w(F M)
+  col :gender, type: :char, check: %w(F M)
   col :dateOfBirth, type: :date
   col :businessAddressId, :ref => :addresses
   col :residenceAddressId, :ref => :addresses

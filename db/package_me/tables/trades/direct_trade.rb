@@ -4,7 +4,7 @@
 
 table :direct_trade do
   col :id, type: :long, required: true, default: :uid, unique: true
-  col :trade_id, type: :int, id: true, business_id: true, identity: { seed: 200 }
+  col :trade_id, type: :int, id: true, identity: { seed: 200 }
   col :tran_type, :ref => :trans_type, len: 18, required: true
   col :account_num, len: 20, required: true
   col :ref => :source_firms
@@ -56,7 +56,7 @@ table :direct_trade do
   col :mergedFromAccount, len: 20
 
   col :cust_check, len: 18
-  col :nav, type: :char, len: 1
+  col :nav, type: :char
   col :buy_sell, len: 8
   col :proration_ratio, type: :percent
   col :skip_license, type: :short

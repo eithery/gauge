@@ -23,9 +23,9 @@ table :fund_account_info do
   col :changeStatusReasonId, :ref => :accountActivationReasons
   col :purgeDate
 
-  col :network_status, type: :char, len: 1
+  col :network_status, type: :char
   col :network_status_date
-  col :network_command, type: :char, len: 1
+  col :network_command, type: :char
   col :network_command_date
   col :network_command_source, len: 10
   col :far_command, len: 3

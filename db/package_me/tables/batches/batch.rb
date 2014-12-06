@@ -3,7 +3,7 @@
 # Contains batch info.
 
 table :batch do
-  col :batch_num, type: :int, id: true, business_id: true, identity: true
+  col :batch_num, type: :int, id: true, identity: true
   col :batch_id, len: 20, required: true
   col :source, len: 10
   col :company, len: 3

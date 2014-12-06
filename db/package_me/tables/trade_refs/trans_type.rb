@@ -3,12 +3,12 @@
 # Contains available trade types.
 
 table :trans_type do
-  col :code, len: 18, id: true, business_id: true
+  col :code, len: 18, id: true
   col :tr_type, len: 18, required: true
   col :tr_type_code, len: 2, required: true
   col :display_name
   col :blotter, len: 2
-  col :bs_code, type: :char, len: 1
+  col :bs_code, type: :char
   col :seq, type: :int, required: true
   col :haircut, type: :percent, required: true, default: 1.0
   col :allowMultipleTradeAllocations, type: :bool, required: true
