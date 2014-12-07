@@ -28,31 +28,54 @@ module Gauge
       def mismatch(expected_default, actual_default)
         return :missing_constraint if !expected_default.nil? && actual_default.nil?
         return :redundant_constraint if expected_default.nil? && !actual_default.nil?
-        return :constraint_mismatch unless matched? expected_default, actual_default
+        :constraint_mismatch unless matched? expected_default, actual_default
       end
 
 
       def matched?(expected_default, actual_default)
         return actual_default.to_s =~ uid_pattern if expected_default == UID
-        return actual_default.to_s =~ sql_function(expected_default) if function? expected_default
-        expected_default == actual_default 
+        actual_default == expected_default
       end
 
 
       def column_default(column_schema, db_column)
-        column_default_value = db_column[:ruby_default]
-        column_default_value = db_column[:default] if column_default_value.nil?
-        column_default_value = column_default_value.constant if column_default_value.instance_of? Sequel::SQL::Constant
-        return column_default_value unless column_schema.column_type == :bool
-        return false if column_default_value == 0
-        true if column_default_value == 1
+        default_value = actual_default_value(db_column)
+        column_schema.bool? ? convert_to_bool(default_value) : default_value
+      end
+
+
+      def convert_to_bool(column_default_value)
+        case column_default_value
+          when 0 then false
+          when 1 then true
+        end
+      end
+
+
+      def bool_column?(column_schema)
+        column_schema.column_type == :bool
       end
 
 
       def expected_default_value(column_schema)
         default_value = column_schema.default_value
         return UID if default_value == :uid
+        return sql_function(default_value) if function? default_value
         default_value
+      end
+
+
+      def actual_default_value(db_column)
+        default_value = db_column[:ruby_default].nil? ? db_column[:default] : db_column[:ruby_default]
+        return sequel_constant(default_value) if default_value.kind_of? Sequel::SQL::Constant
+        return $1 if default_value.to_s =~ /\A\((.*)\)\z/i
+        default_value
+      end
+
+
+      def sequel_constant(default_value)
+        value = default_value.constant
+        value == :CURRENT_TIMESTAMP ? 'getdate()' : value
       end
 
 
@@ -85,13 +108,13 @@ module Gauge
 
 
       def function?(default_value)
-        return default_value.include? :function if default_value.instance_of? Hash
+        return default_value.include? :function if default_value.kind_of? Hash
         false
       end
 
 
       def sql_function(default_value)
-        /#{default_value[:function]}()/i
+        "#{default_value[:function]}()".downcase
       end
     end
   end

@@ -18,6 +18,7 @@ module Gauge
       it { should respond_to :id? }
       it { should respond_to :in_table }
       it { should respond_to :computed? }
+      it { should respond_to :bool? }
 
 
       describe '#initialize' do
@@ -321,6 +322,31 @@ module Gauge
         context "for computed columns" do
           before { @column_schema = DataColumnSchema.new(:source_firm_code, computed: { function: :get_source_code }) }
           it { should be true }
+        end
+      end
+
+
+      describe '#bool?' do
+        before do
+          @bool_columns = [
+            DataColumnSchema.new(:active, type: :bool),
+            DataColumnSchema.new(:is_active),
+            DataColumnSchema.new(:has_participants),
+            DataColumnSchema.new(:allow_delete)
+          ]
+          @other_columns = [
+            DataColumnSchema.new(:code),
+            DataColumnSchema.new(:created_at),
+            DataColumnSchema.new(:is_active, type: :enum)
+          ]
+        end
+
+        it "returns true for boolean data columns" do
+          @bool_columns.each { |col| col.bool?.should be true }
+        end
+
+        it "returns false for all other column types" do
+          @other_columns.each { |col| col.bool?.should be false }
         end
       end
     end

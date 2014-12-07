@@ -34,13 +34,11 @@ module Gauge
 
 
       def column_type
-        type = @options[:type]
-        return type.to_sym unless type.nil?
-
+        return defined_column_type.to_sym unless defined_column_type.nil?
         return :string if string?
         return :id if contains_ref_id?
-        return :bool if bool?
-        return :datetime if datetime?
+        return :bool if bool_by_name?
+        return :datetime if datetime_by_name?
         return :date if date?
         return :id if id?
         :string
@@ -63,7 +61,7 @@ module Gauge
 
 
       def allow_null?
-        !(identity? || @options[:required])
+        !(identity? || @options[:required] == true)
       end
 
 
@@ -91,6 +89,11 @@ module Gauge
         @options.include? :computed
       end
 
+
+      def bool?
+        column_type == :bool || bool_by_name? && defined_column_type.nil?
+      end
+
   private
 
       def name_from_ref
@@ -115,12 +118,12 @@ module Gauge
       end
 
 
-      def bool?
+      def bool_by_name?
         column_name.to_s.downcase.start_with?('is', 'has', 'allow')
       end
 
 
-      def datetime?
+      def datetime_by_name?
         column_name.to_s.downcase.end_with?('date', '_at')
       end
 
@@ -160,8 +163,8 @@ module Gauge
 
 
       def validate_column_type
-        col_type = @options[:type]
-        raise ArgumentError.new('Invalid column type.') unless col_type.nil? || type_map.include?(col_type.to_sym)
+        raise ArgumentError.new('Invalid column type.') unless defined_column_type.nil? ||
+          type_map.include?(defined_column_type.to_sym)
       end
 
 
@@ -188,6 +191,11 @@ module Gauge
           when :us_state  then DEFAULT_ISO_CODE_LENGTH
           when :country   then DEFAULT_ISO_CODE_LENGTH
         end
+      end
+
+
+      def defined_column_type
+        @options[:type]
       end
     end
   end

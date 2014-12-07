@@ -88,6 +88,26 @@ module Gauge
             it { should_append_error(mismatch_message :trade_id, uid_value_for_mismatch, 'invalid_default_value') }
           end
         end
+
+
+        context "when default value is a result of SQL function call" do
+          before { @column_schema = Schema::DataColumnSchema.new(:modified_at, default: { function: :host_name }) }
+
+          context "with matched column default constraint" do
+            before { stub_column_default 'host_name()' }
+            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+          end
+
+          context "with missing column default constraint" do
+            before { stub_column_default nil }
+            it { should_append_error(mismatch_message :modified_at, sql_function_for_mismatch, nil) }
+          end
+
+          context "with the column default constraint mismatch" do
+            before { stub_column_default 'invalid_function' }
+            it { should_append_error(mismatch_message :modified_at, sql_function_for_mismatch, 'invalid_function') }
+          end
+        end
       end
 
   private
@@ -111,33 +131,38 @@ module Gauge
       def message_content(expected_default, actual_default)
         return missing_constraint_message expected_default if actual_default.nil?
         return redundant_constraint_message actual_default if expected_default.nil?
-        constraint_mismatch_message expected_default, actual_default 
+        return constraint_mismatch_message expected_default, actual_default
       end
 
 
       def column_name_message(column_name)
-        "column '(.*)#{column_name.to_s}(.*)' "
+        "column '(.*?)#{column_name.to_s}(.*?)' "
       end
 
 
       def missing_constraint_message(expected_value)
-        "- missing default value '(.*)#{expected_value.to_s}(.*)'"
+        "- missing default value '(.*?)#{expected_value.to_s}(.*?)'"
       end
 
 
       def constraint_mismatch_message(expected_value, actual_value)
-        "should have '(.*)#{expected_value.to_s}(.*)' as default value but actually has " +
-        "'(.*)#{actual_value.to_s}(.*)'"
+        "should have '(.*?)#{expected_value.to_s}(.*?)' as default value but actually has " +
+        "'(.*?)#{actual_value.to_s}(.*?)'"
       end
 
 
       def redundant_constraint_message(actual_value)
-        "should NOT have default value but actually has '(.*)#{actual_value.to_s}(.*)'"
+        "should NOT have default value but actually has '(.*?)#{actual_value.to_s}(.*?)'"
       end
 
 
       def uid_value_for_mismatch
         'abs\(convert\(bigint,convert\(varbinary,newid\(\)\)\)\)'
+      end
+
+
+      def sql_function_for_mismatch
+        'host_name\(\)'
       end
     end
   end
