@@ -6,18 +6,15 @@ require 'gauge'
 module Gauge
   module Validators
     class DefaultConstraintValidator < Validators::Base
-      UID = 'abs(convert(bigint,convert(varbinary,newid())))'
-
       validate do |column_schema, db_column|
-        expected_default = expected_default_value column_schema
         actual_default = column_default column_schema, db_column
 
-        case mismatch expected_default, actual_default
+        case mismatch column_schema.default_value, actual_default
           when :missing_constraint
-            errors << column_header_message(column_schema) + missing_constraint_message(expected_default)
+            errors << column_header_message(column_schema) + missing_constraint_message(column_schema.default_value)
           when :constraint_mismatch
             errors << column_header_message(column_schema) +
-              constraint_mismatch_message(expected_default, actual_default)
+              constraint_mismatch_message(column_schema.default_value, actual_default)
           when :redundant_constraint
             errors << column_header_message(column_schema) + redundant_constraint_message(actual_default)
         end
@@ -33,7 +30,7 @@ module Gauge
 
 
       def matched?(expected_default, actual_default)
-        return actual_default.to_s =~ uid_pattern if expected_default == UID
+        return actual_default.to_s =~ uid_pattern if expected_default == Schema::DataColumnSchema::UID
         actual_default == expected_default
       end
 
@@ -49,19 +46,6 @@ module Gauge
           when 0 then false
           when 1 then true
         end
-      end
-
-
-      def bool_column?(column_schema)
-        column_schema.column_type == :bool
-      end
-
-
-      def expected_default_value(column_schema)
-        default_value = column_schema.default_value
-        return UID if default_value == :uid
-        return sql_function(default_value) if function? default_value
-        default_value
       end
 
 
@@ -104,17 +88,6 @@ module Gauge
 
       def uid_pattern
         /abs\(convert\(\[bigint\],convert\(\[varbinary\],newid\(\)\)\)\)/i
-      end
-
-
-      def function?(default_value)
-        return default_value.include? :function if default_value.kind_of? Hash
-        false
-      end
-
-
-      def sql_function(default_value)
-        "#{default_value[:function]}()".downcase
       end
     end
   end

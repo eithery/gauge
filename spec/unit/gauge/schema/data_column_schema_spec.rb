@@ -268,6 +268,16 @@ module Gauge
             before { @column_schema = DataColumnSchema.new(:is_active, required: true, default: true) }
             it { should be true }
           end
+
+          context "as UID" do
+            before { @column_schema = DataColumnSchema.new(:account_id, id: true, default: :uid) }
+            it { should == DataColumnSchema::UID }
+          end
+
+          context "as SQL function without arguments" do
+            before { @column_schema = DataColumnSchema.new(:modified_at, default: { function: :getdate }) }
+            it { should == 'getdate()' }
+          end
         end
 
         context "when it is not defined in column attributes" do

@@ -90,7 +90,7 @@ module Gauge
         end
 
 
-        context "when default value is a result of SQL function call" do
+        context "when default value is SQL function" do
           before { @column_schema = Schema::DataColumnSchema.new(:modified_at, default: { function: :host_name }) }
 
           context "with matched column default constraint" do

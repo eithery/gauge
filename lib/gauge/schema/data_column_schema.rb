@@ -10,6 +10,8 @@ module Gauge
       DEFAULT_VARCHAR_LENGTH = 256
       DEFAULT_CHAR_LENGTH = 1
       DEFAULT_ISO_CODE_LENGTH = 2
+      UID = 'abs(convert(bigint,convert(varbinary,newid())))'
+
 
       def initialize(*args, &block)
         @column_name = unsplat_name *args
@@ -66,7 +68,11 @@ module Gauge
 
 
       def default_value
-        @options.include?(:default) ? @options[:default] : default_for_required_bool
+        default = @options[:default]
+        return false if default.nil? && column_type == :bool && !allow_null?
+        return UID if default == :uid
+        return sql_function(default) if function? default
+        default
       end
 
 
@@ -91,7 +97,7 @@ module Gauge
 
 
       def bool?
-        column_type == :bool || bool_by_name? && defined_column_type.nil?
+        column_type == :bool
       end
 
   private
@@ -179,11 +185,6 @@ module Gauge
       end
 
 
-      def default_for_required_bool
-        return false if column_type == :bool && !allow_null?
-      end
-
-
       def default_length
         case column_type
           when :string    then DEFAULT_VARCHAR_LENGTH
@@ -196,6 +197,17 @@ module Gauge
 
       def defined_column_type
         @options[:type]
+      end
+
+
+      def function?(default_value)
+        return default_value.include? :function if default_value.kind_of? Hash
+        false
+      end
+
+
+      def sql_function(default_value)
+        "#{default_value[:function]}()".downcase
       end
     end
   end
