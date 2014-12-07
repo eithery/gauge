@@ -48,7 +48,7 @@ module Gauge
 
         def stub_db_column_nullability(nullability)
           allow_null = nullability == :null
-          @db_column.stub(:[]).with(:allow_null).and_return(allow_null)
+          @db_column.stub(:allow_null?).and_return(allow_null)
         end
 
 

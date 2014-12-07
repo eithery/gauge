@@ -20,11 +20,10 @@ module Gauge
       describe '#check' do
         before do
           @db_column = double('db_column')
-          @db_column.stub(:[]).with(:allow_null).and_return(true, true, false, true, true, false)
-          @db_column.stub(:[]).with(:db_type).and_return(:nvarchar, :nvarchar, :bigint, :nvarchar, :nvarchar, :bigint)
-          @db_column.stub(:[]).with(:max_chars).and_return(Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH)
-          @db_column.stub(:[]).with(:ruby_default).and_return(nil)
-          @db_column.stub(:[]).with(:default).and_return(nil)
+          @db_column.stub(:allow_null?).and_return(true, true, false, true, true, false)
+          @db_column.stub(:data_type).and_return(:nvarchar, :nvarchar, :bigint, :nvarchar, :nvarchar, :bigint)
+          @db_column.stub(:length).and_return(Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH)
+          @db_column.stub(:default_value).and_return(nil)
           @dba = double('dba', table_exists?: true, column_exists?: true, column: @db_column)
           validator.stub(:log) do |message, &block|
             block.call
@@ -93,8 +92,8 @@ module Gauge
 
         context "when some errors found" do
           before do
-            @db_column.stub(:[]).with(:allow_null).and_return(false)
-            @db_column.stub(:[]).with(:db_type).and_return(:bigint)
+            @db_column.stub(:allow_null?).and_return(false)
+            @db_column.stub(:data_type).and_return(:bigint)
           end
 
           it "displays validation result total with errors" do

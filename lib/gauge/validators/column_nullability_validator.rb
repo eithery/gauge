@@ -8,7 +8,7 @@ module Gauge
     class ColumnNullabilityValidator < Validators::Base
 
       validate do |column_schema, db_column|
-        if column_schema.allow_null? != db_column[:allow_null]
+        if column_schema.allow_null? != db_column.allow_null?
           should_be = column_schema.allow_null? ? 'NULL' : 'NOT NULL'
 
           errors << "Data column '".color(:red) + column_schema.column_name.to_s.color(:red).bright +

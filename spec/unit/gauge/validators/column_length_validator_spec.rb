@@ -104,7 +104,7 @@ module Gauge
 
 
       def stub_column_length(length)
-        @db_column.stub(:[]).with(:max_chars).and_return(length)
+        @db_column.stub(:length).and_return(length)
       end
 
 

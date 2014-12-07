@@ -36,7 +36,7 @@ module Gauge
 
 
       def column_default(column_schema, db_column)
-        default_value = actual_default_value(db_column)
+        default_value = db_column.default_value
         column_schema.bool? ? convert_to_bool(default_value) : default_value
       end
 
@@ -46,20 +46,6 @@ module Gauge
           when 0 then false
           when 1 then true
         end
-      end
-
-
-      def actual_default_value(db_column)
-        default_value = db_column[:ruby_default].nil? ? db_column[:default] : db_column[:ruby_default]
-        return sequel_constant(default_value) if default_value.kind_of? Sequel::SQL::Constant
-        return $1 if default_value.to_s =~ /\A\((.*)\)\z/i
-        default_value
-      end
-
-
-      def sequel_constant(default_value)
-        value = default_value.constant
-        value == :CURRENT_TIMESTAMP ? 'getdate()' : value
       end
 
 

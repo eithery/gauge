@@ -15,7 +15,7 @@ module Gauge
       describe '#validate' do
         before do
           @db_column = double('db_column')
-          @db_column.stub(:[]).with(:db_type).and_return(:nvarchar)
+          @db_column.stub(:data_type).and_return(:nvarchar)
         end
 
         context "when the actual column type is different from defined in metadata" do

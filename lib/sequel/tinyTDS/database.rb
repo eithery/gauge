@@ -19,9 +19,10 @@ module Sequel
 
 
       def column(column_schema)
-        table(column_schema).select do |item|
+        column = table(column_schema).select do |item|
           item.first == column_schema.to_key
         end.first.last
+        Gauge::DB::DataColumn.new(column)
       end
 
 private

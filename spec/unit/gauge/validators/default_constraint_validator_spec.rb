@@ -74,7 +74,7 @@ module Gauge
           before { @column_schema = Schema::DataColumnSchema.new(:trade_id, default: :uid) }
 
           context "with matched column default constraint" do
-            before { stub_column_default nil, 'abs(CONVERT([bigint],CONVERT([varbinary],newid())))' }
+            before { stub_column_default 'abs(CONVERT([bigint],CONVERT([varbinary],newid())))' }
             specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
           end
 
@@ -117,9 +117,8 @@ module Gauge
       end
 
 
-      def stub_column_default(default_value, native_default_value=default_value)
-        @db_column.stub(:[]).with(:ruby_default).and_return(default_value)
-        @db_column.stub(:[]).with(:default).and_return(native_default_value)
+      def stub_column_default(default_value)
+        @db_column.stub(:default_value).and_return(default_value)
       end
 
 
