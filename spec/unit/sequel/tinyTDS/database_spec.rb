@@ -40,13 +40,7 @@ module Sequel
 
 
       describe '#column_exists?' do
-        before do
-          database.stub(:schema).and_return([
-            [:id, double('id')],
-            [:account_number, double('account_number')],
-            [:created_at, double('created_at')]
-          ])
-        end
+        before { stub_database_schema }
 
         context "when data column does not exists in the table" do
           specify { database.column_exists?(missing_column_schema).should be false }
@@ -64,12 +58,27 @@ module Sequel
             .and_return([[:account_number, double('account_number')]])
           database.column column_schema
         end
+
+        it "returns data column metadata" do
+          stub_database_schema
+          Gauge::DB::DataColumn.should_receive(:new).once
+          database.column column_schema
+        end
       end
 
 private
 
       def stub_table_local_name(name)
         @table_schema.stub(:local_name).and_return(name)
+      end
+
+
+      def stub_database_schema
+        database.stub(:schema).and_return([
+          [:id, double('id')],
+          [:account_number, double('account_number')],
+          [:created_at, double('created_at')]
+        ])
       end
     end
   end
