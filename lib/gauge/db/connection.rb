@@ -6,26 +6,15 @@ require 'gauge'
 module Gauge
   module DB
     class Connection
+      class << self
+        attr_accessor :server, :user, :password
+      end
+
 
       def self.configure(options)
-        @@server = options[:server]
-        @@user = options[:user]
-        @@password = options[:password]
-      end
-
-
-      def self.server
-        @@server
-      end
-
-
-      def self.user
-        @@user
-      end
-
-
-      def self.password
-        @@password
+        self.server = options[:server]
+        self.user = options[:user]
+        self.password = options[:password]
       end
     end
   end

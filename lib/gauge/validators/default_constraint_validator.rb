@@ -7,16 +7,16 @@ module Gauge
   module Validators
     class DefaultConstraintValidator < Validators::Base
       validate do |column_schema, db_column|
-        actual_default = column_default column_schema, db_column
+        actual_default_value = column_default column_schema, db_column
 
-        case mismatch column_schema.default_value, actual_default
+        case mismatch column_schema.default_value, actual_default_value
           when :missing_constraint
             errors << column_header_message(column_schema) + missing_constraint_message(column_schema.default_value)
           when :constraint_mismatch
             errors << column_header_message(column_schema) +
-              constraint_mismatch_message(column_schema.default_value, actual_default)
+              constraint_mismatch_message(column_schema.default_value, actual_default_value)
           when :redundant_constraint
-            errors << column_header_message(column_schema) + redundant_constraint_message(actual_default)
+            errors << column_header_message(column_schema) + redundant_constraint_message(actual_default_value)
         end
       end
 
@@ -36,8 +36,7 @@ module Gauge
 
 
       def column_default(column_schema, db_column)
-        default_value = db_column.default_value
-        column_schema.bool? ? convert_to_bool(default_value) : default_value
+        column_schema.bool? ? convert_to_bool(db_column.default_value) : db_column.default_value
       end
 
 
