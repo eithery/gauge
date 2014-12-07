@@ -13,7 +13,7 @@ table :product do
   col :desc2, len: 128
   col :desc3, len: 128
   col :issuer_id, len: 10
-  col :cusip, len: 9
+  col :cusip_old, len: 9
   col :fund_id, len: 10
   col :service_level, type: :char, required: true, default: 'N'
   col :share_class, type: :char
