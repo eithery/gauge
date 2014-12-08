@@ -19,9 +19,7 @@ module Gauge
   private
 
       def missing_table(table_name)
-        message = "Check ".color(:red) + "'#{table_name.color(:red).bright}'" + " data table - ".color(:red) +
-          "missing".color(:red).bright
-        errors << message
+        errors << "Check '#{table_name}' data table - missing"
       end
     end
   end

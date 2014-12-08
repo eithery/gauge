@@ -19,7 +19,7 @@ module Gauge
   private
 
       def missing_column(column_name)
-        errors << "Missing '".color(:red) + column_name.to_s.color(:red).bright + "' data column.".color(:red)
+        errors << "Missing '#{column_name}' data column."
       end
     end
   end

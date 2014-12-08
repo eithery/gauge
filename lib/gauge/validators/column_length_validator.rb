@@ -9,9 +9,8 @@ module Gauge
 
       validate do |column_schema, db_column|
         if length_mismatch? column_schema, db_column
-          errors << "The length of column '".color(:red) +  column_schema.column_name.to_s.color(:red).bright +
-            "' is '".color(:red) + "#{db_column.length}".color(:red).bright + "', but it must be '".color(:red) +
-            "#{column_schema.length}".color(:red).bright + "' chars.".color(:red)
+          errors << "The length of column '#{column_schema.column_name}' is '#{db_column.length}', " +
+            "but it must be '#{column_schema.length}' chars."
         end
       end
 

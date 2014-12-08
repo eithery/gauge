@@ -20,7 +20,7 @@ module Gauge
 
           context "and actual data column in DB is nullable" do
             before { stub_db_column_nullability :null }
-            it { should_append_error(/Data column '(.*)account_number(.*)' must be defined as NOT NULL/) }
+            it { should_append_error(/Data column '(.*?)account_number(.*?)' must be defined as '(.*?)NOT NULL(.*?)'/) }
           end
 
           context "and actual data column in DB is NOT nullable" do
@@ -40,7 +40,7 @@ module Gauge
 
           context "and actual data column in DB is NOT nullable" do
             before { stub_db_column_nullability :not_null }
-            it { should_append_error(/Data column '(.*)account_number(.*)' must be defined as NULL/) }
+            it { should_append_error(/Data column '(.*?)account_number(.*?)' must be defined as '(.*?)NULL(.*?)'/) }
           end
         end
 

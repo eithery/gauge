@@ -9,9 +9,8 @@ module Gauge
 
       validate do |column_schema, db_column|
         if column_schema.data_type != db_column.data_type
-          errors << "Data column '".color(:red) +  column_schema.column_name.to_s.color(:red).bright +
-            "' is '".color(:red) + "#{db_column.data_type}".color(:red).bright + "' but it must be '".color(:red) +
-            "#{column_schema.data_type}".color(:red).bright + "'.".color(:red)
+          errors << "Data column '#{column_schema.column_name}' is '#{db_column.data_type}', " +
+            "but it must be '#{column_schema.data_type}'."
         end
       end
     end

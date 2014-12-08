@@ -20,7 +20,7 @@ module Gauge
 
         context "when the actual column type is different from defined in metadata" do
           before { @column_schema = Schema::DataColumnSchema.new(:total_amount, type: :money) }
-          it { should_append_error(/data column '(.*)total_amount(.*)' is '(.*)nvarchar(.*)' but it must be '(.*)decimal(.*)'/i) }
+          it { should_append_error(/data column '(.*?)total_amount(.*?)' is '(.*?)nvarchar(.*?)', but it must be '(.*?)decimal(.*?)'/i) }
         end
 
         context "when the actual column type is the same as defined in metadata" do

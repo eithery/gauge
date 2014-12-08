@@ -109,8 +109,8 @@ module Gauge
 
 
       def mismatch_message(column_name, actual_length, defined_length)
-        /the length of column '(.*)#{column_name}(.*)' is '(.*)#{actual_length}/i
-        /(.*)', but it must be '(.*)#{defined_length}(.*)' chars./i
+        /the length of column '(.*?)#{column_name}(.*?)' is '(.*?)#{actual_length}/i
+        /(.*?)', but it must be '(.*?)#{defined_length}(.*?)' chars./i
       end
     end
   end
