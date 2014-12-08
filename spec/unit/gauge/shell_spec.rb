@@ -22,8 +22,8 @@ module Gauge
 
     describe '#help' do
       it "delegates call to Helper instance" do
-        Helper.any_instance.stub(:puts)
         helper = Helper.new(global_options)
+        helper.stub(:info)
         Helper.should_receive(:new).with(global_options).and_return(helper)
         shell.help(global_options)
       end

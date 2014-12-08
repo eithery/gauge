@@ -3,10 +3,11 @@
 # Performs various validation checks of the specified database or
 # particular database objects structure against the predefined schema.
 require 'gauge'
+require_relative 'logger'
 
 module Gauge
   class DatabaseInspector
-    include ConsoleListener
+    include Logger
 
     def initialize(global_opts, options, args)
       @args = args
