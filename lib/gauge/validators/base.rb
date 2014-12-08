@@ -6,7 +6,7 @@ require 'gauge'
 module Gauge
   module Validators
     class Base
-      include ConsoleListener
+      include Logger
 
       def self.check_all(validator_name, &block)
         define_method(:do_check_all) do |dbo_schema, dba|

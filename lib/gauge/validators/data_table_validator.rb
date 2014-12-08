@@ -10,7 +10,7 @@ module Gauge
       check_all(:data_columns) { |table_schema| table_schema.columns }
 
       def check(table_schema, dba)
-        log "Check '#{table_schema.table_name}' data table" do
+        with_log "Check '#{table_schema.table_name}' data table" do
           errors.clear
           super(table_schema, dba)
           errors
