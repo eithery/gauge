@@ -4,24 +4,14 @@
 
 module Gauge
   module Logger
-    def log(message, options={})
-      formatters.each { |f| f.log message, options }
+
+    def log(*args)
+      formatters.each { |f| f.log *args }
     end
 
 
-    def with_log(message, options={})
-      print "#{message} ...".color(:cyan)
-      return unless block_given?
-
-      errors = yield
-      if errors.empty?
-        puts "\r#{message} - ok".color(:green)
-      else
-        puts "\r#{message} - failed".color(:red).bright
-        puts "Errors:".color(:red)
-        errors.each { |error| puts "- #{error}".color(:red) }
-        puts "Total #{errors.count} errors found.\n".color(:red)
-      end
+    def with_log(*args, &block)
+      formatters.each { |f| f.with_log *args, &block }
     end
 
 
