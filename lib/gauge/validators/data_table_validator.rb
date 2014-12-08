@@ -10,10 +10,21 @@ module Gauge
       check_all(:data_columns) { |table_schema| table_schema.columns }
 
       def check(table_schema, dba)
-        with_log "Check '#{table_schema.table_name}' data table" do
-          errors.clear
-          super(table_schema, dba)
-          errors
+        errors.clear
+        super(table_schema, dba)
+        print_totals table_schema
+      end
+
+  private
+
+      def print_totals(table_schema)
+        if errors.empty?
+          ok "Check '#{table_schema.table_name}' data table - ok"
+        else
+          error "Check '#{table_schema.table_name}' data table - failed"
+          error "Errors:"
+          errors.each { |msg| error "- #{msg}" }
+          error "Total #{errors.count} errors found.\n"
         end
       end
     end

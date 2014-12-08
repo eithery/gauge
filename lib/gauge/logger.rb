@@ -10,11 +10,6 @@ module Gauge
     end
 
 
-    def with_log(*args, &block)
-      formatters.each { |f| f.with_log *args, &block }
-    end
-
-
     def error(message)
       log message, severity: :error
     end

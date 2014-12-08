@@ -25,9 +25,7 @@ module Gauge
           @db_column.stub(:length).and_return(Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH)
           @db_column.stub(:default_value).and_return(nil)
           @dba = double('dba', table_exists?: true, column_exists?: true, column: @db_column)
-          validator.stub(:with_log) do |message, &block|
-            block.call
-          end
+          validator.stub(:log)
         end
 
 
@@ -71,19 +69,13 @@ module Gauge
         end
 
 
-        it "displays log message for data table validation" do
-          validator.should_receive(:with_log).with(/check 'dbo\.master_accounts' data table/i)
-          validator.check(schema, dba)
-        end
-
-
         context "when no errors found" do
           specify "errors collection remains empty" do
             no_validation_errors { |schema, dba| validator.check(schema, dba) }
           end
 
           it "displays successful validation result" do
-            allow(validator).to receive(:with_log).and_call_original
+            allow(validator).to receive(:log).and_call_original
             expect { validator.check(schema, dba) }
               .to output(/check 'dbo\.master_accounts' data table - ok/i).to_stdout
           end
@@ -97,7 +89,7 @@ module Gauge
           end
 
           it "displays validation result total with errors" do
-            allow(validator).to receive(:with_log).and_call_original
+            allow(validator).to receive(:log).and_call_original
             expect { validator.check(schema, dba) }
               .to output(/check 'dbo\.master_accounts' data table - failed/i).to_stdout
             expect { validator.check(schema, dba) }

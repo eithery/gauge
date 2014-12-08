@@ -13,7 +13,7 @@ module Gauge
 
     subject { logger }
 
-    it { should respond_to :log, :with_log }
+    it { should respond_to :log }
     it { should respond_to :error, :warning, :info, :ok }
 
 
@@ -21,14 +21,6 @@ module Gauge
       it "delegates #log calls to registered formatters" do
         formatter.should_receive(:log).with('message', hash_including(severity: :error)).exactly(3).times
         logger.log 'message', severity: :error
-      end
-    end
-
-
-    describe '#with_log' do
-      it "delegates #with_log calls to registered formatters" do
-        formatter.should_receive(:with_log).with('message', hash_including(severity: :error)).exactly(3).times
-        logger.with_log 'message', { severity: :error } {  }
       end
     end
 

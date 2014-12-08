@@ -11,7 +11,6 @@ module Gauge
       def check(database_schema, dba)
         info "Inspecting '#{database_schema.database_name.to_s}' database ..."
         super(database_schema, dba)
-        errors
       end
     end
   end

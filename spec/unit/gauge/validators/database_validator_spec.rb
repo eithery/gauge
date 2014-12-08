@@ -32,9 +32,7 @@ module Gauge
       describe '#check' do
         before do
           validator.stub(:info)
-          DataTableValidator.any_instance.stub(:log) do |message, &block|
-            block.call
-          end
+          DataTableValidator.any_instance.stub(:log)
         end
 
         it "creates validator to check data tables" do
