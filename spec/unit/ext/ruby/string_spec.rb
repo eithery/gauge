@@ -7,6 +7,10 @@ describe String do
   it { should respond_to :colorize }
 
   describe '#colorize' do
-    it "colorizes the specified string"
+    it "colorizes the specified string" do
+      str = "sample string"
+      str.should_receive(:color).with(:red).and_return(str)
+      str.colorize(:error)
+    end
   end
 end

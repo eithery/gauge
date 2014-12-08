@@ -1,7 +1,7 @@
 # Eithery Lab., 2014.
 # Class String
 # Extends functionality of Ruby String class.
-# Supports colorization for console messages.
+# Supports string colorization for console messages.
 require 'gauge'
 
 class String

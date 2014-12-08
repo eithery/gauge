@@ -8,7 +8,7 @@ module Gauge
     class ColoredConsoleFormatter
 
       def log(message, options={})
-        puts message.colorize_as(options[:severity])
+        puts message.colorize(options[:severity])
       end
     end
   end

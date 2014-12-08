@@ -2,10 +2,11 @@
 # Class Gauge::Helper
 # Displays brief help and version information for the application.
 require 'gauge'
+require_relative 'logger'
 
 module Gauge
   class Helper
-    include ConsoleListener
+    include Logger
 
     def initialize(global_opts={})
       @global_opts = global_opts
