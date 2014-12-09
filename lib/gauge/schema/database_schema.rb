@@ -39,6 +39,11 @@ module Gauge
 			def to_key
 				database_name.downcase.to_sym
 			end
+
+
+			def home
+				@options[:home]
+			end
 		end
 	end
 end

@@ -5,13 +5,14 @@ require 'spec_helper'
 module Gauge
   module Schema
     describe DatabaseSchema do
-      let(:db_schema) { DatabaseSchema.new(:rep_profile, sql_name: 'RepProfile_DB') }
+      let(:db_schema) { DatabaseSchema.new(:rep_profile, sql_name: 'RepProfile_DB', home: 'metadata_home') }
       subject { db_schema }
 
       it { should respond_to :database_name, :sql_name }
       it { should respond_to :database_schema }
       it { should respond_to :tables, :to_key }
       it { should respond_to :object_name }
+      it { should respond_to :home }
 
 
       describe '#database_name' do
@@ -51,6 +52,11 @@ module Gauge
 
       describe '#to_key' do
         specify { db_schema.to_key.should == :rep_profile }
+      end
+
+
+      describe '#home' do
+        specify { db_schema.home.should == 'metadata_home' }
       end
     end
   end

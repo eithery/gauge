@@ -21,7 +21,7 @@ module Gauge
         require expand_path('/config/databases.rb')
         databases.values.each do |db_schema|
           with_database db_schema do
-            Dir["#{metadata_home}/#{db_schema.database_name}/**/tables/**/*.rb"].each { |f| require f }
+            Dir["#{home_for(db_schema)}/**/#{db_schema.database_name}/**/tables/**/*.rb"].each { |f| require f }
           end
         end
       end
@@ -114,6 +114,11 @@ private
 
       def self.current_db_schema
         @@current_db_schema
+      end
+
+
+      def self.home_for(db_schema)
+        db_schema.home.nil? ? metadata_home : db_schema.home
       end
     end
   end
