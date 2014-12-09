@@ -2,3 +2,4 @@
 :server: localhost
 :user: admin
 :password: secret
+:colored: true
