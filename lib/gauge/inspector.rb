@@ -30,6 +30,9 @@ module Gauge
             DB::Adapter.session schema do |dba|
               validator.check(schema, dba) unless validator.nil?
             end
+          rescue => e
+            error e.message
+            validator.errors << e.message
           ensure
             info "== #{schema.object_name} '#{schema.sql_name}' inspected ".ljust(80, '=')
             print_total validator

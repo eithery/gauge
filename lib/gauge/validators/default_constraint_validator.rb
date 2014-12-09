@@ -59,7 +59,7 @@ module Gauge
 
 
       def redundant_constraint_message(actual_value)
-        " should NOT have default value, but actually has '<b>#{actual_value}</b>'."
+        " should <b>NOT</b> have default value, but actually has '<b>#{actual_value}</b>'."
       end
 
 

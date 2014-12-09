@@ -19,7 +19,7 @@ module Gauge
   private
 
       def missing_table(table_name)
-        errors << "Check '#{table_name}' data table - missing"
+        errors << "'<b>#{table_name}</b>' data table does not exist."
       end
     end
   end

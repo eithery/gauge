@@ -19,7 +19,7 @@ module Gauge
   private
 
       def missing_column(column_name)
-        errors << "Missing '#{column_name}' data column."
+        errors << "Data column '<b>#{column_name}</b>' does <b>NOT</b> exist."
       end
     end
   end
