@@ -100,7 +100,7 @@ module Gauge
             validator.check schema, dba
             validator.should have(4).errors
             validator.errors.should include(/but it must be '(.*)nvarchar(.*)'/)
-            validator.errors.should include(/must be defined as NULL/)
+            validator.errors.should include(/must be defined as 'NULL'/)
           end
         end
 

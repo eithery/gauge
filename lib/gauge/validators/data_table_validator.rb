@@ -19,9 +19,9 @@ module Gauge
 
       def print_totals(table_schema)
         if errors.empty?
-          ok "Check '#{table_schema.table_name}' data table - ok"
+          ok "Check '#{table_schema.table_name}' data table - <b>ok</b>"
         else
-          error "Check '#{table_schema.table_name}' data table - failed"
+          error "Check '<b>#{table_schema.table_name}</b>' data table - failed"
           error "Errors:"
           errors.each { |msg| error "- #{msg}" }
           error "Total #{errors.count} errors found.\n"
