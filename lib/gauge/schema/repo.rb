@@ -6,15 +6,12 @@ require 'gauge'
 module Gauge
   module Schema
     class Repo
-
-      def self.databases
-        @@databases ||= {}
+      class << self
+        attr_accessor :databases, :current_db_schema
+        private :current_db_schema
       end
 
-
-      def self.metadata_home
-        @@metadata_home ||= expand_path('/db')
-      end
+      @databases = {}
 
 
       def self.load
@@ -104,21 +101,16 @@ private
 
       def self.with_database(db_schema)
         begin
-          @@current_db_schema = db_schema
+          @current_db_schema = db_schema
           yield
         ensure
-          @@current_db_schema = nil;
+          @current_db_schema = nil;
         end
       end
 
 
-      def self.current_db_schema
-        @@current_db_schema
-      end
-
-
       def self.home_for(db_schema)
-        db_schema.home.nil? ? metadata_home : db_schema.home
+        db_schema.home.nil? ? expand_path('db') : db_schema.home
       end
     end
   end

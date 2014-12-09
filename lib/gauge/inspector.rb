@@ -49,7 +49,7 @@ private
 
 
     def print_total(validator)
-      validator.errors.empty? ? ok('ok') : error("Total errors found: #{validator.errors.count}")
+      validator.errors.empty? ? ok('<b>ok</b>') : error("Total errors found: #{validator.errors.count}")
     end
   end
 end

@@ -19,7 +19,7 @@ module Gauge
 
       before { Repo.databases[:test_db] = database_schema }
 
-      it { should respond_to :databases, :metadata_home }
+      it { should respond_to :databases }
       it { should respond_to :load, :clear }
       it { should respond_to :database?, :table? }
       it { should respond_to :schema }
@@ -37,13 +37,6 @@ module Gauge
         context "when any database metadata defined" do
           it { should_not be_empty }
           specify { Repo.databases.should include(:test_db) }
-        end
-      end
-
-
-      describe '.metadata_home' do
-        it "points to the folder containing metadata files" do
-          Repo.metadata_home.should =~ /gauge\/db\z/
         end
       end
 
