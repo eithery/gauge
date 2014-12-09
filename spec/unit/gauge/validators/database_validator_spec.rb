@@ -6,14 +6,8 @@ module Gauge
   module Validators
     describe DatabaseValidator do
       let(:validator) { DatabaseValidator.new }
-      let(:db_column) do
-        db_column = double('db_column')
-        db_column.stub(:allow_null?).and_return(false)
-        db_column.stub(:data_type).and_return(:bigint)
-        db_column.stub(:length).and_return(Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH)
-        db_column.stub(:default_value).and_return(nil)
-        db_column
-      end
+      let(:db_column) { double('db_column', :allow_null? => false, data_type: :bigint, default_value: nil,
+          length: Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH) }
       let(:dba) { double('dba', table_exists?: true, column_exists?: true, column: db_column) }
       let(:schema) do
         db_schema = Schema::DatabaseSchema.new(:test_db)
@@ -21,7 +15,7 @@ module Gauge
         %w(master_accounts customers primary_reps).map do |table_name|
           tables[table_name.to_sym] = Schema::DataTableSchema.new(table_name.to_sym)
         end
-        db_schema.stub(:tables).and_return tables
+        db_schema.stub(tables: tables)
         db_schema
       end
 
@@ -45,6 +39,14 @@ module Gauge
           stub_validator(DataTableValidator).should_receive(:check)
             .with(instance_of(Schema::DataTableSchema), dba).exactly(3).times
           validator.check schema, dba
+        end
+
+        it "displays an error if no data tables defined in metadata" do
+          empty_schema = Schema::DatabaseSchema.new(:test_db)
+          empty_schema.stub(tables: {})
+          validator.stub(:error)
+          validator.check empty_schema, dba
+          validator.errors.should include(/cannot found data tables metadata for (.*?)test_db(.*?) database/i)
         end
       end
     end

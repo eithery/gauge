@@ -25,13 +25,17 @@ module Gauge
         validator = validator_for dbo
         schema = Schema::Repo.schema dbo
         unless schema.nil?
-          log "== #{schema.object_name} '#{schema.sql_name}' inspecting ".ljust(80, '=')
-          DB::Adapter.session schema do |dba|
-            validator.check(schema, dba) unless validator.nil?
-          log "== #{schema.object_name} '#{schema.sql_name}' inspected ".ljust(80, '=')
+          begin
+            info "== #{schema.object_name} '#{schema.sql_name}' inspecting ".ljust(80, '=')
+            DB::Adapter.session schema do |dba|
+              validator.check(schema, dba) unless validator.nil?
+            end
+          ensure
+            info "== #{schema.object_name} '#{schema.sql_name}' inspected ".ljust(80, '=')
+            print_total validator
           end
         else
-          error "Database metadata for '#{dbo}' is not found."
+          error "Database metadata for '<b>#{dbo}</b>' is not found."
         end
       end
     end
@@ -41,6 +45,11 @@ private
     def validator_for(dbo)
       return Validators::DatabaseValidator.new if Schema::Repo.database? dbo
       Validators::DataTableValidator.new if Schema::Repo.table? dbo
+    end
+
+
+    def print_total(validator)
+      validator.errors.empty? ? ok('ok') : error("Total errors found: #{validator.errors.count}")
     end
   end
 end

@@ -32,6 +32,7 @@ module Gauge
       before do
         stub_db_adapter
         Schema::Repo.stub(:load)
+        Validators::DatabaseValidator.any_instance.stub(:log)
       end
 
       it "displays an error when no arguments specified" do
@@ -46,6 +47,16 @@ module Gauge
 
       it "runs within data adapter session" do
         DB::Adapter.should_receive(:session).with(db_schema)
+        inspector.check ['test_db']
+      end
+
+      it "displays an initial inspection message" do
+        inspector.as_null_object.should_receive(:info).with(/database 'test_db' inspecting/i)
+        inspector.check ['test_db']
+      end
+
+      it "displays a final inspection message" do
+        inspector.as_null_object.should_receive(:info).with(/database 'test_db' inspected/i)
         inspector.check ['test_db']
       end
 
@@ -85,8 +96,31 @@ module Gauge
 
       context "when metadata for at least one passed DB object is not defined" do
         it "displays the appropriate error message" do
-          inspector.should_receive(:error).with(/database metadata for 'unknown_db_object' is not found/i)
+          inspector.should_receive(:error).with(/database metadata for '(.*?)unknown_db_object(.*?)' is not found/i)
           inspector.check ['unknown_db_object']
+        end
+      end
+
+
+      context "wnen no validation errors found" do
+        before do
+          validator = double('validator', check: [], errors: [])
+          Validators::DatabaseValidator.stub(:new).and_return(validator)
+        end
+
+        it "displays OK total" do
+          inspector.as_null_object.should_receive(:ok).with(/ok/i)
+          inspector.check ['test_db']
+        end
+      end
+
+
+      context "when any validation errors found" do
+        before { Schema::Repo.databases[:empty_db] = Schema::DatabaseSchema.new(:empty_db) }
+
+        it "displays the total count of errors" do
+          inspector.as_null_object.should_receive(:error).with(/total errors found: 1/i)
+          inspector.check ['empty_db']
         end
       end
     end
