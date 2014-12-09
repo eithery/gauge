@@ -46,11 +46,6 @@ module Gauge
             .with(instance_of(Schema::DataTableSchema), dba).exactly(3).times
           validator.check schema, dba
         end
-
-        it "displays database validation header message" do
-          allow(validator).to receive(:info).and_call_original
-          expect { validator.check(schema, dba) }.to output(/inspecting 'test_db' database/i).to_stdout
-        end
       end
     end
   end
