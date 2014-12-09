@@ -4,9 +4,15 @@
 
 module Gauge
   module Logger
+    class << self
+      attr_accessor :formatters
+    end
+
+    @formatters = []
+
 
     def log(*args)
-      formatters.each { |f| f.log *args }
+      Logger.formatters.each { |f| f.log *args }
     end
 
 
@@ -29,10 +35,9 @@ module Gauge
       log message, severity: :success
     end
 
-  private
 
-    def formatters
-      [Formatters::ColoredConsoleFormatter.new]
+    def self.configure(options)
+      formatters << (options[:colored] ? Formatters::ColoredConsoleFormatter.new : Formatters::ConsoleFormatter.new)
     end
   end
 end

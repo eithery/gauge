@@ -11,6 +11,7 @@ module Gauge
 
     def initialize(global_opts, options)
       DB::Connection.configure global_opts
+      Logger.configure global_opts
     end
 
 

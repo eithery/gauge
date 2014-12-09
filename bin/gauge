@@ -28,6 +28,10 @@ desc 'Password used to connect to db server.'
 default_value defaults[:password] || 'secret'
 flag [:p, :password]
 
+desc 'Setups colored console formatter to output messages.'
+default_value defaults[:colored] || false
+switch :colored
+
 
 # Available commands.
 
