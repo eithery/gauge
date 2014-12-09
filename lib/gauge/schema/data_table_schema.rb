@@ -29,8 +29,18 @@ module Gauge
       end
 
 
+      def object_name
+        'Data table'
+      end
+
+
       def sql_schema
         @options[:sql_schema] || :dbo
+      end
+
+
+      def sql_name
+        table_name
       end
 
 

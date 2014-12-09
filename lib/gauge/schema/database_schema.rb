@@ -31,6 +31,11 @@ module Gauge
 			end
 
 
+			def object_name
+				'Database'
+			end
+
+
 			def to_key
 				database_name.downcase.to_sym
 			end

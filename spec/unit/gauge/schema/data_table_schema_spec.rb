@@ -22,6 +22,7 @@ module Gauge
 
       it { should respond_to :table_name, :local_name }
       it { should respond_to :sql_schema, :database_schema }
+      it { should respond_to :object_name, :sql_name }
       it { should respond_to :columns }
       it { should respond_to :to_key, :contains? }
       it { should respond_to :col, :timestamps }
@@ -50,6 +51,11 @@ module Gauge
       end
 
 
+      describe '#object_name' do
+        specify { table_schema.object_name.should == "Data table" }
+      end
+
+
       describe '#sql_schema' do
         context "when data table is defined in default SQL schema" do
           specify { dbo_table_schema.sql_schema.should == :dbo }
@@ -58,6 +64,11 @@ module Gauge
         context "when data table is defined in custom SQL schema" do
           specify { ref_table_schema.sql_schema.should == :ref }
         end
+      end
+
+
+      describe '#sql_name' do
+        specify { table_schema.sql_name.should == table_schema.table_name }
       end
 
 
@@ -242,10 +253,6 @@ module Gauge
         context "with 'camel' column naming convention for string columns" do
           specify { columns_should_be_added(:createdBy, :modifiedBy) { table_schema.timestamps naming: :camel }}
         end
-      end
-
-
-      describe '#index' do
       end
 
   private
