@@ -13,4 +13,5 @@ database :rep_profile, sql_name: 'RepProfile', home: 'c:/dbs/gauge'
 database :package_me, sql_name: 'PackageMe', home: 'c:/dbs/gauge'
 
 # Test DB metadata. Used for test purposes only.
-database :test_db, sql_name: 'TestDB'
+database :test_db_green
+database :test_db_red
