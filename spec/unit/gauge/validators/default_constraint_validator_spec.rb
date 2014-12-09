@@ -151,7 +151,7 @@ module Gauge
 
 
       def redundant_constraint_message(actual_value)
-        "should NOT have default value, but actually has '(.*?)#{actual_value.to_s}(.*?)'"
+        "should (.*?)NOT(.*?) have default value, but actually has '(.*?)#{actual_value.to_s}(.*?)'"
       end
 
 

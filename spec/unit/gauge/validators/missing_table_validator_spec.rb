@@ -28,7 +28,7 @@ module Gauge
         context "when missing data table" do
           before { dba.stub(:table_exists?).and_return(false) }
 
-          it { should_append_error(/'(.*)dbo\.master_accounts(.*)'(.*) data table \- (.*)missing/i) }
+          it { should_append_error(/data table '(.*?)dbo\.master_accounts(.*?)' does not exist/i) }
           specify { validator.do_validate(schema, dba).should be false }
         end
       end

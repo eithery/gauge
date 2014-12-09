@@ -25,7 +25,7 @@ module Gauge
         context "when missing data column" do
           before { dba.stub(:column_exists?).and_return(false) }
 
-          it { should_append_error(/missing '(.*)account_number(.*)' data column/i) }
+          it { should_append_error(/data column '(.*?)account_number(.*)' does (.*?)NOT(.*?) exist/i) }
           specify { validator.do_validate(schema, dba).should be false }
         end        
       end
