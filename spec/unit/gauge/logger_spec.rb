@@ -7,7 +7,7 @@ module Gauge
     let(:logger) { Helper.new }
     let(:formatter) do
         formatter = double('formatter')
-        logger.stub(:formatters).and_return([formatter, formatter, formatter])
+        Logger.stub(:formatters).and_return([formatter, formatter, formatter])
         formatter
     end
 
@@ -15,6 +15,7 @@ module Gauge
 
     it { should respond_to :log }
     it { should respond_to :error, :warning, :info, :ok }
+    specify { Logger.should respond_to :formatters, :configure }
 
 
     describe '#log' do
@@ -54,6 +55,31 @@ module Gauge
         logger.should_receive(:log).with('message', hash_including(severity: :success))
         logger.ok 'message'
       end
+    end
+
+
+    describe '.configure' do
+      context "with :colored option" do
+        before { Logger.configure(colored: true) }
+
+        it "setups colored console formatter" do
+          Logger.formatters.should include(Formatters::ColoredConsoleFormatter)
+        end
+      end
+
+      context "without :colored option" do
+        before { Logger.configure }
+
+        it "setups simple console formatter" do
+          Logger.formatters.should include(Formatters::ConsoleFormatter)
+        end
+      end
+    end
+
+
+    describe '.formatters' do
+      subject { Logger.formatters }
+      it { should have(1).formatter }
     end
   end
 end

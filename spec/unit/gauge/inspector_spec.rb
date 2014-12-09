@@ -25,6 +25,12 @@ module Gauge
         DB::Connection.should_receive(:configure).with(hash_including(global_options)).once
         Inspector.new(global_options, {})
       end
+
+      it "performs configuring logging infrastructure" do
+        global_options = { colored: true }
+        Logger.should_receive(:configure).with(global_options)
+        Inspector.new(global_options, {})
+      end
     end
 
 

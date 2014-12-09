@@ -36,7 +36,8 @@ module Gauge
     end
 
 
-    def self.configure(options)
+    def self.configure(options={})
+      formatters.clear
       formatters << (options[:colored] ? Formatters::ColoredConsoleFormatter.new : Formatters::ConsoleFormatter.new)
     end
   end
