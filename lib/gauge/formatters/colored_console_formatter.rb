@@ -14,16 +14,12 @@ module Gauge
   private
 
       def colorize(message, severity)
-        message.colorize severity
-#        parts = message.split("'")
-#        parts.each_with_index do |str, index|
-#          parts[index] = parts[index].colorize(severity) if index % 2 == 0
-#          parts[index] = "'".colorize(severity) + parts[index].colorize(severity).bright + "'".colorize(severity) if index % 2 == 1
-#        end
-#        result = parts.join
-#        result.sub(/(- ok)/, '\1'.bright)
-#          .sub(/(- failed)/, '\1'.bright)
-        p message.scan(/(.*?)<b>(.*?)<\/b>(.*?)/)
+        parts = message.split(/<b>(.*?)<\/b>/)
+        parts.each_with_index do |str, index|
+          parts[index] = parts[index].colorize(severity)
+          parts[index] = parts[index].bright if index % 2 == 1
+        end
+        parts.join
       end
     end
   end

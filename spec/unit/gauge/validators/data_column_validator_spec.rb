@@ -74,8 +74,8 @@ module Gauge
           it "aggregates all errors in the errors collection" do
             validator.check schema, dba
             validator.should have(2).errors
-            validator.errors.should include(/but it must be '(.*?)nvarchar(.*?)'/)
-            validator.errors.should include(/must be defined as 'NULL'/)
+            validator.errors.should include(/but it must be '<b>nvarchar<\/b>'/)
+            validator.errors.should include(/must be defined as <b>NULL<\/b>/)
           end
         end
       end

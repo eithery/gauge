@@ -77,7 +77,7 @@ module Gauge
           it "displays successful validation result" do
             allow(validator).to receive(:log).and_call_original
             expect { validator.check(schema, dba) }
-              .to output(/check 'dbo\.master_accounts' data table - ok/i).to_stdout
+              .to output(/check 'dbo\.master_accounts' data table - (.*?)ok/i).to_stdout
           end
         end
 
@@ -91,7 +91,7 @@ module Gauge
           it "displays validation result total with errors" do
             allow(validator).to receive(:log).and_call_original
             expect { validator.check(schema, dba) }
-              .to output(/check 'dbo\.master_accounts' data table - failed/i).to_stdout
+              .to output(/check '(.*?)dbo\.master_accounts(.*?)' data table - (.*?)failed/i).to_stdout
             expect { validator.check(schema, dba) }
               .to output(/total 4 errors found/i).to_stdout
           end
@@ -99,8 +99,8 @@ module Gauge
           it "aggregates all errors in the errors collection" do
             validator.check schema, dba
             validator.should have(4).errors
-            validator.errors.should include(/but it must be '(.*)nvarchar(.*)'/)
-            validator.errors.should include(/must be defined as 'NULL'/)
+            validator.errors.should include(/but it must be '<b>nvarchar<\/b>'/)
+            validator.errors.should include(/must be defined as <b>NULL<\/b>/)
           end
         end
 

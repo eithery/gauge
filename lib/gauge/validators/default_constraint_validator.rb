@@ -49,22 +49,22 @@ module Gauge
 
 
       def missing_constraint_message(expected_value)
-        " - missing default value '#{expected_value}'."
+        " - missing default value '<b>#{expected_value}</b>'."
       end
 
 
       def constraint_mismatch_message(expected_value, actual_value)
-        " should have '#{expected_value}' as default value, but actually has '#{actual_value}'."
+        " should have '<b>#{expected_value}</b>' as default value, but actually has '<b>#{actual_value}</b>'."
       end
 
 
       def redundant_constraint_message(actual_value)
-        " should NOT have default value, but actually has '#{actual_value}'."
+        " should NOT have default value, but actually has '<b>#{actual_value}</b>'."
       end
 
 
       def column_header_message(column_schema)
-        "The column '#{column_schema.column_name}'"
+        "The column '<b>#{column_schema.column_name}</b>'"
       end
 
 

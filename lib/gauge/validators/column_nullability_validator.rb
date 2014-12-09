@@ -10,7 +10,7 @@ module Gauge
       validate do |column_schema, db_column|
         if column_schema.allow_null? != db_column.allow_null?
           should_be = column_schema.allow_null? ? 'NULL' : 'NOT NULL'
-          errors << "Data column '#{column_schema.column_name}' must be defined as '#{should_be}'."
+          errors << "Data column '<b>#{column_schema.column_name}</b>' must be defined as <b>#{should_be}</b>."
         end
       end
     end

@@ -21,7 +21,7 @@ module Gauge
         if errors.empty?
           ok "Check '#{table_schema.table_name}' data table - <b>ok</b>"
         else
-          error "Check '<b>#{table_schema.table_name}</b>' data table - failed"
+          error "Check '<b>#{table_schema.table_name}</b>' data table - <b>failed</b>"
           error "Errors:"
           errors.each { |msg| error "- #{msg}" }
           error "Total #{errors.count} errors found.\n"
