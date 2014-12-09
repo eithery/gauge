@@ -23,9 +23,9 @@ module Gauge
         else
           error "Check '<b>#{table_schema.table_name}</b>' data table - <b>failed</b>"
           error "Errors:"
-          errors.each { |msg| error "- #{msg}" }
+          errors.each { |msg| error "-- #{msg}" }
           error "Total #{errors.count} errors found."
-          puts
+          error ""
         end
       end
     end
