@@ -6,7 +6,9 @@ require 'gauge'
 
 class String
   def colorize(severity)
-    color color_for(severity)
+    displayed_color = color_for(severity)
+    return self.color displayed_color unless displayed_color.nil?
+    self
   end
 
 private

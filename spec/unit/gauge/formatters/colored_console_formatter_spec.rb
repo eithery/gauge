@@ -14,6 +14,10 @@ module Gauge
         it "displays the message in console" do
           expect { formatter.log 'error message', severity: :error }.to output(/error message/).to_stdout
         end
+
+        it "displays a non-colored message when severity is not specified" do
+          expect { formatter.log 'some message' }.to output(/some message/).to_stdout
+        end
       end
     end
   end

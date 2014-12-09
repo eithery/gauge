@@ -25,10 +25,10 @@ module Gauge
         validator = validator_for dbo
         schema = Schema::Repo.schema dbo
         unless schema.nil?
-          info "== #{schema.object_name} '#{schema.sql_name}' inspecting ".ljust(80, '=')
+          log "== #{schema.object_name} '#{schema.sql_name}' inspecting ".ljust(80, '=')
           DB::Adapter.session schema do |dba|
             validator.check(schema, dba) unless validator.nil?
-          info "== #{schema.object_name} '#{schema.sql_name}' inspected ".ljust(80, '=')
+          log "== #{schema.object_name} '#{schema.sql_name}' inspected ".ljust(80, '=')
           end
         else
           error "Database metadata for '#{dbo}' is not found."
