@@ -9,25 +9,26 @@ module Gauge
   class DatabaseInspector
     include Logger
 
-    def initialize(global_opts, options, args)
-      @args = args
+    def initialize(global_opts, options)
       DB::Connection.configure global_opts
     end
 
 
-    def check
-      if @args.empty?
+    def check(args)
+      if args.empty?
         error 'No database objects specified to be inspected.'
         return
       end
 
       Schema::Repo.load
-      @args.each do |dbo|
+      args.each do |dbo|
         validator = validator_for dbo
         schema = Schema::Repo.schema dbo
         unless schema.nil?
+          info "== #{schema.object_name} '#{schema.sql_name}' inspecting ".ljust(80, '=')
           DB::Adapter.session schema do |dba|
             validator.check(schema, dba) unless validator.nil?
+          info "== #{schema.object_name} '#{schema.sql_name}' inspected ".ljust(80, '=')
           end
         else
           error "Database metadata for '#{dbo}' is not found."

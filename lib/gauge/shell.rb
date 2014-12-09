@@ -15,8 +15,8 @@ module Gauge
     end
 
 
-    def check(*args)
-      DatabaseInspector.new(*args).check
+    def check(global_opts, opts, args)
+      DatabaseInspector.new(global_opts, opts).check args
     end
   end
 end
