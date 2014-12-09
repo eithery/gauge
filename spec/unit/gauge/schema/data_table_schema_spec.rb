@@ -258,7 +258,7 @@ module Gauge
   private
 
       def last_column_should_have_table_name
-        table_schema.columns.last.table_name.should == table_schema.local_name
+        table_schema.columns.last.table_name.should == table_schema.table_name
       end
 
 

@@ -64,11 +64,21 @@ module Gauge
 
       describe '#table_name' do
         context "when column schema is created by data table schema" do
-          before do
-            @table_schema = DataTableSchema.new(:customers)
-            @table_schema.col :account_number
+          context "in dbo SQL schema" do
+            before do
+              @table_schema = DataTableSchema.new(:customers)
+              @table_schema.col :account_number
+            end
+            specify { @table_schema.columns.last.table_name.should == 'dbo.customers' }
           end
-          specify { @table_schema.columns.last.table_name.should == 'customers' }
+
+          context "in custom SQL schema" do
+            before do
+              @table_schema = DataTableSchema.new(:customers, sql_schema: :ref)
+              @table_schema.col :account_number
+            end
+            specify { @table_schema.columns.last.table_name.should == 'ref.customers' }
+          end
         end
 
         context "when column schema is created explicitly" do

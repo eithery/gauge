@@ -28,7 +28,7 @@ module Sequel
 private
 
       def table(column_schema)
-        self.schema(column_schema.table_name.to_s)
+        self.schema(column_schema.table_name.split('.').last)
       end
     end
   end

@@ -61,7 +61,7 @@ module Gauge
 
       def col(*args, &block)
         column = DataColumnSchema.new(*args, &block)
-        column.in_table local_name
+        column.in_table table_name
         columns << column
       end
 
