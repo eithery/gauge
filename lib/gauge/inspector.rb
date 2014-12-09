@@ -31,7 +31,7 @@ module Gauge
             DB::Adapter.session schema do |dba|
               validator.check(schema, dba) unless validator.nil?
             end
-          rescue => e
+          rescue Sequel::DatabaseConnectionError => e
             error e.message
             validator.errors << e.message
           ensure
