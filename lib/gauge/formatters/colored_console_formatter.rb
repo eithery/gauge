@@ -14,12 +14,9 @@ module Gauge
   private
 
       def colorize(message, severity)
-        parts = message.split(/<b>(.*?)<\/b>/)
-        parts.each_with_index do |str, index|
-          parts[index] = parts[index].colorize(severity)
-          parts[index] = parts[index].bright if index % 2 == 1
-        end
-        parts.join
+        message.split(/<b>(.*?)<\/b>/).map.with_index do |str, index|
+          index.odd? ? str.colorize(severity).bright : str.colorize(severity)
+        end.join
       end
     end
   end
