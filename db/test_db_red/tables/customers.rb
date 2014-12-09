@@ -1,4 +1,4 @@
-table :customers do
+table :customers, sql_schema: :test do
   col :code, len: 10, required: true
   col :first_name
   col :middle_name
