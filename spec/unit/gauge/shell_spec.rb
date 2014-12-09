@@ -32,11 +32,11 @@ module Gauge
 
     describe '#check' do
       before do
-        @db_inspector = DatabaseInspector.new(global_options, options)
+        @db_inspector = Inspector.new(global_options, options)
         @db_inspector.stub(:error)
       end
       it "delegates call to DatabaseInspector instance" do
-        DatabaseInspector.should_receive(:new).with(global_options, options).and_return(@db_inspector)
+        Inspector.should_receive(:new).with(global_options, options).and_return(@db_inspector)
         shell.check(global_options, options, args)
       end
     end

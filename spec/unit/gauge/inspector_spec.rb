@@ -1,11 +1,11 @@
 # Eithery Lab., 2014.
-# Gauge::DatabaseInspector specs.
+# Gauge::Inspector specs.
 require 'spec_helper'
 
 module Gauge
-  describe DatabaseInspector do
+  describe Inspector do
     let(:inspector) do
-      inspector = DatabaseInspector.new({}, {})
+      inspector = Inspector.new({}, {})
       inspector.stub(:log)
       inspector
     end
@@ -15,7 +15,7 @@ module Gauge
       db_schema.tables[:dbo_primary_reps] = table_schema
     end
 
-    subject { DatabaseInspector.new({}, {}) }
+    subject { Inspector.new({}, {}) }
     it { should respond_to :check }
 
 
@@ -23,7 +23,7 @@ module Gauge
       it "performs configuring of connection settings" do
         global_options = { server: 'local\SQL2012', user: 'admin' }
         DB::Connection.should_receive(:configure).with(hash_including(global_options)).once
-        DatabaseInspector.new(global_options, {})
+        Inspector.new(global_options, {})
       end
     end
 

@@ -1,12 +1,12 @@
 # Eithery Lab., 2014.
-# Class Gauge::DatabaseInspector
+# Class Gauge::Inspector
 # Performs various validation checks of the specified database or
 # particular database objects structure against the predefined schema.
 require 'gauge'
 require_relative 'logger'
 
 module Gauge
-  class DatabaseInspector
+  class Inspector
     include Logger
 
     def initialize(global_opts, options)
