@@ -100,6 +100,8 @@ module Gauge
           specify { Repo.database?(:test_db).should be true }
           specify { Repo.database?('test_db').should be true }
           specify { Repo.database?('TestDB').should be true }
+          specify { Repo.database?('testdb').should be true }
+          specify { Repo.database?('TEST_DB').should be true }
         end
 
         context "when database with specified name is not found" do

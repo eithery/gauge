@@ -43,7 +43,8 @@ module Gauge
 
 
       def self.database?(dbo_name)
-        databases.include?(dbo_name.to_sym) || databases.values.any? { |db_schema| dbo_name == db_schema.sql_name }
+        databases.include?(dbo_name.downcase.to_sym) ||
+          databases.values.any? { |db_schema| dbo_name.downcase == db_schema.sql_name.downcase }
       end
 
 
@@ -86,7 +87,8 @@ private
 
 
       def self.database_schema(dbo_name)
-        databases[dbo_name.to_sym] || databases.values.select { |db_schema| dbo_name == db_schema.sql_name }.first
+        databases[dbo_name.downcase.to_sym] ||
+          databases.values.select { |db_schema| dbo_name.downcase == db_schema.sql_name.downcase }.first
       end
 
 
