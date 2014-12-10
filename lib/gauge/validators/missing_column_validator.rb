@@ -13,10 +13,10 @@ module Gauge
           missing_column column_schema.column_name
           result = false
 
-          build_sql(column_schema.table_name, "add_#{column_schema.column_name}_column") do
+          save_sql(column_schema.table_name, "add_#{column_schema.column_name}_column") do
             "alter table #{column_schema.table_name}\n" +
             "add [#{column_schema.column_name}] #{column_attributes(column_schema)};\n" +
-            "go\n"
+            "go"
           end
         end
         result
@@ -50,6 +50,7 @@ module Gauge
 
 
       def default_value(column)
+        ""
       end
     end
   end

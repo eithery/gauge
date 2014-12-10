@@ -9,7 +9,7 @@ module Gauge
       @sql_home = File.expand_path(File.dirname(__FILE__) + '/../../../sql/')
 
 
-      def self.build_sql(table_name, script_name, sql)
+      def self.save_sql(table_name, script_name, sql)
         File.open("#{table_home(table_name)}/#{script_name}.sql", 'w') { |f| f.puts sql }
       end
 
