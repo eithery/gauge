@@ -64,6 +64,11 @@ module Gauge
         end
       end
 
+
+      def build_sql(table_name, script_name)
+        SQL::Builder.build_sql table_name, script_name, yield
+      end
+
   private
 
       def validator_for(validator_name)
