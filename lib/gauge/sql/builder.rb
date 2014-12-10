@@ -22,8 +22,12 @@ module Gauge
 
 
       def self.table_home(table_schema)
-        tables_root = "#{sql_home}/tables"
+        database_folder = "#{sql_home}/#{table_schema.database_schema.sql_name}"
+        Dir.mkdir(database_folder) unless File.exists? database_folder
+
+        tables_root = "#{database_folder}/tables"
         Dir.mkdir(tables_root) unless File.exists? tables_root
+
         table_folder = "#{tables_root}/#{table_schema.table_name}"
         Dir.mkdir(table_folder) unless File.exists? table_folder
         table_folder

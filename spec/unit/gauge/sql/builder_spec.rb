@@ -6,7 +6,8 @@ module Gauge
   module SQL
     describe Builder do
       let(:sql_script) { "alter [dbo].[customer] alter column [customer_name] nvarchar(256) not null" }
-      let(:table_schema) { Schema::DataTableSchema.new(:customers) }
+      let(:database_schema) { double('database', sql_name: 'books_n_records') }
+      let(:table_schema) { Schema::DataTableSchema.new(:customers, database: database_schema) }
       subject { Builder }
 
       it { should respond_to :save_sql }
@@ -17,19 +18,25 @@ module Gauge
 
         it "creates SQL home folder if it does not exist" do
           File.stub(:exists? => false)
-          Dir.should_receive(:mkdir).with(/\/sql/).exactly(3).times
+          Dir.should_receive(:mkdir).with(/\/sql/).exactly(4).times
           save_sql
         end
 
-        it "creates tables folder of it does not exist" do
-          File.stub(:exists?).and_return(true, false, false)
-          Dir.should_receive(:mkdir).with(/\/sql\/tables/).exactly(2).times
+        it "creates database folder if it does not exist" do
+          File.stub(:exists?).and_return(true, false, false, false)
+          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records/).exactly(3).times
+          save_sql
+        end
+
+        it "creates tables folder if it does not exist" do
+          File.stub(:exists?).and_return(true, true, false, false)
+          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records\/tables/).exactly(2).times
           save_sql
         end
 
         it "creates the separate folder for the specified data table" do
-          File.stub(:exists?).and_return(true, true, false)
-          Dir.should_receive(:mkdir).with(/\/sql\/tables\/dbo.customers/).once
+          File.stub(:exists?).and_return(true, true, true, false)
+          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records\/tables\/dbo.customers/).once
           save_sql
         end
 
