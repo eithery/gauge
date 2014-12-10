@@ -19,6 +19,7 @@ module Gauge
 
       describe '#check' do
         before do
+          Logger.configure(colored: true)
           @db_column = double('db_column')
           @db_column.stub(:allow_null?).and_return(true, true, false, true, true, false)
           @db_column.stub(:data_type).and_return(:nvarchar, :nvarchar, :bigint, :nvarchar, :nvarchar, :bigint)
