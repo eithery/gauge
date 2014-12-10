@@ -6,6 +6,7 @@ module Gauge
   module SQL
     describe Builder do
       let(:sql_script) { "alter [dbo].[customer] alter column [customer_name] nvarchar(256) not null" }
+      let(:table_schema) { Schema::DataTableSchema.new(:customers) }
       subject { Builder }
 
       it { should respond_to :save_sql }
@@ -52,7 +53,7 @@ module Gauge
   private
   
       def save_sql
-        Builder.save_sql('dbo.customers', 'alter_customer_name_column', sql_script)
+        Builder.save_sql(table_schema, 'alter_customer_name_column', sql_script)
       end
     end
   end

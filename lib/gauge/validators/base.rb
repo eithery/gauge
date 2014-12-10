@@ -65,8 +65,8 @@ module Gauge
       end
 
 
-      def save_sql(table_name, script_name)
-        SQL::Builder.save_sql table_name, script_name, yield
+      def save_sql(table_schema, script_name)
+        SQL::Builder.save_sql table_schema, script_name, yield
       end
 
   private

@@ -85,10 +85,11 @@ module Gauge
 
       describe '#save_sql' do
         let(:sql_script) { "alter [dbo].[customers]..." }
+        before { @table_schema = double('table_schema') }
 
         it "delegates save SQL operation to SQL::Builder class" do
-          SQL::Builder.should_receive(:save_sql).with('dbo.customers', 'alter_first_name_column', sql_script)
-          validator.save_sql('dbo.customers', 'alter_first_name_column') { sql_script }
+          SQL::Builder.should_receive(:save_sql).with(@table_schema, 'alter_first_name_column', sql_script)
+          validator.save_sql(@table_schema, 'alter_first_name_column') { sql_script }
         end
       end
     end

@@ -48,7 +48,7 @@ module Gauge
 
           it "builds SQL script to create missing column" do
             generated_script = ""
-            validator.stub(:save_sql) do |table_name, script_name, &block|
+            validator.stub(:save_sql) do |table, script_name, &block|
               generated_script = block.call
             end
             validate
@@ -56,7 +56,7 @@ module Gauge
           end
 
           it "saves SQL script" do
-            validator.should_receive(:save_sql).with('dbo.accounts', 'add_account_number_column')
+            validator.should_receive(:save_sql).with(table_schema, 'add_account_number_column')
             validate
           end
         end        
