@@ -6,7 +6,8 @@ module Gauge
   module Validators
     describe DataColumnValidator do
       let(:validator) { DataColumnValidator.new }
-      let(:schema) { Schema::DataColumnSchema.new(:account_number) }
+      let(:accounts_schema) { Schema::DataTableSchema.new(:accounts) }
+      let(:schema) { Schema::DataColumnSchema.new(:account_number).in_table accounts_schema }
       let(:dba) { double('dba', column: @db_column, column_exists?: true) }
 
       it_behaves_like "any database object validator"

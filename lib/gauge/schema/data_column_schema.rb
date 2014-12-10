@@ -7,6 +7,8 @@ require 'gauge'
 module Gauge
   module Schema
     class DataColumnSchema
+      attr_reader :table
+
       DEFAULT_VARCHAR_LENGTH = 256
       DEFAULT_CHAR_LENGTH = 1
       DEFAULT_ISO_CODE_LENGTH = 2
@@ -27,11 +29,6 @@ module Gauge
         return col_name.to_s unless col_name.blank?
 
         raise "Data column name is not specified."
-      end
-
-
-      def table_name
-        @table_name.to_s
       end
 
 
@@ -86,8 +83,9 @@ module Gauge
       end
 
 
-      def in_table(table_name)
-        @table_name = table_name
+      def in_table(table_schema)
+        @table = table_schema
+        self
       end
 
 

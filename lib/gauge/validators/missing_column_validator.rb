@@ -13,8 +13,8 @@ module Gauge
           missing_column column_schema.column_name
           result = false
 
-          save_sql(column_schema.table_name, "add_#{column_schema.column_name}_column") do
-            "alter table #{column_schema.table_name}\n" +
+          save_sql(column_schema.table.table_name, "add_#{column_schema.column_name}_column") do
+            "alter table #{column_schema.table.table_name}\n" +
             "add [#{column_schema.column_name}] #{column_attributes(column_schema)};\n" +
             "go"
           end

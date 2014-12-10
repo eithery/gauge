@@ -197,7 +197,8 @@ module Gauge
       describe '#col' do
         before do
           table_schema
-          @column_schema = double('column_schema', in_table: 'master_accounts')
+          @column_schema = double('column_schema', table: table_schema)
+          @column_schema.stub(in_table: @column_schema)
         end
 
         it "creates new data column schema" do
@@ -214,13 +215,13 @@ module Gauge
 
         it "sets data table attribute for newly created data column" do
           table_schema.col :office_code, type: :string
-          last_column_should_have_table_name
+          last_column_should_have_table
 
           table_schema.col :ref => 'ref.risk_tolerance'
-          last_column_should_have_table_name
+          last_column_should_have_table
 
           table_schema.col :ref => :investment_time_horizon, schema: :ref
-          last_column_should_have_table_name
+          last_column_should_have_table
         end
       end
 
@@ -257,8 +258,8 @@ module Gauge
 
   private
 
-      def last_column_should_have_table_name
-        table_schema.columns.last.table_name.should == table_schema.table_name
+      def last_column_should_have_table
+        table_schema.columns.last.table.should be_equal(table_schema)
       end
 
 

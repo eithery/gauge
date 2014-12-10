@@ -6,11 +6,8 @@ module Gauge
   module Validators
     describe MissingColumnValidator do
       let(:validator) { MissingColumnValidator.new }
-      let(:schema) do
-        schema = Schema::DataColumnSchema.new(:account_number)
-        schema.in_table 'dbo.accounts'
-        schema
-      end
+      let(:table_schema) { Schema::DataTableSchema.new(:accounts) }
+      let(:schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:dba) { double('dba') }
 
       let(:sql_script) do

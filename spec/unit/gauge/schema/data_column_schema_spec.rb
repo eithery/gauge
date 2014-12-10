@@ -11,7 +11,7 @@ module Gauge
 
       it { should respond_to :column_name }
       it { should respond_to :column_type, :data_type }
-      it { should respond_to :table_name }
+      it { should respond_to :table }
       it { should respond_to :length, :char_column? }
       it { should respond_to :allow_null?, :default_value }
       it { should respond_to :to_key }
@@ -62,28 +62,18 @@ module Gauge
       end
 
 
-      describe '#table_name' do
+      describe '#table' do
         context "when column schema is created by data table schema" do
-          context "in dbo SQL schema" do
-            before do
-              @table_schema = DataTableSchema.new(:customers)
-              @table_schema.col :account_number
-            end
-            specify { @table_schema.columns.last.table_name.should == 'dbo.customers' }
+          before do
+            @table_schema = DataTableSchema.new(:customers, sql_schema: :ref)
+            @table_schema.col :account_number
           end
-
-          context "in custom SQL schema" do
-            before do
-              @table_schema = DataTableSchema.new(:customers, sql_schema: :ref)
-              @table_schema.col :account_number
-            end
-            specify { @table_schema.columns.last.table_name.should == 'ref.customers' }
-          end
+          specify { @table_schema.columns.last.table.should == @table_schema }
         end
 
         context "when column schema is created explicitly" do
           before { @column = DataColumnSchema.new(:account_number) }
-          specify { @column.table_name.should be_empty }
+          specify { @column.table.should be_nil }
         end
       end
 
@@ -325,9 +315,16 @@ module Gauge
 
 
       describe '#in_table' do
+        before { @table_schema = double('table_schema') }
+
         it "sets table name for the data column" do
-          column.in_table 'customers'
-          column.table_name.should == 'customers'
+          column.in_table @table_schema
+          column.table.should == @table_schema
+        end
+
+
+        it "returns self (column schema instance)" do
+          column.in_table(@table_schema).should be_equal(column)
         end
       end
 

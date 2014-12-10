@@ -6,15 +6,12 @@ module Sequel
   module TinyTDS
     describe Database do
       let(:database) { Database.new }
-      let(:column_schema) do
-        column = Gauge::Schema::DataColumnSchema.new(:account_number)
-        column.in_table 'customers'
-        column
-      end
-
-      let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column) }
+      let(:table_schema) { Gauge::Schema::DataTableSchema.new(:accounts, sql_schema: :bnr) }
+      let(:column_schema) { Gauge::Schema::DataColumnSchema.new(:account_number).in_table table_schema }
+      let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column).in_table table_schema }
 
       it { should respond_to :table_exists?, :column_exists?, :column }
+
 
       describe '#table_exists?' do
         before do
@@ -54,7 +51,7 @@ module Sequel
 
       describe '#column' do
         it "retrieves SQL metadata for the data table" do
-          database.should_receive(:schema).with('customers')
+          database.should_receive(:schema).with('accounts')
             .and_return([[:account_number, double('account_number')]])
           database.column column_schema
         end
