@@ -44,6 +44,16 @@ module Gauge
       end
 
 
+      def sql_type
+        return "#{data_type}(#{length})" if [:nvarchar, :nchar].include? data_type
+        return "decimal(18,2)" if column_type == :money
+        return "decimal(18,4)" if column_type == :percent
+        return "varbinary(max)" if column_type == :blob
+        return "binary(#{length})" if column_type == :binary
+        "#{data_type}"
+      end
+
+
       def data_type
         type_map[column_type]
       end
@@ -70,6 +80,14 @@ module Gauge
         return UID if default == :uid
         return sql_function(default) if function? default
         default
+      end
+
+
+      def sql_default_value
+        return nil if default_value.nil?
+        return "'#{default_value}'" if char_column?
+        return default_value == true ? 1 : 0 if bool?
+        default_value
       end
 
 

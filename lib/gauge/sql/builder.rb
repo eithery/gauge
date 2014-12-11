@@ -65,17 +65,7 @@ module Gauge
 
 
       def column_attributes(column)
-        attrs = "#{column_type(column)} #{nullability(column)}"
-        attrs += default_value(column) unless column.default_value.nil?
-        attrs
-      end
-
-
-      def column_type(column)
-        type = [column.data_type.to_s]
-        type << "(#{column.length})" if [:nvarchar, :nchar].include? column.data_type
-        type << "(18,2)" if column.column_type == :money
-        type.join
+        "#{column.sql_type} #{nullability(column)}#{default_value(column)}"
       end
 
 
@@ -85,7 +75,7 @@ module Gauge
 
 
       def default_value(column)
-        ""
+        " default #{column.sql_default_value}" unless column.sql_default_value.nil?
       end
     end
   end

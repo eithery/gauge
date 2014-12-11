@@ -6,10 +6,14 @@ module Gauge
   module SQL
     describe Builder do
       let(:builder) { Builder.new }
-      let(:sql_script) { "alter [dbo].[customer] alter column [customer_name] nvarchar(256) not null" }
       let(:database_schema) { double('database', sql_name: 'books_n_records') }
       let(:table_schema) { Schema::DataTableSchema.new(:customers, sql_schema: :bnr, database: database_schema) }
       let(:column_schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
+      let(:sql_script) do
+        "alter table [bnr].[customers]\n" +
+        "add [account_number] nvarchar(256) null;\n" +
+        "go"
+      end
 
       subject { builder }
 
@@ -46,39 +50,87 @@ module Gauge
 
         it "creates SQL script file with the specified name" do
           File.stub(:exists? => true)
-          File.should_receive(:open).with(/alter_customer_name_column.sql/, 'w')
+          File.should_receive(:open).with(/add_account_number_column.sql/, 'w')
           build_sql
         end
 
-        it "writes SQL script into the file" do
-          file = double('script_file')
-          File.stub(:exists? => true)
-          File.stub(:open) do |arg, arg2, &block|
-            block.call(file)
+        context "builds correct SQL script" do
+          before do
+            @file = double('script_file', puts: nil)
+            File.stub(:exists? => true)
+            File.stub(:open) do |arg, arg2, &block|
+              block.call(@file)
+            end
           end
-          file.should_receive(:puts).with(sql_script)
-          build_sql
+
+          it "and returns generated script" do
+            build_sql.should == sql_script
+          end
+
+          it "and saves SQL script into the file" do
+            @file.should_receive(:puts).with(sql_script)
+            build_sql
+          end
         end
       end
 
 
       describe '#alter_table' do
         it "creates ALTER TABLE SQL clause" do
-          builder.alter_table(table_schema).should == "alter table [bnr].[customers]"
+          builder.alter_table(table_schema).should == ["alter table [bnr].[customers]"]
         end
       end
 
 
       describe '#add_column' do
         it "creates SQL statement to add the new data column" do
-          builder.add_column(column_schema).should == "add [account_number] nvarchar(256) null;"
+          columns.each do |col|
+            schema = Schema::DataColumnSchema.new(col[0][0], col[0][1]).in_table table_schema
+            Builder.new.add_column(schema).should == ["add #{col[1]}"]
+          end
         end
       end
 
   private
   
       def build_sql
-        builder.build_sql(:add_column, column_schema) {}
+        builder.build_sql(:add_column, column_schema) do |b|
+          b.alter_table table_schema
+          b.add_column column_schema
+        end
+      end
+
+      def columns
+        [
+          [[:last_name, {}],                                        '[last_name] nvarchar(256) null;'],
+          [[:rep_code, {len: 10}],                                  '[rep_code] nvarchar(10) null;'],
+          [[:description, {len: :max}],                             '[description] nvarchar(max) null;'],
+          [[:total_amount, {type: :money}],                         '[total_amount] decimal(18,2) null;'],
+          [[:state_code, {type: :us_state}],                        '[state_code] nchar(2) null;'],
+          [[:country, {type: :country, required: true}],            '[country] nchar(2) not null;'],
+          [[:service_flag, {type: :char}],                          '[service_flag] nchar(1) null;'],
+          [[:account_id, {id: true}],                               '[account_id] bigint not null;'],
+          [[:status, {type: :short, required: true, default: -1}],  '[status] smallint not null default -1;'],
+          [[:total_years, {type: :int, required: true}],            '[total_years] int not null;'],
+          [[nil, {id: true}],                                       '[id] bigint not null;'],
+          [[nil, {:ref => :primary_reps}],                          '[primary_rep_id] bigint null;'],
+          [[:is_active, {required: true}],                          '[is_active] tinyint not null default 0;'],
+          [[:has_dependents, {required: true, default: true}],      '[has_dependents] tinyint not null default 1;'],
+          [[:created_at, {}],                                       '[created_at] datetime null;'],
+          [[:snapshot, {type: :xml}],                               '[snapshot] xml null;'],
+          [[:photo, {type: :blob, required: true}],                 '[photo] varbinary(max) not null;'],
+          [[:hash_code, {type: :binary, len: 10, required: true}],  '[hash_code] binary(10) not null;'],
+          [[:created_on, {required: true, default: {function: :getdate}}],
+            '[created_on] date not null default getdate();'],
+          [[:rate, {type: :percent, required: true, default: 100.01}],
+            '[rate] decimal(18,4) not null default 100.01;'],
+          [[:risk_tolerance, {type: :enum, required: true, default: 1}],
+            '[risk_tolerance] tinyint not null default 1;'],
+          [[:account_number, len: 20, required: true, default: 'A0001'],
+            "[account_number] nvarchar(20) not null default 'A0001';"],
+          [[:trade_id, {id: true, default: :uid}],
+            "[trade_id] bigint not null default abs(convert(bigint,convert(varbinary,newid())));"]
+        ]
       end
     end
   end

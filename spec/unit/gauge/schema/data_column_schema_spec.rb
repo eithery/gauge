@@ -10,10 +10,10 @@ module Gauge
       subject { column }
 
       it { should respond_to :column_name }
-      it { should respond_to :column_type, :data_type }
+      it { should respond_to :column_type, :data_type, :sql_type }
       it { should respond_to :table }
       it { should respond_to :length, :char_column? }
-      it { should respond_to :allow_null?, :default_value }
+      it { should respond_to :allow_null?, :default_value, :sql_default_value }
       it { should respond_to :to_key }
       it { should respond_to :id? }
       it { should respond_to :in_table }
@@ -164,6 +164,43 @@ module Gauge
       end
 
 
+      describe '#sql_type' do
+        context "for character types" do
+          specify do
+            DataColumnSchema.new(:account_number).sql_type.should == 'nvarchar(256)'
+            DataColumnSchema.new(:rep_code, len: 10).sql_type.should == 'nvarchar(10)'
+            DataColumnSchema.new(:service_flag, type: :char).sql_type.should == 'nchar(1)'
+          end
+        end
+
+        context "for money type" do
+          specify { DataColumnSchema.new(:total_amount, type: :money).sql_type.should == 'decimal(18,2)'}
+        end
+
+        context "for percent type" do
+          specify { DataColumnSchema.new(:bank_rate, type: :percent).sql_type.should == 'decimal(18,4)' }
+        end
+
+        context "for blob type" do
+          specify { DataColumnSchema.new(:image, type: :blob).sql_type.should == 'varbinary(max)' }
+        end
+
+        context "for binary type" do
+          specify { DataColumnSchema.new(:hash_code, type: :binary, len: 10).sql_type.should == 'binary(10)' }
+        end
+
+        context "for other types" do
+          specify { DataColumnSchema.new(:status, type: :enum).sql_type.should == 'tinyint' }
+          specify { DataColumnSchema.new(id: true).sql_type.should == 'bigint' }
+          specify { DataColumnSchema.new(:created_at).sql_type.should == 'datetime' }
+          specify { DataColumnSchema.new(:country, type: :country).sql_type.should == 'nchar(2)' }
+          specify { DataColumnSchema.new(:state_code, type: :us_state).sql_type.should == 'nchar(2)' }
+          specify { DataColumnSchema.new(:is_active).sql_type.should == 'tinyint'}
+          specify { DataColumnSchema.new(:snapshot, type: :xml).sql_type.should == 'xml'}
+        end
+      end
+
+
       describe '#char_column?' do
         context "when the column type is one of character types" do
           before do
@@ -290,6 +327,29 @@ module Gauge
             before { @column_schema = DataColumnSchema.new(:rep_code) }
             it { should be nil }
           end
+        end
+      end
+
+
+      describe '#sql_default_value' do
+        it "returns nil if no default value defined" do
+          DataColumnSchema.new(:trade_id, :ref => :trades).sql_default_value.should be nil
+        end
+
+        it "returns quoted default value for character types" do
+          DataColumnSchema.new(:rep_code, default: 'R001').sql_default_value.should == "'R001'"
+          DataColumnSchema.new(:country, type: :country, default: 'US').sql_default_value.should == "'US'"
+        end
+
+        it "returns 0 and 1 respectively for boolean types" do
+          DataColumnSchema.new(:is_active, default: true).sql_default_value.should == 1
+          DataColumnSchema.new(:is_active, required: true).sql_default_value.should == 0
+        end
+
+        it "returns unchanged default value for other column types" do
+          DataColumnSchema.new(:created_at, default: { function: :getdate }).sql_default_value.should == 'getdate()'
+          DataColumnSchema.new(:status, type: :enum, default: 2).sql_default_value.should == 2
+          DataColumnSchema.new(:total_amount, type: :money, default: 120.32).sql_default_value.should == 120.32
         end
       end
 
