@@ -83,13 +83,21 @@ module Gauge
       end
 
 
-      describe '#save_sql' do
-        let(:sql_script) { "alter [dbo].[customers]..." }
-        before { @table_schema = double('table_schema') }
+      describe '#build_sql' do
+        before do
+          @column_schema = double('column_schema')
+          @builder = double('sql_builder', build_sql: "alter table ...")
+          SQL::Builder.stub(:new => @builder)
+        end
 
-        it "delegates save SQL operation to SQL::Builder class" do
-          SQL::Builder.should_receive(:save_sql).with(@table_schema, 'alter_first_name_column', sql_script)
-          validator.save_sql(@table_schema, 'alter_first_name_column') { sql_script }
+        it "delegates build SQL operation to SQL::Builder class" do
+          @builder.should_receive(:build_sql).with(:add_column, @column_schema)
+          validator.build_sql(:add_column, @column_schema) {}
+        end
+
+        it "retains generated SQL script" do
+          validator.build_sql(:add_column, @column_schema) {}
+          validator.sql.should == 'alter table ...'
         end
       end
     end

@@ -11,12 +11,6 @@ module Gauge
       let(:schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:dba) { double('dba') }
 
-      let(:sql_script) do
-        "alter table dbo.accounts\n" +
-        "add [account_number] nvarchar(256) null;\n" +
-        "go"
-      end
-
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"
 
@@ -35,7 +29,7 @@ module Gauge
           it { should be true }
 
           it "does not generate SQL scripts" do
-            validator.should_not_receive(:save_sql)
+            validator.should_not_receive(:build_sql)
             validate
           end
         end
@@ -47,18 +41,17 @@ module Gauge
           it { should_append_error(/data column '(.*?)account_number(.*)' does (.*?)NOT(.*?) exist/i) }
           it { should be false }
 
-          it "builds SQL script to create missing column" do
-            generated_script = ""
-            validator.stub(:save_sql) do |table, script_name, &block|
-              generated_script = block.call
-            end
+          it "builds SQL script to add missing column" do
+            validator.should_receive(:build_sql).with(:add_column, schema)
             validate
-            generated_script.should == sql_script
           end
 
-          it "saves SQL script" do
-            validator.should_receive(:save_sql).with(table_schema, 'add_account_number_column')
+          it "generates correct SQL script" do
             validate
+            validator.sql.should ==
+              "alter table [dbo].[accounts]\n" +
+              "add [account_number] nvarchar(256) null;\n" +
+              "go"
           end
         end        
       end

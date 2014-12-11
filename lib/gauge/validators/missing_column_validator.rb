@@ -7,16 +7,15 @@ module Gauge
   module Validators
     class MissingColumnValidator < Validators::Base
 
-      validate do |column_schema, dba|
+      validate do |column, dba|
         result = true
-        unless dba.column_exists? column_schema
-          missing_column column_schema.column_name
+        unless dba.column_exists? column
+          missing_column column.column_name
           result = false
 
-          save_sql(column_schema.table, "add_#{column_schema.column_name}_column") do
-            "alter table #{column_schema.table.table_name}\n" +
-            "add [#{column_schema.column_name}] #{column_attributes(column_schema)};\n" +
-            "go"
+          build_sql(:add_column, column) do |sql|
+            sql.alter_table column.table
+            sql.add_column column
           end
         end
         result
@@ -26,31 +25,6 @@ module Gauge
 
       def missing_column(column_name)
         errors << "Data column '<b>#{column_name}</b>' does <b>NOT</b> exist."
-      end
-
-
-      def column_attributes(column)
-        attrs = "#{column_type(column)} #{nullability(column)}"
-        attrs += default_value(column) unless column.default_value.nil?
-        attrs
-      end
-
-
-      def column_type(column)
-        type = [column.data_type.to_s]
-        type << "(#{column.length})" if [:nvarchar, :nchar].include? column.data_type
-        type << "(18,2)" if column.column_type == :money
-        type.join
-      end
-
-
-      def nullability(column)
-        column.allow_null? ? 'null' : 'not null'
-      end
-
-
-      def default_value(column)
-        ""
       end
     end
   end

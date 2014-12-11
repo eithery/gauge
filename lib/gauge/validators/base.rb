@@ -7,6 +7,7 @@ module Gauge
   module Validators
     class Base
       include Logger
+      attr_reader :sql
 
       def self.check_all(validator_name, &block)
         define_method(:do_check_all) do |dbo_schema, dba|
@@ -65,8 +66,9 @@ module Gauge
       end
 
 
-      def save_sql(table_schema, script_name)
-        SQL::Builder.save_sql table_schema, script_name, yield
+      def build_sql(*args, &block)
+        builder = SQL::Builder.new
+        @sql = builder.build_sql(*args, &block)
       end
 
   private
