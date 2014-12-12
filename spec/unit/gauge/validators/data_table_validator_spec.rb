@@ -6,8 +6,9 @@ module Gauge
   module Validators
     describe DataTableValidator do
       let(:validator) { DataTableValidator.new }
+      let(:database) { double('database', sql_name: 'books_n_records') }
       let(:schema) do
-        Schema::DataTableSchema.new(:master_accounts) do
+        Schema::DataTableSchema.new(:master_accounts, database: database) do
           col :account_number
           col :rep_code
         end
@@ -19,6 +20,8 @@ module Gauge
 
       describe '#check' do
         before do
+          File.stub(:open)
+          Dir.stub(:mkdir)
           Logger.configure(colored: true)
           @db_column = double('db_column')
           @db_column.stub(:allow_null?).and_return(true, true, false, true, true, false)
