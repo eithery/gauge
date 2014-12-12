@@ -110,7 +110,7 @@ module Gauge
             before { stub_column_length 6 }
 
             it "builds SQL script to alter column" do
-              validator.should_receive(:build_sql).with(:alter_column, schema)
+              validator.should_receive(:build_alter_column_sql).with(schema)
               validate
             end
 

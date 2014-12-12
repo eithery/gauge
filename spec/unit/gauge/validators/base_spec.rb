@@ -100,6 +100,16 @@ module Gauge
           validator.sql.should == 'alter table ...'
         end
       end
+
+
+      describe '#build_alter_column_sql' do
+        before { @column_schema = double('column_schema') }
+
+        it "builds SQL script to alter column" do
+          validator.should_receive(:build_sql).with(:alter_column, @column_schema)
+          validator.build_alter_column_sql @column_schema
+        end
+      end
     end
   end
 end

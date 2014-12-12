@@ -60,7 +60,7 @@ module Gauge
             before { stub_db_column_nullability :null }
 
             it "builds SQL script to alter column" do
-              validator.should_receive(:build_sql).with(:alter_column, schema)
+              validator.should_receive(:build_alter_column_sql).with(schema)
               validate
             end
 

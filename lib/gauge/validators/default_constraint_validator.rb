@@ -18,13 +18,6 @@ module Gauge
           when :redundant_constraint
             errors << column_header_message(column_schema) + redundant_constraint_message(actual_default_value)
         end
-
-        if errors.any?
-          build_sql(:alter_column, column_schema) do |sql|
-            sql.alter_table column_schema.table
-            sql.alter_column column_schema
-          end
-        end
       end
 
   private

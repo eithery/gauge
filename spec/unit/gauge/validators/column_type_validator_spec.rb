@@ -27,7 +27,7 @@ module Gauge
           it { should_append_error(/data column '(.*?)total_amount(.*?)' is '(.*?)nvarchar(.*?)', but it must be '(.*?)decimal(.*?)'/i) }
 
           it "builds SQL script to alter column" do
-            validator.should_receive(:build_sql).with(:alter_column, schema)
+            validator.should_receive(:build_alter_column_sql).with(schema)
             validate
           end
 
