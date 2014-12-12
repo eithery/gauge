@@ -13,7 +13,11 @@ module Gauge
 
 
       describe '#validate' do
-        before { @db_column = double('db_column') }
+        before do
+          File.stub(:open)
+          Dir.stub(:mkdir)
+          @db_column = double('db_column')
+        end
 
         context "for enumeration (integer) columns" do
           before { @column_schema = Schema::DataColumnSchema.new(:account_status, required: true, default: 1) }

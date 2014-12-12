@@ -9,7 +9,6 @@ module Gauge
 
       validate do |column_schema, db_column|
         if column_schema.data_type != db_column.data_type
-
           build_sql(:alter_column, column_schema) do |sql|
             sql.alter_table column_schema.table
             sql.alter_column column_schema

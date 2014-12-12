@@ -6,6 +6,8 @@ module Gauge
   module Validators
     describe ColumnNullabilityValidator do
       let(:validator) { ColumnNullabilityValidator.new }
+      let(:database) { double('database_schema', sql_name: 'books_n_records') }
+      let(:table_schema) { Schema::DataTableSchema.new(:master_accounts, database: database) }
       let(:schema) { @column_schema }
 
       it { should respond_to :do_validate }
@@ -13,10 +15,15 @@ module Gauge
 
 
       describe '#validate' do
-        before { @db_column = double('db_column') }
+        before do
+          File.stub(:open)
+          Dir.stub(:mkdir)
+          @db_column = double('db_column')
+        end
 
         context "when data column is defined as NOT NULL in metadata" do
-          before { @column_schema = Schema::DataColumnSchema.new(:account_number, required: true) }
+          before { @column_schema = Schema::DataColumnSchema.new(:account_number, required: true)
+            .in_table table_schema }
 
           context "and actual data column in DB is nullable" do
             before { stub_db_column_nullability :null }
@@ -31,7 +38,7 @@ module Gauge
 
 
         context "when data column is defined as NULL in metadata" do
-          before { @column_schema = Schema::DataColumnSchema.new(:account_number) }
+          before { @column_schema = Schema::DataColumnSchema.new(:account_number).in_table table_schema }
 
           context "and actual data column in DB is nullable" do
             before { stub_db_column_nullability :null }
@@ -41,6 +48,38 @@ module Gauge
           context "and actual data column in DB is NOT nullable" do
             before { stub_db_column_nullability :not_null }
             it { should_append_error(/Data column '(.*?)account_number(.*?)' must be defined as (.*?)NULL(.*?)/) }
+          end
+        end
+
+
+        describe "SQL script generation" do
+          before { @column_schema = Schema::DataColumnSchema.new(:account_number, required: true)
+            .in_table table_schema }
+
+          context "when validation check is failed" do
+            before { stub_db_column_nullability :null }
+
+            it "builds SQL script to alter column" do
+              validator.should_receive(:build_sql).with(:alter_column, schema)
+              validate
+            end
+
+            it "generates correct SQL script" do
+              validate
+              validator.sql.should ==
+                "alter table [dbo].[master_accounts]\n" +
+                "alter column [account_number] nvarchar(256) not null;\n" +
+                "go"
+            end
+          end
+
+          context "when validation check is passed" do
+            before { stub_db_column_nullability :not_null }
+
+            it "does not generate SQL scripts" do
+              validator.should_not_receive(:build_sql)
+              validate
+            end
           end
         end
 
@@ -54,6 +93,11 @@ module Gauge
 
         def dba
           @db_column
+        end
+
+
+        def validate
+          validator.do_validate(schema, dba)
         end
       end
     end

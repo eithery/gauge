@@ -6,6 +6,8 @@ module Gauge
   module Validators
     describe ColumnLengthValidator do
       let(:validator) { ColumnLengthValidator.new }
+      let(:database) { double('database_schema', sql_name: 'books_n_records') }
+      let(:table_schema) { Schema::DataTableSchema.new(:primary_reps, database: database) }
       let(:schema) { @column_schema }
 
       it { should respond_to :do_validate }
@@ -13,47 +15,51 @@ module Gauge
 
 
       describe '#validate' do
-        before { @db_column = double('db_column') }
+        before do
+          File.stub(:open)
+          Dir.stub(:mkdir)
+          @db_column = double('db_column')
+        end
 
         context "for character columns" do
           context "with specified normal length" do
-            before { @column_schema = Schema::DataColumnSchema.new(:rep_code, len: 10) }
+            before { @column_schema = Schema::DataColumnSchema.new(:rep_code, len: 10).in_table table_schema }
 
-            context "in case of mismatched length" do
+            context "in the case of mismatched length" do
               before { stub_column_length 6 }
               it { should_append_error(mismatch_message :rep_code, 6, 10) }
             end
 
-            context "in case of equal length" do
+            context "in the case of equal length" do
               before { stub_column_length 10 }
               specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
             end
           end
 
           context "with specified MAX length" do
-            before { @column_schema = Schema::DataColumnSchema.new(:description, len: :max) }
+            before { @column_schema = Schema::DataColumnSchema.new(:description, len: :max).in_table table_schema }
 
-            context "in case of mismatched length" do
+            context "in the case of mismatched length" do
               before { stub_column_length 50 }
               it { should_append_error(mismatch_message :description, 50, :max) }
             end
 
-            context "in case of equal length" do
+            context "in the case of equal length" do
               before { stub_column_length -1 }
               specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
             end
           end
 
           context "with default length" do
-            before { @column_schema = Schema::DataColumnSchema.new(:last_name) }
+            before { @column_schema = Schema::DataColumnSchema.new(:last_name).in_table table_schema }
 
-            context "in case of mismatched length" do
+            context "in the case of mismatched length" do
               before { stub_column_length 50 }
               it { should_append_error(mismatch_message :last_name, 50,
                 Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH) }
             end
 
-            context "in case of equal length" do
+            context "in the case of equal length" do
               before do
                 stub_column_length Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH
               end
@@ -65,7 +71,7 @@ module Gauge
 
         context "for not character column types" do
           before do
-            @column_schema = Schema::DataColumnSchema.new(:total_amount, type: :money)
+            @column_schema = Schema::DataColumnSchema.new(:total_amount, type: :money).in_table table_schema
             stub_column_length nil
           end
           specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
@@ -73,14 +79,14 @@ module Gauge
 
 
         context "for ISO code columns (country, US state)" do
-          before { @column_schema = Schema::DataColumnSchema.new(:country_code, type: :country) }
+          before { @column_schema = Schema::DataColumnSchema.new(:country_code, type: :country).in_table table_schema }
 
-          context "in case of mismatched length" do
+          context "in the case of mismatched length" do
             before { stub_column_length 3 }
             it { should_append_error(mismatch_message :country_code, 3, 2) }
           end
 
-          context "in case of equal length" do
+          context "in the case of equal length" do
             before { stub_column_length 2 }
             specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
           end
@@ -90,9 +96,41 @@ module Gauge
         context "for computed columns" do
           before do
             @column_schema = Schema::DataColumnSchema.new(:source_code, computed: { function: :get_source_code })
+              .in_table table_schema
             stub_column_length 10
           end
           specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+        end
+
+
+        describe "SQL script generation" do
+          before { @column_schema = Schema::DataColumnSchema.new(:rep_code, len: 10).in_table table_schema }
+
+          context "when validation check is failed" do
+            before { stub_column_length 6 }
+
+            it "builds SQL script to alter column" do
+              validator.should_receive(:build_sql).with(:alter_column, schema)
+              validate
+            end
+
+            it "generates correct SQL script" do
+              validate
+              validator.sql.should ==
+                "alter table [dbo].[primary_reps]\n" +
+                "alter column [rep_code] nvarchar(10) null;\n" +
+                "go"
+            end
+          end
+
+          context "when validation check is passed" do
+            before { stub_column_length 10 }
+
+            it "does not generate SQL scripts" do
+              validator.should_not_receive(:build_sql)
+              validate
+            end
+          end
         end
       end
 
@@ -111,6 +149,11 @@ module Gauge
       def mismatch_message(column_name, actual_length, defined_length)
         /the length of column '(.*?)#{column_name}(.*?)' is '(.*?)#{actual_length}/i
         /(.*?)', but it must be '(.*?)#{defined_length}(.*?)' chars./i
+      end
+
+
+      def validate
+        validator.do_validate(schema, dba)
       end
     end
   end
