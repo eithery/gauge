@@ -18,7 +18,7 @@ module Gauge
       subject { builder }
 
       it { should respond_to :build_sql }
-      it { should respond_to :alter_table, :add_column }
+      it { should respond_to :alter_table, :add_column, :alter_column }
 
 
       describe '#build_sql' do
@@ -48,10 +48,28 @@ module Gauge
           build_sql
         end
 
-        it "creates SQL script file with the specified name" do
-          File.stub(:exists? => true)
-          File.should_receive(:open).with(/add_account_number_column.sql/, 'w')
-          build_sql
+        context "when creates SQL script file" do
+          before { File.stub(:exists? => true) }
+
+          context "creating the new column" do
+            it "generates the file name corresponding to add column operation" do
+              File.should_receive(:open).with(/add_account_number_column.sql/, 'w')
+              builder.build_sql(:add_column, column_schema) do |b|
+                b.alter_table table_schema
+                b.add_column column_schema
+              end
+            end
+          end
+
+          context "altering existing column" do
+            it "generates the file name corresponding to alter column operation" do
+              File.should_receive(:open).with(/alter_account_number_column.sql/, 'w')
+              builder.build_sql(:alter_column, column_schema) do |b|
+                b.alter_table table_schema
+                b.alter_column column_schema
+              end
+            end
+          end
         end
 
         context "builds correct SQL script" do
@@ -87,6 +105,16 @@ module Gauge
           columns.each do |col|
             schema = Schema::DataColumnSchema.new(col[0][0], col[0][1]).in_table table_schema
             Builder.new.add_column(schema).should == ["add #{col[1]}"]
+          end
+        end
+      end
+
+
+      describe '#alter_column' do
+        it "creates SQL statement altering existing data column" do
+          columns.each do |col|
+            schema = Schema::DataColumnSchema.new(col[0][0], col[0][1]).in_table table_schema
+            Builder.new.alter_column(schema).should == ["alter column #{col[1]}"]
           end
         end
       end

@@ -65,7 +65,15 @@ module Gauge
 
 
       def script_file(command, schema)
-        "add_#{schema.column_name}_column.sql"
+        "#{prefix(command)}_#{schema.column_name}_column.sql"
+      end
+
+
+      def prefix(command)
+        case command
+          when :add_column then 'add'
+          when :alter_column then 'alter'
+        end
       end
 
 
