@@ -38,6 +38,22 @@ module Gauge
         @sql << "alter column [#{column.column_name}] #{column.sql_attributes};"
       end
 
+
+      def drop_check_constraints(table)
+      end
+
+
+      def add_check_constraints(table)
+      end
+
+
+      def drop_default_constraint(column)
+      end
+
+
+      def add_default_constraint(column)
+      end
+
   private
 
       def self.sql_home

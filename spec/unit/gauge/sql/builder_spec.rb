@@ -19,6 +19,8 @@ module Gauge
 
       it { should respond_to :build_sql }
       it { should respond_to :alter_table, :add_column, :alter_column }
+      it { should respond_to :drop_check_constraints, :add_check_constraints }
+      it { should respond_to :drop_default_constraint, :add_default_constraint }
 
 
       describe '#build_sql' do
