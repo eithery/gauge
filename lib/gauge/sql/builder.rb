@@ -33,6 +33,11 @@ module Gauge
         @sql << "add [#{column_schema.column_name}] #{column_attributes(column_schema)};"
       end
 
+
+      def alter_column(column_schema)
+        @sql << "alter column [#{column_schema.column_name}] #{column_attributes(column_schema)};"
+      end
+
   private
 
       def self.sql_home
