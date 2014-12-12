@@ -71,6 +71,14 @@ module Gauge
         @sql = builder.build_sql(*args, &block)
       end
 
+
+      def build_alter_column_sql(column_schema)
+        build_sql(:alter_column, column_schema) do |sql|
+          sql.alter_table column_schema.table
+          sql.alter_column column_schema
+        end
+      end
+
   private
 
       def validator_for(validator_name)
