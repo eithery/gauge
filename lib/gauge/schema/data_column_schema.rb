@@ -91,6 +91,11 @@ module Gauge
       end
 
 
+      def sql_attributes
+        "#{sql_type} #{sql_nullability}"
+      end
+
+
       def to_key
         column_name.downcase.to_sym
       end
@@ -157,6 +162,11 @@ module Gauge
 
       def string?
         @options.include? :len
+      end
+
+
+      def sql_nullability
+        allow_null? ? 'null' : 'not null'
       end
 
 

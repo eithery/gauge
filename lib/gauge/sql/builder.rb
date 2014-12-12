@@ -29,13 +29,13 @@ module Gauge
       end
 
 
-      def add_column(column_schema)
-        @sql << "add [#{column_schema.column_name}] #{column_attributes(column_schema)};"
+      def add_column(column)
+        @sql << "add [#{column.column_name}] #{column.sql_attributes}#{default_value(column)};"
       end
 
 
-      def alter_column(column_schema)
-        @sql << "alter column [#{column_schema.column_name}] #{column_attributes(column_schema)};"
+      def alter_column(column)
+        @sql << "alter column [#{column.column_name}] #{column.sql_attributes};"
       end
 
   private
@@ -74,16 +74,6 @@ module Gauge
           when :add_column then 'add'
           when :alter_column then 'alter'
         end
-      end
-
-
-      def column_attributes(column)
-        "#{column.sql_type} #{nullability(column)}#{default_value(column)}"
-      end
-
-
-      def nullability(column)
-        column.allow_null? ? 'null' : 'not null'
       end
 
 

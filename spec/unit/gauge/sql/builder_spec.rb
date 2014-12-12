@@ -102,7 +102,7 @@ module Gauge
 
       describe '#add_column' do
         it "creates SQL statement to add the new data column" do
-          columns.each do |col|
+          (columns + columns_with_defaults).each do |col|
             schema = Schema::DataColumnSchema.new(col[0][0], col[0][1]).in_table table_schema
             Builder.new.add_column(schema).should == ["add #{col[1]}"]
           end
@@ -128,26 +128,38 @@ module Gauge
         end
       end
 
+
       def columns
         [
           [[:last_name, {}],                                        '[last_name] nvarchar(256) null;'],
           [[:rep_code, {len: 10}],                                  '[rep_code] nvarchar(10) null;'],
           [[:description, {len: :max}],                             '[description] nvarchar(max) null;'],
           [[:total_amount, {type: :money}],                         '[total_amount] decimal(18,2) null;'],
+          [[:rate, {type: :percent, required: true}],               '[rate] decimal(18,4) not null;'],
           [[:state_code, {type: :us_state}],                        '[state_code] nchar(2) null;'],
           [[:country, {type: :country, required: true}],            '[country] nchar(2) not null;'],
           [[:service_flag, {type: :char}],                          '[service_flag] nchar(1) null;'],
           [[:account_id, {id: true}],                               '[account_id] bigint not null;'],
-          [[:status, {type: :short, required: true, default: -1}],  '[status] smallint not null default -1;'],
           [[:total_years, {type: :int, required: true}],            '[total_years] int not null;'],
           [[nil, {id: true}],                                       '[id] bigint not null;'],
           [[nil, {:ref => :primary_reps}],                          '[primary_rep_id] bigint null;'],
-          [[:is_active, {required: true}],                          '[is_active] tinyint not null default 0;'],
-          [[:has_dependents, {required: true, default: true}],      '[has_dependents] tinyint not null default 1;'],
           [[:created_at, {}],                                       '[created_at] datetime null;'],
+          [[:created_on, {required: true}],                         '[created_on] date not null;'],
           [[:snapshot, {type: :xml}],                               '[snapshot] xml null;'],
           [[:photo, {type: :blob, required: true}],                 '[photo] varbinary(max) not null;'],
           [[:hash_code, {type: :binary, len: 10, required: true}],  '[hash_code] binary(10) not null;'],
+          [[:is_active, {}],                                        '[is_active] tinyint null;'],
+          [[:status, {type: :short, required: true}],               '[status] smallint not null;'],
+          [[:risk_tolerance, {type: :enum, required: true}],        '[risk_tolerance] tinyint not null;']
+        ]
+      end
+
+
+      def columns_with_defaults
+        [
+          [[:is_active, {required: true}], '[is_active] tinyint not null default 0;'],
+          [[:status, {type: :short, required: true, default: -1}], '[status] smallint not null default -1;'],
+          [[:has_dependents, {required: true, default: true}], '[has_dependents] tinyint not null default 1;'],
           [[:created_on, {required: true, default: {function: :getdate}}],
             '[created_on] date not null default getdate();'],
           [[:rate, {type: :percent, required: true, default: 100.01}],

@@ -19,6 +19,7 @@ module Gauge
       it { should respond_to :in_table }
       it { should respond_to :computed? }
       it { should respond_to :bool? }
+      it { should respond_to :sql_attributes }
 
 
       describe '#initialize' do
@@ -354,6 +355,16 @@ module Gauge
       end
 
 
+      describe '#sql_attributes' do
+        it "returns column type, length, and nullability as part of SQL clause" do
+          columns.each do |col|
+            column = Schema::DataColumnSchema.new(col[0][0], col[0][1])
+            column.sql_attributes.should == "#{col[1]}"
+          end
+        end
+      end
+
+
       describe '#to_key' do
         it "returns column name converted to symbol" do
           column.to_key.should == :account_number
@@ -425,6 +436,33 @@ module Gauge
         it "returns false for all other column types" do
           @other_columns.each { |col| col.bool?.should be false }
         end
+      end
+
+  private
+
+      def columns
+        [
+          [[:last_name, {}],                                        'nvarchar(256) null'],
+          [[:rep_code, {len: 10}],                                  'nvarchar(10) null'],
+          [[:description, {len: :max}],                             'nvarchar(max) null'],
+          [[:total_amount, {type: :money}],                         'decimal(18,2) null'],
+          [[:rate, {type: :percent, required: true}],               'decimal(18,4) not null'],
+          [[:state_code, {type: :us_state}],                        'nchar(2) null'],
+          [[:country, {type: :country, required: true}],            'nchar(2) not null'],
+          [[:service_flag, {type: :char}],                          'nchar(1) null'],
+          [[:account_id, {id: true}],                               'bigint not null'],
+          [[:total_years, {type: :int, required: true}],            'int not null'],
+          [[nil, {id: true}],                                       'bigint not null'],
+          [[nil, {:ref => :primary_reps}],                          'bigint null'],
+          [[:created_at, {}],                                       'datetime null'],
+          [[:created_on, {required: true}],                         'date not null'],
+          [[:snapshot, {type: :xml}],                               'xml null'],
+          [[:photo, {type: :blob, required: true}],                 'varbinary(max) not null'],
+          [[:hash_code, {type: :binary, len: 10, required: true}],  'binary(10) not null'],
+          [[:is_active, {}],                                        'tinyint null'],
+          [[:status, {type: :short, required: true}],               'smallint not null'],
+          [[:risk_tolerance, {type: :enum, required: true}],        'tinyint not null']
+        ]
       end
     end
   end
