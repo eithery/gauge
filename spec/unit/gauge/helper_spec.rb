@@ -10,8 +10,18 @@ module Gauge
       it "displays name, version and copyright info" do
         helper.should_receive(:info).with(/^Database Gauge. Version \d\.\d\.\d/)
         helper.should_receive(:info).with(/Copyright \(C\) M&O Systems, Inc\., 2014\./)
-        helper.should_receive(:info).with(/usage: gauge \[\-\-version\|\-v\] \[\-\-help\|\-h\] <command> \[<args>\]/)
+        helper.should_receive(:info).with(/usage: gauge \[\-v\|\-\-version\] \[\-h\|\-\-help\]/)
+        helper.should_receive(:info).with(/<command> \[<args>\] \[<command options>\]/)
         helper.application_info
+      end
+    end
+
+
+    describe '#initialize' do
+      it "performs configuring logging infrastructure" do
+        global_options = { colored: true }
+        Logger.should_receive(:configure).with(global_options)
+        Helper.new(global_options)
       end
     end
 

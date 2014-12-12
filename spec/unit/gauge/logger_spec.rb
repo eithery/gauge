@@ -4,7 +4,11 @@ require 'spec_helper'
 
 module Gauge
   describe Logger do
-    let(:logger) { Helper.new }
+    class LoggerMock
+      include Logger
+    end
+
+    let(:logger) { LoggerMock.new }
     let(:formatter) do
         formatter = double('formatter')
         Logger.stub(:formatters).and_return([formatter, formatter, formatter])

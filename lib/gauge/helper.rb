@@ -10,6 +10,7 @@ module Gauge
 
     def initialize(global_opts={})
       @global_opts = global_opts
+      Logger.configure global_opts
     end
 
 
@@ -28,7 +29,8 @@ module Gauge
     def full_info(extended)
       info "Database Gauge. Version #{VERSION}"
       info "Copyright (C) M&O Systems, Inc., 2014.\n"
-      info "usage: gauge [--version|-v] [--help|-h] <command> [<args>]"
+      info "usage: gauge [-v|--version] [-h|--help] [-s|--server] [-u|--user] [-p|--password]"
+      info "             [--[no-]colored] <command> [<args>] [<command options>]"
       if extended
         info "\nThe most commonly used gauge commands are:"
         info "   check    Checks database structure against the metadata"
