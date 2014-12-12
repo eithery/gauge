@@ -11,6 +11,7 @@ module Sequel
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column).in_table table_schema }
 
       it { should respond_to :table_exists?, :column_exists?, :column }
+      it { should respond_to :check_constraints, :default_constraint }
 
 
       describe '#table_exists?' do

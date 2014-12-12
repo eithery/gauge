@@ -25,6 +25,16 @@ module Sequel
         Gauge::DB::DataColumn.new(column)
       end
 
+
+      def check_constraints(table_schema)
+        ['ck_1']
+      end
+
+
+      def default_constraint(column_schema)
+        "dc_2"
+      end
+
 private
 
       def table(column_schema)

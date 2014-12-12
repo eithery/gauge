@@ -24,8 +24,8 @@ module Gauge
       end
 
 
-      def alter_table(table_schema)
-        @sql << "alter table [#{table_schema.sql_schema}].[#{table_schema.local_name}]"
+      def alter_table(table)
+        @sql << "alter table [#{table.sql_schema}].[#{table.local_name}]"
       end
 
 
@@ -40,6 +40,10 @@ module Gauge
 
 
       def drop_check_constraints(table)
+        DB::Adapter.current.check_constraints(table).each do |cc|
+          alter_table table
+          @sql << "drop constraint #{cc};\n"
+        end
       end
 
 
@@ -62,15 +66,15 @@ module Gauge
       end
 
 
-      def save_sql(table_schema, script_name, sql)
-        File.open("#{table_home(table_schema)}/#{script_name}", 'w') { |f| f.puts sql }
+      def save_sql(table, script_name, sql)
+        File.open("#{table_home(table)}/#{script_name}", 'w') { |f| f.puts sql }
       end
 
 
-      def table_home(table_schema)
-        database = create_folder "#{Builder.sql_home}/#{table_schema.database_schema.sql_name}"
+      def table_home(table)
+        database = create_folder "#{Builder.sql_home}/#{table.database_schema.sql_name}"
         tables = create_folder "#{database}/tables"
-        create_folder "#{tables}/#{table_schema.table_name}"
+        create_folder "#{tables}/#{table.table_name}"
       end
 
 
