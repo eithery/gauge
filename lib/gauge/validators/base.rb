@@ -7,7 +7,7 @@ module Gauge
   module Validators
     class Base
       include Logger
-      attr_reader :sql
+      include SQL::Provider
 
       def self.check_all(validator_name, &block)
         define_method(:do_check_all) do |dbo_schema, dba|
@@ -62,26 +62,6 @@ module Gauge
         if result
           do_check_all(dbo_schema, dba) if respond_to? :do_check_all
           do_check(dbo_schema, dba) if respond_to? :do_check
-        end
-      end
-
-
-      def build_sql(*args, &block)
-        builder = SQL::Builder.new
-        @sql = builder.build_sql(*args, &block)
-      end
-
-
-      def build_alter_column_sql(column_schema)
-        build_sql(:alter_column, column_schema) do |sql|
-          sql.drop_check_constraints column_schema.table
-          sql.drop_default_constraint column_schema
-
-          sql.alter_table column_schema.table
-          sql.alter_column column_schema
-
-          sql.add_default_constraint column_schema
-          sql.add_check_constraints column_schema.table
         end
       end
 

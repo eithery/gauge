@@ -1,5 +1,5 @@
 # Eithery Lab., 2014.
-# Class Gauge::Logger
+# Module Gauge::Logger
 # Provides logging functionality using the set of various formatters.
 
 module Gauge

@@ -40,10 +40,10 @@ module Gauge
 
 
       def drop_check_constraints(table)
-        DB::Adapter.current.check_constraints(table).each do |cc|
-          alter_table table
-          @sql << "drop constraint #{cc};\n"
-        end
+#        DB::Adapter.database.check_constraints(table).each do |cc|
+#          alter_table table
+#          @sql << "drop constraint #{cc};\n"
+#        end
       end
 
 
