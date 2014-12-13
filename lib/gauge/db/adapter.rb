@@ -7,21 +7,19 @@ module Gauge
   module DB
     class Adapter
       class << self
-        attr_accessor :current
+        attr_accessor :database
       end
 
-      @current = nil
+      @database = nil
 
       def self.session(schema)
         Sequel.tinytds(dataserver: Connection.server, database: schema.database_schema.sql_name,
           user: Connection.user, password: Connection.password) do |dba|
           dba.test_connection
-          begin
-            @current = dba
-            yield dba
-          ensure
-            @current = nil
-          end
+
+          self.database = dba
+          yield dba
+          self.database = nil
         end
       end
     end

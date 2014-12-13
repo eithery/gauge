@@ -64,7 +64,17 @@ module Sequel
         end
       end
 
-private
+
+      describe '#check_constraints' do
+        it "returns all check constraints for data table"
+      end
+
+
+      describe '#default_constraint' do
+        it "returns default constraint for data column"
+      end
+
+  private
 
       def stub_table_local_name(name)
         @table_schema.stub(:local_name).and_return(name)
