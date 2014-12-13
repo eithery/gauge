@@ -103,11 +103,41 @@ module Gauge
 
 
       describe '#build_alter_column_sql' do
-        before { @column_schema = double('column_schema') }
+        before do
+          @table = Schema::DataTableSchema.new(:primary_reps)
+          @column = Schema::DataColumnSchema.new(:rep_code).in_table @table
+        end
 
         it "builds SQL script to alter column" do
-          validator.should_receive(:build_sql).with(:alter_column, @column_schema)
-          validator.build_alter_column_sql @column_schema
+          validator.should_receive(:build_sql).with(:alter_column, @column)
+          validator.build_alter_column_sql @column
+        end
+
+        context "during SQL script generation" do
+          before do
+            @sql = double('sql_builder')
+            validator.stub(:build_sql) do |*args, &block|
+              block.call @sql
+            end
+          end
+
+          it "builds SQL script to drop and recreate check constraints" do
+            @sql.as_null_object.should_receive(:drop_check_constraints).with(@table)
+            @sql.as_null_object.should_receive(:add_check_constraints).with(@table)
+            validator.build_alter_column_sql @column
+          end
+
+          it "builds SQL script to drop and recreate default constraint" do
+            @sql.as_null_object.should_receive(:drop_default_constraint).with(@column)
+            @sql.as_null_object.should_receive(:add_default_constraint).with(@column)
+            validator.build_alter_column_sql @column
+          end
+
+          it "builds alter column SQL clause" do
+            @sql.as_null_object.should_receive(:alter_table).with(@table)
+            @sql.as_null_object.should_receive(:alter_column).with(@column)
+            validator.build_alter_column_sql @column
+          end
         end
       end
     end
