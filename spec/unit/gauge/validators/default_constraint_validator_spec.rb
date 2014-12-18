@@ -14,8 +14,7 @@ module Gauge
 
       describe '#validate' do
         before do
-          File.stub(:open)
-          Dir.stub(:mkdir)
+          stub_file_system
           @db_column = double('db_column')
         end
 

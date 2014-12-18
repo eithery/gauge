@@ -17,10 +17,7 @@ module Gauge
 
       describe '#validate' do
         subject { validate }
-        before do
-          File.stub(:open)
-          Dir.stub(:mkdir)
-        end
+        before { stub_file_system }
 
         context "when data column exists in the table" do
           before { dba.stub(:column_exists?).and_return(true) }

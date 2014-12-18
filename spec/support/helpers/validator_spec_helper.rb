@@ -20,6 +20,12 @@ module Gauge
       end
 
 
+      def stub_file_system
+        Dir.stub(:mkdir)
+        File.stub(:open)
+      end
+
+
       def should_append_error(error_message)
         validator.errors.should_receive(:<<).with(error_message)
         validator.do_validate(schema, dba)

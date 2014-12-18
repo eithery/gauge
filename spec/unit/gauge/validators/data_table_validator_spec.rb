@@ -20,8 +20,7 @@ module Gauge
 
       describe '#check' do
         before do
-          File.stub(:open)
-          Dir.stub(:mkdir)
+          stub_file_system
           Logger.configure(colored: true)
           @db_column = double('db_column')
           @db_column.stub(:allow_null?).and_return(true, true, false, true, true, false)
