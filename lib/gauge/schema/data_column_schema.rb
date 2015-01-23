@@ -189,7 +189,8 @@ module Gauge
           enum: :tinyint,
           xml: :xml,
           blob: :varbinary,
-          binary: :binary
+          binary: :binary,
+          guid: :uniqueidentifier
         }
       end
 
