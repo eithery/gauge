@@ -161,6 +161,7 @@ module Gauge
           [:xml].should be_converted_to(:xml)
           [:blob].should be_converted_to(:varbinary)
           [:binary].should be_converted_to(:binary)
+          [:guid].should be_converted_to(:uniqueidentifier)
         end
       end
 
@@ -196,8 +197,9 @@ module Gauge
           specify { DataColumnSchema.new(:created_at).sql_type.should == 'datetime' }
           specify { DataColumnSchema.new(:country, type: :country).sql_type.should == 'nchar(2)' }
           specify { DataColumnSchema.new(:state_code, type: :us_state).sql_type.should == 'nchar(2)' }
-          specify { DataColumnSchema.new(:is_active).sql_type.should == 'tinyint'}
-          specify { DataColumnSchema.new(:snapshot, type: :xml).sql_type.should == 'xml'}
+          specify { DataColumnSchema.new(:is_active).sql_type.should == 'tinyint' }
+          specify { DataColumnSchema.new(:snapshot, type: :xml).sql_type.should == 'xml' }
+          specify { DataColumnSchema.new(:trageGuid, type: :guid).sql_type.should == 'uniqueidentifier' }
         end
       end
 
@@ -461,7 +463,8 @@ module Gauge
           [[:hash_code, {type: :binary, len: 10, required: true}],  'binary(10) not null'],
           [[:is_active, {}],                                        'tinyint null'],
           [[:status, {type: :short, required: true}],               'smallint not null'],
-          [[:risk_tolerance, {type: :enum, required: true}],        'tinyint not null']
+          [[:risk_tolerance, {type: :enum, required: true}],        'tinyint not null'],
+          [[:trade_guid, {type: :guid}],                            'uniqueidentifier null']
         ]
       end
     end
