@@ -48,6 +48,17 @@ module Gauge
         context "when data table exists in the database" do
           before { dba.stub(:table_exists?).and_return(true) }
 
+          it "created validator to check primary key contraint" do
+            stub_primary_key_validator = double('primary_key_validator', do_validate: false, errors: [])
+            PrimaryKeyValidator.should_receive(:new).once.and_return(stub_primary_key_validator)
+            validator.check schema, dba
+          end
+
+          it "performs validation check for primary key constraint" do
+            stub_validator(PrimaryKeyValidator).should_receive(:do_validate).with(schema, dba).once
+            validator.check schema, dba
+          end
+
           it "creates validator to check data columns" do
             stub_column_validator = double('data_column_validator', check: true, errors: [])
             DataColumnValidator.should_receive(:new).once.and_return(stub_column_validator)
@@ -67,6 +78,11 @@ module Gauge
 
           it "does not perform data column validation check" do
             stub_validator(DataColumnValidator).should_not_receive(:check)
+            validator.check schema, dba
+          end
+
+          it "does not perform primary key constraint validation check" do
+            stub_validator(PrimaryKeyValidator).should_not_receive(:do_validate)
             validator.check schema, dba
           end
         end

@@ -1,4 +1,4 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Validators::DataTableValidator
 # Checks the specified data table structure against the predefined schema.
 require 'gauge'
@@ -7,6 +7,7 @@ module Gauge
   module Validators
     class DataTableValidator < Validators::Base
       check_before :missing_table
+      check :primary_key
       check_all(:data_columns) { |table_schema| table_schema.columns }
 
       def check(table_schema, dba)
