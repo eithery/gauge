@@ -14,8 +14,8 @@ module Gauge
       subject { foreign_key }
 
       it { should respond_to :name }
-      it { should respond_to :table, :referenced_table }
-      it { should respond_to :columns, :referenced_columns }
+      it { should respond_to :table, :ref_table }
+      it { should respond_to :columns, :ref_columns }
 
 
       describe '#name' do
@@ -42,7 +42,7 @@ module Gauge
       end
 
 
-      describe '#referenced_table' do
+      describe '#ref_table' do
         it "equals to the table name passed in the initializer in various forms" do
           tables = {
             :dbo_primary_reps => :dbo_primary_reps,
@@ -53,7 +53,7 @@ module Gauge
           }
           .each do |table_name, actual_table|
             foreign_key = ForeignKey.new('fk_trades_primary_reps', :direct_trades, :rep_code, table_name, :code)
-            foreign_key.referenced_table.should == actual_table
+            foreign_key.ref_table.should == actual_table
           end
         end
       end
@@ -74,16 +74,16 @@ module Gauge
       end
 
 
-      describe '#referenced_columns' do
+      describe '#ref_columns' do
         context "for regular foreign keys" do
-          specify { foreign_key.referenced_columns.should include(:code) }
+          specify { foreign_key.ref_columns.should include(:code) }
         end
 
         context "for composite foreign keys" do
           it "includes all data columns specified as a composite key in various forms" do
-            composite_foreign_key.referenced_columns.count.should == 2
-            composite_foreign_key.referenced_columns.should include(:number)
-            composite_foreign_key.referenced_columns.should include(:source)
+            composite_foreign_key.ref_columns.count.should == 2
+            composite_foreign_key.ref_columns.should include(:number)
+            composite_foreign_key.ref_columns.should include(:source)
           end
         end
       end
