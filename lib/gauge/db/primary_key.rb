@@ -10,15 +10,10 @@ module Gauge
       attr_reader :name, :table, :columns
 
       def initialize(name, table, columns, options={})
-        @name = name
-        @table = table
-        @columns = columns
-        @clustered = clustered
-      end
-
-
-      def columns
-        @columns ||= []
+        @name = name.downcase
+        @table = table.to_s.gsub('.', '_').downcase.to_sym
+        @columns = [columns].flatten.map { |col| col.downcase.to_sym }
+        @clustered = options[:clustered] != false
       end
 
 
