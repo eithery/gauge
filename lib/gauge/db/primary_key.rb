@@ -1,6 +1,6 @@
 # Eithery Lab., 2015.
 # Class Gauge::DB::PrimaryKey
-# Represents the actual primary key constraint.
+# Represents the primary key constraint.
 
 require 'gauge'
 
