@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Validators::ValidatorSpecHelper
 # Provides the set of helper methods for Validator specs.
+
 module Gauge
   module Validators
     module ValidatorSpecHelper

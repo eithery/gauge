@@ -2,58 +2,25 @@
 # Class Gauge::DB::Constraints::UniqueConstraint specs.
 
 require 'spec_helper'
+require_relative 'constraint_spec_helper'
 
 module Gauge
   module DB
     module Constraints
+      include ConstraintSpecHelper
+
       describe UniqueConstraint do
+        let(:constraint_name) { 'uc_primary_reps' }
         let(:constraint) { UniqueConstraint.new('UC_Primary_Reps', :dbo_primary_reps, :rep_code) }
-        subject { constraint }
-
-        it { should respond_to :name }
-        it { should respond_to :table }
-        it { should respond_to :columns }
-
-
-        describe '#name' do
-          it "equals to the unique constraint name in downcase passed in the initializer" do
-            constraint.name.should == 'uc_primary_reps'
-          end
+        let(:composite_constraint) do
+          UniqueConstraint.new('uc_direct_trades', :direct_trades, ['account_number', :source_firm_CODE])
         end
 
-
-        describe '#table' do
-          it "equals to the table name passed in the initializer in various forms" do
-            tables = {
-              :dbo_primary_reps => :dbo_primary_reps,
-              'dbo.PRIMARY_rEPs' => :dbo_primary_reps,
-              'primary_reps' => :primary_reps,
-              :br_CUSTOMER_Financial_Info => :br_customer_financial_info,
-              'br.customer_financial_INFO' => :br_customer_financial_info
-            }
-            .each do |table_name, actual_table|
-              unique_constraint = UniqueConstraint.new('uc_primary_reps', table_name, :rep_code)
-              unique_constraint.table.should == actual_table
-            end
-          end
-        end
+        it_behaves_like "any database constraint"
 
 
-        describe '#columns' do
-          context "for one column unique constraints" do
-            specify { constraint.columns.should include(:rep_code) }
-          end
-
-          context "for multi-columns unique constraints" do
-            before do
-              @unique_constraint = UniqueConstraint.new('uc_fund_account_info', :fund_accounts, ['fund_account_number', :CUSIP])
-            end
-            it "includes all data columns defined in the unique constraint in various forms" do
-              @unique_constraint.columns.count.should == 2
-              @unique_constraint.columns.should include(:fund_account_number)
-              @unique_constraint.columns.should include(:cusip)
-            end
-          end
+        def constraint_for(table_name)
+          UniqueConstraint.new(constraint_name, table_name, :rep_code)
         end
       end
     end

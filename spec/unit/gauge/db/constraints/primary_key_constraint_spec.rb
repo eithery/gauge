@@ -2,62 +2,24 @@
 # Class Gauge::DB::Constraints::PrimaryKeyConstraint specs.
 
 require 'spec_helper'
+require_relative 'constraint_spec_helper'
 
 module Gauge
   module DB
     module Constraints
+      include ConstraintSpecHelper
+
       describe PrimaryKeyConstraint do
-        let(:key) { PrimaryKeyConstraint.new('PK_Primary_Reps', :dbo_primary_reps, :rep_code) }
-        let(:composite_key) do
-          PrimaryKeyConstraint.new('pk_fund_account_info', :fund_accounts,
-            [:fund_account_number, :CUSIP, 'Carrier_CODE'])
+        let(:constraint_name) { 'pk_primary_reps' }
+        let(:constraint) { PrimaryKeyConstraint.new('PK_Primary_Reps', :dbo_primary_reps, :rep_code) }
+        let(:composite_constraint) do
+          PrimaryKeyConstraint.new('pk_direct_trades', :direct_trades, ['account_number', :source_firm_CODE])
         end
-        subject { key }
 
-        it { should respond_to :name }
-        it { should respond_to :table }
-        it { should respond_to :columns }
+        it_behaves_like "any database constraint"
+
+        subject { constraint }
         it { should respond_to :clustered?, :composite? }
-
-
-        describe '#name' do
-          it "equals to the key name in downcase passed in the initializer" do
-            key.name.should == 'pk_primary_reps'
-          end
-        end
-
-
-        describe '#table' do
-          it "equals to the table name passed in the initializer in various forms" do
-            tables = {
-              :dbo_primary_reps => :dbo_primary_reps,
-              'dbo.PRIMARY_rEPs' => :dbo_primary_reps,
-              'primary_reps' => :primary_reps,
-              :br_CUSTOMER_Financial_Info => :br_customer_financial_info,
-              'br.customer_financial_INFO' => :br_customer_financial_info
-            }
-            .each do |table_name, actual_table|
-              primary_key = PrimaryKeyConstraint.new('pk_primary_reps', table_name, :rep_code)
-              primary_key.table.should == actual_table
-            end
-          end
-        end
-
-
-        describe '#columns' do
-          context "for regular primary keys" do
-            specify { key.columns.should include(:rep_code) }
-          end
-
-          context "for composite primary keys" do
-            it "includes all data columns specified as a composite key in various forms" do
-              composite_key.columns.count.should == 3
-              composite_key.columns.should include(:fund_account_number)
-              composite_key.columns.should include(:cusip)
-              composite_key.columns.should include(:carrier_code)
-            end
-          end
-        end
 
 
         describe '#clustered?' do
@@ -88,8 +50,13 @@ module Gauge
           end
 
           context "for composite primary keys" do
-            specify { composite_key.should be_composite }
+            specify { composite_constraint.should be_composite }
           end
+        end
+
+
+        def constraint_for(table_name)
+          PrimaryKeyConstraint.new(constraint_name, table_name, :rep_code)
         end
       end
     end
