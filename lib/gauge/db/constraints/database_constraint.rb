@@ -10,6 +10,8 @@ module Gauge
       class DatabaseConstraint
         attr_reader :name, :table, :columns
 
+    protected
+
         def initialize(name, table, columns)
           @name = name.downcase
           @table = table.to_s.gsub('.', '_').downcase.to_sym
