@@ -55,6 +55,7 @@ module Gauge
 
 
       def data_type
+        return :tinyint if id? && table.metadata?
         type_map[column_type]
       end
 

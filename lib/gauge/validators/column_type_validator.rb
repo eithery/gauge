@@ -9,6 +9,7 @@ module Gauge
 
       validate do |column_schema, db_column|
         if column_schema.data_type != db_column.data_type
+          p column_schema.column_type
           build_alter_column_sql column_schema
 
           errors << "Data column '<b>#{column_schema.column_name}</b>' is '<b>#{db_column.data_type}</b>', " +

@@ -163,6 +163,20 @@ module Gauge
           [:binary].should be_converted_to(:binary)
           [:guid].should be_converted_to(:uniqueidentifier)
         end
+
+        context "when data column represents surrogate primary key" do
+          before { @id_column = DataColumnSchema.new(id: true) }
+
+          context "for regular data table" do
+            before { @id_column.in_table DataTableSchema.new(:customers) }
+            specify { @id_column.data_type.should == :bigint }
+          end
+
+          context "for reference data table containing metadata" do
+            before { @id_column.in_table DataTableSchema.new(:customers, type: :metadata) }
+            specify { @id_column.data_type.should == :tinyint }
+          end
+        end
       end
 
 
