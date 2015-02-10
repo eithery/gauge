@@ -49,6 +49,11 @@ module Gauge
       end
 
 
+      def metadata?
+        @options[:type] == :metadata
+      end
+
+
       def to_key
         "#{sql_schema}_#{local_name}".downcase.to_sym
       end

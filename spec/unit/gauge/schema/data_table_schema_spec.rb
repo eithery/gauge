@@ -23,6 +23,7 @@ module Gauge
       it { should respond_to :table_name, :local_name }
       it { should respond_to :sql_schema, :database_schema }
       it { should respond_to :object_name, :sql_name }
+      it { should respond_to :metadata? }
       it { should respond_to :columns }
       it { should respond_to :to_key, :contains? }
       it { should respond_to :col, :timestamps }
@@ -83,6 +84,19 @@ module Gauge
         context "when no database schema passed in constructors args" do
           before { @table_schema = DataTableSchema.new(:master_accounts) }
           specify { @table_schema.database_schema.should be_nil }
+        end
+      end
+
+
+      describe '#metadata?' do
+        context "when data table is marked as metadata in constructor args" do
+          before { @table_schema = DataTableSchema.new(:master_accounts, type: :metadata) }
+          specify { @table_schema.should be_metadata }
+        end
+
+        context "when data table is not marked as metadata in constructor args" do
+          before { @table_schema = DataTableSchema.new(:master_accounts) }
+          specify { @table_schema.should_not be_metadata }
         end
       end
 
