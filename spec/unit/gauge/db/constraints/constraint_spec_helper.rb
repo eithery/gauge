@@ -26,14 +26,7 @@ module Gauge
 
           describe '#table' do
             it "equals to the table name passed in the initializer in various forms" do
-              tables = {
-                :dbo_primary_reps => :dbo_primary_reps,
-                'dbo.PRIMARY_rEPs' => :dbo_primary_reps,
-                'primary_reps' => :primary_reps,
-                :br_CUSTOMER_Financial_Info => :br_customer_financial_info,
-                'br.customer_financial_INFO' => :br_customer_financial_info
-              }
-              .each do |table_name, actual_table|
+              ConstraintSpecHelper.tables.each do |table_name, actual_table|
                 db_constraint = constraint_for table_name
                 db_constraint.table.should == actual_table
               end
@@ -54,6 +47,17 @@ module Gauge
               end
             end
           end
+        end
+
+
+        def self.tables
+          {
+            :dbo_primary_reps => :dbo_primary_reps,
+            'dbo.PRIMARY_rEPs' => :dbo_primary_reps,
+            'primary_reps' => :primary_reps,
+            :br_CUSTOMER_Financial_Info => :br_customer_financial_info,
+            'br.customer_financial_INFO' => :br_customer_financial_info
+          }
         end
       end
     end
