@@ -38,8 +38,8 @@ module Gauge
         return :id if contains_ref_id?
         return :bool if bool_by_name?
         return :datetime if datetime_by_name?
-        return :date if date?
-        return :id if id?
+        return :date if date_by_name?
+        return :id if id? || id_by_name?
         :string
       end
 
@@ -55,7 +55,7 @@ module Gauge
 
 
       def data_type
-        return :tinyint if id? && table.metadata?
+        return id_data_type if column_type == :id
         type_map[column_type]
       end
 
@@ -156,8 +156,13 @@ module Gauge
       end
 
 
-      def date?
+      def date_by_name?
         column_name.to_s.downcase.end_with?('_on')
+      end
+
+
+      def id_by_name?
+        column_name.to_s.downcase.end_with?('id')
       end
 
 
@@ -168,6 +173,21 @@ module Gauge
 
       def sql_nullability
         allow_null? ? 'null' : 'not null'
+      end
+
+
+      def id_data_type
+        return :tinyint if contains_ref_id? && ref_table_sql_schema == :ref
+        !table.nil? && table.reference_table? ? :tinyint : :bigint
+      end
+
+
+      def ref_table_sql_schema
+        return nil unless contains_ref_id?
+        return @options[:schema] if @options.include? :schema
+
+        parts = @options[:ref].to_s.split('.')
+        parts.first.downcase.to_sym if parts.length > 1
       end
 
 

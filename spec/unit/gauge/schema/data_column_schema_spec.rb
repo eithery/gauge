@@ -164,7 +164,7 @@ module Gauge
           [:guid].should be_converted_to(:uniqueidentifier)
         end
 
-        context "when data column represents surrogate primary key" do
+        context "when data column represents a surrogate primary key" do
           before { @id_column = DataColumnSchema.new(id: true) }
 
           context "for regular data table" do
@@ -173,8 +173,42 @@ module Gauge
           end
 
           context "for reference data table containing metadata" do
-            before { @id_column.in_table DataTableSchema.new(:customers, type: :metadata) }
-            specify { @id_column.data_type.should == :tinyint }
+            context "defined explicitly" do
+              before { @id_column.in_table DataTableSchema.new(:activation_reasons, type: :reference) }
+              specify { @id_column.data_type.should == :tinyint }
+            end
+
+            context "defined based on the table name" do
+              before { @id_column.in_table DataTableSchema.new(:risk_tolerance, sql_schema: :ref) }
+              specify { @id_column.data_type.should == :tinyint }
+            end
+          end
+        end
+
+
+        context "when data column represents a foreign key reference" do
+          context "to ref data table" do
+            context "defined explicitly" do
+              before { @ref_column = DataColumnSchema.new(:ref => :risk_tolerance, schema: :ref) }
+              specify { @ref_column.data_type.should == :tinyint }
+            end
+
+            context "defined by ref table name" do
+              before { @ref_column = DataColumnSchema.new(:ref => 'ref.risk_tolerance') }
+              specify { @ref_column.data_type.should == :tinyint }
+            end
+          end
+
+          context "to regular data table" do
+            context "when table name is defined as symbol" do
+              before { @ref_column = DataColumnSchema.new(:ref => :reps) }
+              specify { @ref_column.data_type.should == :bigint }
+            end
+
+            context "when table name is defined as string" do
+              before { @ref_column = DataColumnSchema.new(:ref => 'exp.reps') }
+              specify { @ref_column.data_type.should == :bigint }
+            end
           end
         end
       end

@@ -112,7 +112,7 @@ private
 
 
       def define_surrogate_id
-        col :id, type: :long, required: true
+        col :id, required: true, id: true
       end
     end
   end
