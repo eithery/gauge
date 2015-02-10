@@ -49,8 +49,8 @@ module Gauge
       end
 
 
-      def metadata?
-        @options[:type] == :metadata
+      def reference_table?
+        @options[:type] == :reference || sql_schema == :ref
       end
 
 

@@ -23,7 +23,7 @@ module Gauge
       it { should respond_to :table_name, :local_name }
       it { should respond_to :sql_schema, :database_schema }
       it { should respond_to :object_name, :sql_name }
-      it { should respond_to :metadata? }
+      it { should respond_to :reference_table? }
       it { should respond_to :columns }
       it { should respond_to :to_key, :contains? }
       it { should respond_to :col, :timestamps }
@@ -88,15 +88,22 @@ module Gauge
       end
 
 
-      describe '#metadata?' do
-        context "when data table is marked as metadata in constructor args" do
-          before { @table_schema = DataTableSchema.new(:master_accounts, type: :metadata) }
-          specify { @table_schema.should be_metadata }
+      describe '#reference_table?' do
+        context "when data table represents a reference_table" do
+          context "defined explicitly" do
+            before { @table_schema = DataTableSchema.new(:activation_reasons, type: :reference) }
+            specify { @table_schema.should be_reference_table }
+          end
+
+          context "defined based on the table name" do
+            before { @table_schema = DataTableSchema.new(:risk_tolerance, sql_schema: :ref) }
+            specify { @table_schema.should be_reference_table }
+          end
         end
 
-        context "when data table is not marked as metadata in constructor args" do
+        context "when data table is not a reference_table" do
           before { @table_schema = DataTableSchema.new(:master_accounts) }
-          specify { @table_schema.should_not be_metadata }
+          specify { @table_schema.should_not be_reference_table }
         end
       end
 
