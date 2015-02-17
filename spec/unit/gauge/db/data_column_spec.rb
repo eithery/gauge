@@ -1,4 +1,4 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::DB::DataColumn specs.
 require 'spec_helper'
 
@@ -51,10 +51,10 @@ module Gauge
           column.default_value.should == 1
         end
 
-        context "when the actual default value is Sequel constant" do
+        context "when the actual default value is CURRENT_TIMESTAMP constant" do
           before { sequel.stub(:[]).with(:ruby_default).and_return(Sequel::SQL::Constant.new(:CURRENT_TIMESTAMP)) }
           it "converts Sequel constant to SQL function" do
-            column.default_value.should == 'getdate()'
+            column.default_value.should == :current_timestamp
           end
         end
 

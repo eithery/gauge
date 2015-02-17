@@ -1,4 +1,4 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Gauge::Schema::DataColumnSchema specs.
 require 'spec_helper'
 
@@ -363,8 +363,18 @@ module Gauge
           end
 
           context "as SQL function without arguments" do
+            before { @column_schema = DataColumnSchema.new(:modified_by, default: { function: :host_name }) }
+            it { should == 'host_name()' }
+          end
+
+          context "as CURRENT_TIMESTAMP SQL function" do
+            before { @column_schema = DataColumnSchema.new(:modified_at, default: { function: :current_timestamp }) }
+            it { should == :current_timestamp }
+          end
+
+          context "as getdate() SQL function" do
             before { @column_schema = DataColumnSchema.new(:modified_at, default: { function: :getdate }) }
-            it { should == 'getdate()' }
+            it { should == :current_timestamp }
           end
         end
 
@@ -398,7 +408,8 @@ module Gauge
         end
 
         it "returns unchanged default value for other column types" do
-          DataColumnSchema.new(:created_at, default: { function: :getdate }).sql_default_value.should == 'getdate()'
+          DataColumnSchema.new(:created_at, default: { function: :getdate })
+            .sql_default_value.should == :current_timestamp
           DataColumnSchema.new(:status, type: :enum, default: 2).sql_default_value.should == 2
           DataColumnSchema.new(:total_amount, type: :money, default: 120.32).sql_default_value.should == 120.32
         end

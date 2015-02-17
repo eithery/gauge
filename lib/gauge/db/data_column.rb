@@ -1,4 +1,4 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::DB::DataColumn
 # Encapsulates the actual data column attributes.
 require 'gauge'
@@ -38,7 +38,7 @@ module Gauge
 
       def sequel_constant(default_value)
         value = default_value.constant
-        value == :CURRENT_TIMESTAMP ? 'getdate()' : value
+        value == :CURRENT_TIMESTAMP ? :current_timestamp : value
       end
     end
   end

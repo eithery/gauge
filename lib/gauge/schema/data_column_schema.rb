@@ -1,4 +1,4 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Schema::DataColumnSchema
 # Data column schema.
 # Contains metadata info defining a data table column.
@@ -255,7 +255,12 @@ module Gauge
 
 
       def sql_function(default_value)
-        "#{default_value[:function]}()".downcase
+        current_timestamp?(default_value) ? :current_timestamp : "#{default_value[:function]}()".downcase
+      end
+
+
+      def current_timestamp?(default_value)
+        [:current_timestamp, :getdate].include? default_value[:function].downcase
       end
     end
   end
