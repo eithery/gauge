@@ -2,9 +2,11 @@
 # Class Gauge::DB::Index
 # Represents the database index on the data table or data view.
 
+require 'gauge'
+
 module Gauge
   module DB
-    class Index
+    class Index < Constraints::CompositeConstraint
     end
   end
 end
