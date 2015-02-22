@@ -6,9 +6,10 @@ require 'spec_helper'
 module Gauge
   module DB
     module Constraints
-      include ConstraintSpecHelper
-
       describe PrimaryKeyConstraint do
+        let(:dbo_name) { 'PK_Primary_Reps' }
+        let(:dbo) { PrimaryKeyConstraint.new(dbo_name, :reps, :rep_code) }
+
         let(:constraint_name) { 'pk_primary_reps' }
         let(:constraint) { PrimaryKeyConstraint.new('PK_Primary_Reps', :dbo_primary_reps, :rep_code) }
         let(:composite_constraint) do

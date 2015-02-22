@@ -7,6 +7,9 @@ module Gauge
   module DB
     module Constraints
       describe CheckConstraint do
+        let(:dbo_name) { 'CK_Reps_Is_Active' }
+        let(:dbo) { CheckConstraint.new(dbo_name, :reps, :is_active, 0..1) }
+
         let(:constraint_name) { 'ck_primary_reps_rep_code' }
         let(:constraint) { CheckConstraint.new('CK_Primary_Reps_Rep_Code', :primary_reps, :rep_code, 'len(rep_code) > 0') }
         let(:composite_constraint) do

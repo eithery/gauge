@@ -6,9 +6,10 @@ require 'spec_helper'
 module Gauge
   module DB
     module Constraints
-      include ConstraintSpecHelper
-
       describe ForeignKeyConstraint do
+        let(:dbo_name) { 'FK_Trade_Primary_Reps' }
+        let(:dbo) { ForeignKeyConstraint.new(dbo_name, :trades, :rep_code, :primary_reps, :code) }
+
         let(:constraint_name) { 'fk_trade_primary_reps' }
         let(:constraint) { ForeignKeyConstraint.new('FK_Trade_Primary_Reps', :direct_trades, :rep_code, :primary_reps, :code) }
         let(:composite_constraint) do

@@ -6,8 +6,8 @@ require 'spec_helper'
 module Gauge
   module DB
     describe DatabaseObject do
-      let(:clazz) { DatabaseObject }
       let(:dbo_name) { 'PK_Rep_Code' }
+      let(:dbo) { DatabaseObject.new(dbo_name) }
 
       it_should_behave_like "any database object"
     end

@@ -6,9 +6,10 @@ require 'spec_helper'
 module Gauge
   module DB
     module Constraints
-      include ConstraintSpecHelper
-
       describe UniqueConstraint do
+        let(:dbo_name) { 'UC_Primary_Reps' }
+        let(:dbo) { UniqueConstraint.new(constraint_name, :reps, :rep_code) }
+
         let(:constraint_name) { 'uc_primary_reps' }
         let(:constraint) { UniqueConstraint.new('UC_Primary_Reps', :dbo_primary_reps, :rep_code) }
         let(:composite_constraint) do
