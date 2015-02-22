@@ -2,7 +2,6 @@
 # Class Gauge::DB::Constraints::ForeignKeyConstraint specs.
 
 require 'spec_helper'
-require_relative 'constraint_spec_helper'
 
 module Gauge
   module DB

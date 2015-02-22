@@ -2,7 +2,6 @@
 # Class Gauge::DB::Constraints::DefaultConstraint specs.
 
 require 'spec_helper'
-require_relative 'constraint_spec_helper'
 
 module Gauge
   module DB

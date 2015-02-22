@@ -8,20 +8,24 @@ module Gauge
   module DB
     module Constraints
       module ConstraintSpecHelper
+        shared_examples_for "any database object" do
+          subject { clazz.new(dbo_name) }
+
+          it { should respond_to :name }
+
+          describe '#name' do
+            it "equals to the object name in downcase passed in the initializer" do
+              subject.name.should == dbo_name.downcase
+            end
+          end
+        end
+
 
         shared_examples_for "any database constraint" do
           subject { constraint }
 
-          it { should respond_to :name }
           it { should respond_to :table }
           it { should respond_to :columns }
-
-
-          describe '#name' do
-            it "equals to the constraint name in downcase passed in the initializer" do
-              constraint.name.should == constraint_name
-            end
-          end
 
 
           describe '#table' do

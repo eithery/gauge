@@ -6,17 +6,10 @@ require 'spec_helper'
 module Gauge
   module DB
     describe DatabaseObject do
-      let(:db_object) { DatabaseObject.new('PK_Rep_Code') }
-      subject { db_object }
+      let(:clazz) { DatabaseObject }
+      let(:dbo_name) { 'PK_Rep_Code' }
 
-      it { should respond_to :name }
-
-
-      describe '#name' do
-        it "equals to the object name in downcase passed in the initializer" do
-          db_object.name.should == 'pk_rep_code'
-        end
-      end
+      it_should_behave_like "any database object"
     end
   end
 end
