@@ -11,8 +11,8 @@ module Gauge
         attr_reader :default_value
 
 
-        def initialize(name, table, columns, default_value)
-          super(name, table, columns)
+        def initialize(name, table, column, default_value)
+          super(name, table)
           @default_value = default_value
         end
       end

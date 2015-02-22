@@ -3,12 +3,12 @@
 # Represents the data table check constraint.
 
 require 'gauge'
-require_relative 'database_constraint'
+require_relative 'composite_constraint'
 
 module Gauge
   module DB
     module Constraints
-      class CheckConstraint < DatabaseConstraint
+      class CheckConstraint < CompositeConstraint
         attr_reader :check_expression
 
 

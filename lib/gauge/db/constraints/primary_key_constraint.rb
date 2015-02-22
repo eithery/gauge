@@ -7,7 +7,7 @@ require 'gauge'
 module Gauge
   module DB
     module Constraints
-      class PrimaryKeyConstraint < DatabaseConstraint
+      class PrimaryKeyConstraint < CompositeConstraint
 
         def initialize(name, table, columns, options={})
           super(name, table, columns)

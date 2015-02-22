@@ -7,7 +7,7 @@ require 'gauge'
 module Gauge
   module DB
     module Constraints
-      class ForeignKeyConstraint < DatabaseConstraint
+      class ForeignKeyConstraint < CompositeConstraint
         attr_reader :ref_table, :ref_columns
 
         def initialize(name, table, columns, ref_table, ref_columns)

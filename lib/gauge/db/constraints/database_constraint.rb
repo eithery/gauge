@@ -9,24 +9,18 @@ module Gauge
   module DB
     module Constraints
       class DatabaseConstraint < Gauge::DB::DatabaseObject
-        attr_reader :table, :columns
+        attr_reader :table
 
     protected
 
-        def initialize(name, table, columns)
+        def initialize(name, table)
           super(name)
           @table = table_key_for table
-          @columns = flatten_array_of columns
         end
 
 
         def table_key_for(table)
           table.to_s.gsub('.', '_').downcase.to_sym
-        end
-
-
-        def flatten_array_of(columns)
-          [columns].flatten.map { |col| col.downcase.to_sym }
         end
       end
     end
