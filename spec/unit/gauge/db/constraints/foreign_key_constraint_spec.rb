@@ -7,12 +7,11 @@ module Gauge
   module DB
     module Constraints
       describe ForeignKeyConstraint do
-        let(:dbo_name) { 'FK_Trade_Primary_Reps' }
+        let(:dbo_name) { 'FK_TRADES_PRIMARY_REPS' }
         let(:dbo) { ForeignKeyConstraint.new(dbo_name, :trades, :rep_code, :primary_reps, :code) }
         subject { dbo }
 
         it_behaves_like "any composite database constraint"
-
 
         it { should respond_to :ref_table }
         it { should respond_to :ref_columns }

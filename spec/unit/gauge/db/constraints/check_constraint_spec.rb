@@ -7,12 +7,11 @@ module Gauge
   module DB
     module Constraints
       describe CheckConstraint do
-        let(:dbo_name) { 'CK_Reps_Is_Active' }
+        let(:dbo_name) { 'CK_REPS_IS_ACTIVE' }
         let(:dbo) { CheckConstraint.new(dbo_name, :reps, :is_active, 0..1) }
         subject { dbo }
 
         it_behaves_like "any composite database constraint"
-
         it { should respond_to :check_expression }
 
 

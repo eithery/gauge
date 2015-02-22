@@ -7,12 +7,11 @@ module Gauge
   module DB
     module Constraints
       describe PrimaryKeyConstraint do
-        let(:dbo_name) { 'PK_Primary_Reps' }
+        let(:dbo_name) { 'PK_REPS' }
         let(:dbo) { PrimaryKeyConstraint.new(dbo_name, :reps, :rep_code) }
         subject { dbo }
 
         it_behaves_like "any composite database constraint"
-
         it { should respond_to :clustered?, :composite? }
 
 
@@ -45,7 +44,8 @@ module Gauge
 
           context "for composite primary keys" do
             before do
-              @composite_constraint = PrimaryKeyConstraint.new('pk_direct_trades', :trades, [:account_number, :source_firm_code])
+              @composite_constraint = PrimaryKeyConstraint.new('pk_direct_trades', :trades,
+                [:account_number, :source_firm_code])
             end
             specify { @composite_constraint.should be_composite }
           end

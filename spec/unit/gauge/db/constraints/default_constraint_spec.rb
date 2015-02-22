@@ -7,7 +7,7 @@ module Gauge
   module DB
     module Constraints
       describe DefaultConstraint do
-        let(:dbo_name) { 'DF_Reps_Is_Active' }
+        let(:dbo_name) { 'DF_REPS_IS_ACTIVE' }
         let(:dbo) { DefaultConstraint.new(dbo_name, :reps, :is_active, true) }
         subject { dbo }
 
