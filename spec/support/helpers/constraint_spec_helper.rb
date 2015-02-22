@@ -22,9 +22,8 @@ module Gauge
 
 
         shared_examples_for "any database constraint" do
+          subject { dbo }
           it_behaves_like "any database object"
-
-          subject { constraint }
 
           it { should respond_to :table }
           it { should respond_to :columns }
