@@ -41,7 +41,9 @@ module Gauge
         shared_examples_for "any composite database constraint" do
           subject { dbo }
           it_behaves_like "any database constraint"
+
           it { should respond_to :columns }
+          it { should respond_to :composite? }
 
 
           describe '#columns' do
@@ -58,6 +60,18 @@ module Gauge
                 @composite_constraint.columns.should include(:account_number)
                 @composite_constraint.columns.should include(:source_firm_code)
               end
+            end
+          end
+
+
+          describe '#composite?' do
+            context "for regular (single column) database constraints" do
+              it { should_not be_composite }
+            end
+
+            context "for composite (multiple column) database constraints" do
+              before { @composite_constraint = constraint_for dbo_name, :trades, [:account_number, :source_firm_code] }
+              specify { @composite_constraint.should be_composite }
             end
           end
         end

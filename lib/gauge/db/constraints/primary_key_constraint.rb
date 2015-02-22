@@ -18,11 +18,6 @@ module Gauge
         def clustered?
           @clustered
         end
-
-
-        def composite?
-          columns.length > 1
-        end
       end
     end
   end

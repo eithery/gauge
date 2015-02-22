@@ -12,7 +12,7 @@ module Gauge
         subject { dbo }
 
         it_behaves_like "any composite database constraint"
-        it { should respond_to :clustered?, :composite? }
+        it { should respond_to :clustered? }
 
 
         describe '#clustered?' do
@@ -33,21 +33,6 @@ module Gauge
           context "when specified with incorrect value" do
             before { @clustered_key = PrimaryKeyConstraint.new('pk_reps', :reps, :id, clustered: 'no') }
             specify { @clustered_key.should be_clustered }
-          end
-        end
-
-
-        describe '#composite?' do
-          context "for regular primary keys" do
-            it { should_not be_composite }
-          end
-
-          context "for composite primary keys" do
-            before do
-              @composite_constraint = PrimaryKeyConstraint.new('pk_direct_trades', :trades,
-                [:account_number, :source_firm_code])
-            end
-            specify { @composite_constraint.should be_composite }
           end
         end
       end

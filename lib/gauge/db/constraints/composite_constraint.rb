@@ -16,6 +16,11 @@ module Gauge
           @columns = flatten_array_of columns
         end
 
+
+        def composite?
+          columns.length > 1
+        end
+
   protected
 
         def flatten_array_of(columns)
