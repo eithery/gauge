@@ -9,17 +9,10 @@ module Gauge
       describe CheckConstraint do
         let(:dbo_name) { 'CK_Reps_Is_Active' }
         let(:dbo) { CheckConstraint.new(dbo_name, :reps, :is_active, 0..1) }
+        subject { dbo }
 
-        let(:constraint_name) { 'ck_primary_reps_rep_code' }
-        let(:constraint) { CheckConstraint.new('CK_Primary_Reps_Rep_Code', :primary_reps, :rep_code, 'len(rep_code) > 0') }
-        let(:composite_constraint) do
-          CheckConstraint.new('ck_direct_trades', :direct_trades, ['account_number', :source_firm_CODE],
-            'len(rep_code) > 0')
-        end
+        it_behaves_like "any composite database constraint"
 
-        it_behaves_like "any database constraint"
-
-        subject { constraint }
         it { should respond_to :check_expression }
 
 
@@ -31,8 +24,8 @@ module Gauge
         end
 
 
-        def constraint_for(table_name)
-          CheckConstraint.new(constraint_name, table_name, :rep_code, 'len(rep_code) > 0')
+        def constraint_for(*args)
+          CheckConstraint.new(*args, 'len(rep_code) > 0')
         end
       end
     end

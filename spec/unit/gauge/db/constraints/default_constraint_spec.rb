@@ -9,16 +9,9 @@ module Gauge
       describe DefaultConstraint do
         let(:dbo_name) { 'DF_Reps_Is_Active' }
         let(:dbo) { DefaultConstraint.new(dbo_name, :reps, :is_active, true) }
-
-        let(:constraint_name) { 'df_primary_reps_rep_code' }
-        let(:constraint) { DefaultConstraint.new('DF_Primary_Reps_Rep_Code', :dbo_primary_reps, :rep_code, 'R001') }
-        let(:composite_constraint) do
-          DefaultConstraint.new('df_direct_trades_account', :direct_trades, ['account_number', :source_firm_CODE], 'A000001')
-        end
+        subject { dbo }
 
         it_behaves_like "any database constraint"
-
-        subject { constraint }
         it { should respond_to :default_value }
 
 
@@ -30,8 +23,8 @@ module Gauge
         end
 
 
-        def constraint_for(table_name)
-          DefaultConstraint.new(constraint_name, table_name, :is_enabled, true)
+        def constraint_for(*args)
+          DefaultConstraint.new(*args, 'R0001')
         end
       end
     end

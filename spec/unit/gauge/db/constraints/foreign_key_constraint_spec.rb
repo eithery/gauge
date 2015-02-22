@@ -9,17 +9,10 @@ module Gauge
       describe ForeignKeyConstraint do
         let(:dbo_name) { 'FK_Trade_Primary_Reps' }
         let(:dbo) { ForeignKeyConstraint.new(dbo_name, :trades, :rep_code, :primary_reps, :code) }
+        subject { dbo }
 
-        let(:constraint_name) { 'fk_trade_primary_reps' }
-        let(:constraint) { ForeignKeyConstraint.new('FK_Trade_Primary_Reps', :direct_trades, :rep_code, :primary_reps, :code) }
-        let(:composite_constraint) do
-          ForeignKeyConstraint.new('fk_trade_accounts', :direct_trades, ['account_number', :source_firm_CODE],
-            :accounts, [:number, 'Source'])
-        end
+        it_behaves_like "any composite database constraint"
 
-        it_behaves_like "any database constraint"
-
-        subject { constraint }
 
         it { should respond_to :ref_table }
         it { should respond_to :ref_columns }
@@ -37,21 +30,25 @@ module Gauge
 
         describe '#ref_columns' do
           context "for regular foreign keys" do
-            specify { constraint.ref_columns.should include(:code) }
+            specify { subject.ref_columns.should include(:code) }
           end
 
           context "for composite foreign keys" do
+            before do
+              @composite_constraint = ForeignKeyConstraint.new('fk_trade_accounts', :trades,
+                [:account_number, :source_firm_code], :accounts, [:number, 'Source'])
+            end
             it "includes all data columns specified as a composite key in various forms" do
-              composite_constraint.ref_columns.count.should == 2
-              composite_constraint.ref_columns.should include(:number)
-              composite_constraint.ref_columns.should include(:source)
+              @composite_constraint.ref_columns.count.should == 2
+              @composite_constraint.ref_columns.should include(:number)
+              @composite_constraint.ref_columns.should include(:source)
             end
           end
         end
 
 
-        def constraint_for(table_name)
-          ForeignKeyConstraint.new(constraint_name, table_name, :rep_code, :primary_reps, :code)
+        def constraint_for(*args)
+          ForeignKeyConstraint.new(*args, :primary_reps, :code)
         end
       end
     end
