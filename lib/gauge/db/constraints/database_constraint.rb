@@ -3,17 +3,18 @@
 # Represents the base class for all database constraints.
 
 require 'gauge'
+require_relative '../database_object'
 
 module Gauge
   module DB
     module Constraints
-      class DatabaseConstraint
-        attr_reader :name, :table, :columns
+      class DatabaseConstraint < Gauge::DB::DatabaseObject
+        attr_reader :table, :columns
 
     protected
 
         def initialize(name, table, columns)
-          @name = name.downcase
+          super(name)
           @table = table_key_for table
           @columns = flatten_array_of columns
         end
