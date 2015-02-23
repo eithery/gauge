@@ -10,6 +10,7 @@ module Sequel
       let(:column_schema) { Gauge::Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column).in_table table_schema }
 
+      it { should respond_to :data_tables }
       it { should respond_to :table_exists?, :column_exists?, :column }
       it { should respond_to :check_constraints, :default_constraints }
       it { should respond_to :primary_keys }
@@ -63,6 +64,10 @@ module Sequel
           Gauge::DB::DataColumn.should_receive(:new).once
           database.column column_schema
         end
+      end
+
+
+      describe '#data_tables' do
       end
 
 

@@ -7,7 +7,6 @@ require 'gauge'
 module Sequel
   module TinyTDS
     class Database < Sequel::Database
-
       def table_exists?(table_schema)
         self.tables(schema: table_schema.sql_schema).include?(table_schema.local_name.downcase.to_sym)
       end
@@ -23,6 +22,10 @@ module Sequel
           item.first == column_schema.to_key
         end.first.last
         Gauge::DB::DataColumn.new(column)
+      end
+
+
+      def data_tables
       end
 
 
