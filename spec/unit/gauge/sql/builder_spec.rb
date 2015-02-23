@@ -163,7 +163,7 @@ module Gauge
           [[:status, {type: :short, required: true, default: -1}], '[status] smallint not null default -1;'],
           [[:has_dependents, {required: true, default: true}], '[has_dependents] tinyint not null default 1;'],
           [[:created_on, {required: true, default: {function: :getdate}}],
-            '[created_on] date not null default getdate();'],
+            '[created_on] date not null default current_timestamp;'],
           [[:rate, {type: :percent, required: true, default: 100.01}],
             '[rate] decimal(18,4) not null default 100.01;'],
           [[:risk_tolerance, {type: :enum, required: true, default: 1}],
