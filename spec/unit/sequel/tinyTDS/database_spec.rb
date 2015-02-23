@@ -11,7 +11,7 @@ module Sequel
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column).in_table table_schema }
 
       it { should respond_to :table_exists?, :column_exists?, :column }
-      it { should respond_to :check_constraints, :default_constraint }
+      it { should respond_to :check_constraints, :default_constraints }
 
 
       describe '#table_exists?' do
@@ -66,12 +66,56 @@ module Sequel
 
 
       describe '#check_constraints' do
-        it "returns all check constraints for data table"
+        before do
+          Sequel::Dataset.any_instance.stub(:all).and_return([
+            { constraint_name: 'ck_reps_is_active', table_catalog: 'rep_profile', table_schema: 'dbo',
+              table_name: 'reps', column_name: 'is_active', check_clause: '([is_active]>= 0) AND [is_active]<=(1))' },
+            { constraint_name: 'ck_offices_tax_id', table_catalog: 'rep_profile', table_schema: 'br',
+              table_name: 'offices', column_name: 'tax_id', check_clause: '(len[tax_id]=(9))' }
+          ])
+        end
+        subject { database.check_constraints }
+
+        it { should_not be_empty }
+        it { should have(2).constraints }
+
+        context "where the first element" do
+          subject { database.check_constraints.first }
+
+          it { should be_a(Gauge::DB::Constraints::CheckConstraint) }
+          its(:name) { should == 'ck_reps_is_active' }
+          its(:table) { should == :dbo_reps }
+          its(:columns) { should include(:is_active) }
+          its(:check_expression) { should == '([is_active]>= 0) AND [is_active]<=(1))' }
+        end
       end
 
 
-      describe '#default_constraint' do
-        it "returns default constraint for data column"
+      describe '#default_constraints' do
+        before do
+          Sequel::Dataset.any_instance.stub(:all).and_return([
+            { constraint_name: 'df_risk_tolerance_is_enabled', table_schema: 'ref', table_name: 'risk_tolerance',
+              column_name: 'is_enabled', definition: '((1))' },
+            { constraint_name: 'df_validation_rules_id', table_schema: 'vld', table_name: 'validation_rules',
+              column_name: 'id', definition: '(abs(CONVERT([bigint],CONVERT([varbinary],newid()))))' },
+            { constraint_name: 'df_product_updated', table_schema: 'dbo', table_name: 'products',
+              column_name: 'updated', definition: '(getdate())' }
+          ])
+        end
+        subject { database.default_constraints }
+
+        it { should_not be_empty }
+        it { should have(3).constraints }
+
+        context "where the first element" do
+          subject { database.default_constraints.first }
+
+          it { should be_a(Gauge::DB::Constraints::DefaultConstraint) }
+          its(:name) { should == 'df_risk_tolerance_is_enabled' }
+          its(:table) { should == :ref_risk_tolerance }
+          its(:column) { should == :is_enabled }
+          its(:default_value) { should == '((1))' }
+        end
       end
 
   private
