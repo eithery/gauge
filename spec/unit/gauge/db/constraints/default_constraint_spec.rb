@@ -12,7 +12,19 @@ module Gauge
         subject { dbo }
 
         it_behaves_like "any database constraint"
+
+        it { should respond_to :column }
         it { should respond_to :default_value }
+
+
+        describe '#column' do
+          it "equals to the column name passed in the initializer in various forms" do
+            [:is_active, 'is_active', 'IS_ACTIVE'].each do |column_name|
+              default_constraint = DefaultConstraint.new(dbo_name, :reps, column_name, true)
+              default_constraint.column.should == :is_active
+            end
+          end
+        end
 
 
         describe '#default_value' do
