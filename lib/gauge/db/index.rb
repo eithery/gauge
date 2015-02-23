@@ -7,6 +7,22 @@ require 'gauge'
 module Gauge
   module DB
     class Index < Constraints::CompositeConstraint
+
+      def initialize(name, table, columns, options={})
+        super(name, table, columns)
+        @clustered = options[:clustered] == true
+        @unique = options[:unique] == true
+      end
+
+
+      def clustered?
+        @clustered
+      end
+
+
+      def unique?
+        @unique
+      end
     end
   end
 end
