@@ -12,6 +12,7 @@ module Sequel
 
       it { should respond_to :table_exists?, :column_exists?, :column }
       it { should respond_to :check_constraints, :default_constraints }
+      it { should respond_to :primary_keys }
 
 
       describe '#table_exists?' do
@@ -65,6 +66,41 @@ module Sequel
       end
 
 
+      describe '#primary_keys' do
+        before do
+          Sequel::Dataset.any_instance.stub(:all).and_return([
+            { constraint_name: 'pk_account_owner', table_schema: 'dbo', table_name: 'account_owners',
+              column_name: 'master_account_id', key_type: '1' },
+            { constraint_name: 'pk_account_owner', table_schema: 'dbo', table_name: 'account_owners',
+              column_name: 'natural_owner_id', key_type: '1' },
+            { constraint_name: 'pk_validation_rules', table_schema: 'vld', table_name: 'validation_rules',
+              column_name: 'id', key_type: '2' },
+          ])
+        end
+        subject { database.primary_keys }
+
+        it { should_not be_empty }
+        it { should have(2).primary_keys }
+
+        context "where the first element" do
+          subject { database.primary_keys.first }
+
+          it { should be_a(Gauge::DB::Constraints::PrimaryKeyConstraint) }
+          its(:name) { should == 'pk_account_owner' }
+          its(:table) { should == :dbo_account_owners }
+          its(:columns) { should include(:master_account_id, :natural_owner_id) }
+        end
+
+        context "when the primary key is clustered" do
+          specify { database.primary_keys.first.should be_clustered }
+        end
+
+        context "when the primary key is not clustered" do
+          specify { database.primary_keys.last.should_not be_clustered }
+        end
+      end
+
+
       describe '#check_constraints' do
         before do
           Sequel::Dataset.any_instance.stub(:all).and_return([
@@ -77,7 +113,7 @@ module Sequel
         subject { database.check_constraints }
 
         it { should_not be_empty }
-        it { should have(2).constraints }
+        it { should have(2).check_constraints }
 
         context "where the first element" do
           subject { database.check_constraints.first }
@@ -105,7 +141,7 @@ module Sequel
         subject { database.default_constraints }
 
         it { should_not be_empty }
-        it { should have(3).constraints }
+        it { should have(3).default_constraints }
 
         context "where the first element" do
           subject { database.default_constraints.first }
