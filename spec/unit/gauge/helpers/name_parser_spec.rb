@@ -8,45 +8,45 @@ module Gauge
     describe NameParser do
       subject { NameParser }
 
-      it { should respond_to :local_name }
-      it { should respond_to :sql_schema }
-      it { should respond_to :dbo_key }
+      it { should respond_to :local_name_of }
+      it { should respond_to :sql_schema_of }
+      it { should respond_to :dbo_key_of }
 
 
-      describe '.local_name' do
+      describe '.local_name_of' do
         it "extracts the local part of a database object name" do
           (dbo_default_names + dbo_custom_names).each do |dbo_name|
-            NameParser.local_name(dbo_name.downcase).should == 'reps'
+            NameParser.local_name_of(dbo_name.downcase).should == 'reps'
           end
         end
       end
 
 
-      describe '.sql_schema' do
+      describe '.sql_schema_of' do
         context "for default SQL schema (dbo)" do
           it "returns 'dbo' as SQL schema" do
-            dbo_default_names.each { |dbo_name| NameParser.sql_schema(dbo_name).should == 'dbo' }
+            dbo_default_names.each { |dbo_name| NameParser.sql_schema_of(dbo_name).should == 'dbo' }
           end
         end
 
         context "for custom SQL schema" do
           it "extracts SQL schema part from a database object name" do
-            dbo_custom_names.each { |dbo_name| NameParser.sql_schema(dbo_name.downcase).should == 'bnr' }
+            dbo_custom_names.each { |dbo_name| NameParser.sql_schema_of(dbo_name.downcase).should == 'bnr' }
           end
         end
       end
 
 
-      describe '.dbo_key' do
+      describe '.dbo_key_of' do
         context "for default SQL schema (dbo)" do
           it "returns a database object name with 'dbo' SQL schema converted to symbol" do
-            dbo_default_names.each { |dbo_name| NameParser.dbo_key(dbo_name).should == :dbo_reps }
+            dbo_default_names.each { |dbo_name| NameParser.dbo_key_of(dbo_name).should == :dbo_reps }
           end
         end
 
         context "for custom SQL schema" do
           it "returns a database object name with custom SQL schema converted to symbol" do
-            dbo_custom_names.each { |dbo_name| NameParser.dbo_key(dbo_name).should == :bnr_reps }
+            dbo_custom_names.each { |dbo_name| NameParser.dbo_key_of(dbo_name).should == :bnr_reps }
           end
         end
       end

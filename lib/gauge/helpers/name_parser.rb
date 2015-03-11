@@ -8,19 +8,19 @@ module Gauge
   module Helpers
     class NameParser
 
-      def self.local_name(dbo_name)
+      def self.local_name_of(dbo_name)
         parsed_name(dbo_name).last
       end
 
 
-      def self.sql_schema(dbo_name)
+      def self.sql_schema_of(dbo_name)
         schema = parsed_name(dbo_name)[-2]
         schema.blank? ? 'dbo' : schema
       end
 
 
-      def self.dbo_key(dbo_name)
-        "#{sql_schema(dbo_name)}_#{local_name(dbo_name)}".downcase.to_sym
+      def self.dbo_key_of(dbo_name)
+        "#{sql_schema_of(dbo_name)}_#{local_name_of(dbo_name)}".downcase.to_sym
       end
 
   private

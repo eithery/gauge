@@ -15,12 +15,7 @@ module Gauge
 
         def initialize(name, table)
           super(name)
-          @table = table_key_for table
-        end
-
-
-        def table_key_for(table)
-          table.to_s.gsub('.', '_').downcase.to_sym
+          @table = Gauge::Helpers::NameParser.dbo_key_of table
         end
       end
     end
