@@ -127,7 +127,7 @@ module Sequel
           its(:name) { should == 'ck_reps_is_active' }
           its(:table) { should == :dbo_reps }
           its(:columns) { should include(:is_active) }
-          its(:check_expression) { should == '([is_active]>= 0) AND [is_active]<=(1))' }
+          its(:expression) { should == '([is_active]>= 0) AND [is_active]<=(1))' }
         end
       end
 

@@ -12,7 +12,7 @@ module Gauge
 
         def initialize(name, table, columns, ref_table, ref_columns)
           super(name, table, columns)
-          @ref_table = table_key_for ref_table
+          @ref_table = Gauge::Helpers::NameParser.dbo_key_of ref_table
           @ref_columns = flatten_array_of ref_columns
         end
       end

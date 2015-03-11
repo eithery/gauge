@@ -61,7 +61,7 @@ private
 
 
       def table_from(dataset_row)
-        "#{dataset_row[:table_schema]}_#{dataset_row[:table_name]}".downcase.to_sym
+        "#{dataset_row[:table_schema]}.#{dataset_row[:table_name]}".downcase.to_sym
       end
 
 

@@ -69,20 +69,7 @@ private
 
 
       def self.table_key(dbo_name)
-        table_name = dbo_name.to_s.gsub(/\[|\]/, '')
-        "#{sql_schema(table_name)}_#{local_table_name(table_name)}".downcase.to_sym
-      end
-
-
-      def self.sql_schema(table_name)
-        parts = table_name.split('.')
-        return parts.first if parts.count > 1
-        'dbo'
-      end
-
-
-      def self.local_table_name(table_name)
-        table_name.split('.').last
+        Gauge::Helpers::NameParser.dbo_key_of dbo_name
       end
 
 
