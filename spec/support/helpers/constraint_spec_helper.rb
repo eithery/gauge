@@ -26,7 +26,6 @@ module Gauge
           it_behaves_like "any database object"
           it { should respond_to :table }
 
-
           describe '#table' do
             it "equals to the table name passed in the initializer in various forms" do
               ConstraintSpecHelper.tables.each do |table_name, actual_table|
@@ -87,8 +86,9 @@ module Gauge
           {
             :dbo_primary_reps => :dbo_primary_reps,
             'dbo.PRIMARY_rEPs' => :dbo_primary_reps,
-            'primary_reps' => :primary_reps,
-            :br_CUSTOMER_Financial_Info => :br_customer_financial_info,
+            'primary_reps' => :dbo_primary_reps,
+            :primary_REPS => :dbo_primary_reps,
+            :br_CUSTOMER_Financial_Info => :dbo_br_customer_financial_info,
             'br.customer_financial_INFO' => :br_customer_financial_info
           }
         end

@@ -6,6 +6,8 @@ require 'spec_helper'
 module Gauge
   module DB
     module Constraints
+      UID = 'abs(convert(bigint,convert(varbinary,newid())))'
+
       describe DefaultConstraint do
         let(:dbo_name) { 'DF_REPS_IS_ACTIVE' }
         let(:dbo) { DefaultConstraint.new(dbo_name, :reps, :is_active, true) }
@@ -28,9 +30,29 @@ module Gauge
 
 
         describe '#default_value' do
-          it "equals to the default value passed in the initializer" do
-            default_constraint = DefaultConstraint.new('df_reps_is_active', :reps, :is_active, true)
-            default_constraint.default_value.should be true
+          subject { @default_constraint.default_value }
+
+          context "for boolean columns" do
+            before { @default_constraint = DefaultConstraint.new('df_reps_is_active', :reps, :is_active, true) }
+            it { should be true }
+          end
+
+          context "for character columns" do
+            before { @default_constraint = DefaultConstraint.new('df_address_country', :addresses, :country, 'US') }
+            it { should == 'US' }
+          end
+
+          context "for expressions" do
+            before { @default_constraint = DefaultConstraint.new('df_trade_id', :trades, :id, UID); }
+            it { should == UID }
+          end
+
+          context "for SQL functions" do
+            before do
+              @default_constraint = DefaultConstraint.new('df_audit_trail_processed', :at_audit_trail,
+                :processed, function: :getdate)
+            end
+            it { should == { function: :getdate } }
           end
         end
 

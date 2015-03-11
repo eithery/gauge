@@ -12,13 +12,23 @@ module Gauge
         subject { dbo }
 
         it_behaves_like "any composite database constraint"
-        it { should respond_to :check_expression }
+        it { should respond_to :expression }
 
 
-        describe '#check_expression' do
-          it "equals to check expression passed in the initializer" do
-            check_constraint = CheckConstraint.new('ck_rep_code_is_active', :reps, :is_active, 0..1)
-            check_constraint.check_expression.should == (0..1)
+        describe '#expression' do
+          subject { @check_constraint.expression }
+
+          context "for range check" do
+            before { @check_constraint = CheckConstraint.new('ck_rep_code_is_active', :reps, :is_active, 0..1) }
+            it { should == (0..1) }
+          end
+
+          context "for comparison check" do
+            before do
+              @check_constraint = CheckConstraint.new('ck_financial_info_level', :account_financial_info,
+                :level_value, '>= 0')
+            end
+            it { should == '>= 0' }
           end
         end
 
