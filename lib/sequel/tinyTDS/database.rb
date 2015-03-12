@@ -1,6 +1,7 @@
 # Eithery Lab., 2014.
 # Class Sequel::TynyTDS::Database
 # Extends Sequel Database functionality.
+
 require 'sequel'
 require 'gauge'
 
@@ -38,19 +39,36 @@ module Sequel
       end
 
 
+      def foreign_keys
+        all_constraints(SQL_ALL_FOREIGN_KEYS, contains_refs: true) do |name, row|
+          Gauge::DB::Constraints::ForeignKeyConstraint.new(name, table_from(row), column_from(row),
+            ref_table_from(row), ref_column_from(row))
+        end
+      end
+
+
+      def unique_constraints
+        all_constraints(SQL_ALL_UNIQUE_CONSTRAINTS) do |name, row|
+          Gauge::DB::Constraints::UniqueConstraint.new(name, table_from(row), column_from(row))
+        end
+      end
+
+
       def check_constraints
         all_constraints(SQL_ALL_CHECK_CONSTRAINTS) do |name, row|
-          Gauge::DB::Constraints::CheckConstraint.new(row[:constraint_name],
-            table_from(row), column_from(row), row[:check_clause])
+          Gauge::DB::Constraints::CheckConstraint.new(name, table_from(row), column_from(row), row[:check_clause])
         end
       end
 
 
       def default_constraints
-        execute_sql(SQL_ALL_DEFAULT_CONSTRAINTS).map do |row|
-          Gauge::DB::Constraints::DefaultConstraint.new(row[:constraint_name],
-            table_from(row), column_from(row), row[:definition])
+        all_constraints(SQL_ALL_DEFAULT_CONSTRAINTS) do |name, row|
+          Gauge::DB::Constraints::DefaultConstraint.new(name, table_from(row), column_from(row), row[:definition])
         end
+      end
+
+
+      def indexes
       end
 
 private
@@ -61,23 +79,44 @@ private
 
 
       def table_from(dataset_row)
-        "#{dataset_row[:table_schema]}.#{dataset_row[:table_name]}".downcase.to_sym
+        compose_table dataset_row, :table_schema, :table_name
+      end
+
+
+      def ref_table_from(dataset_row)
+        compose_table dataset_row, :ref_table_schema, :ref_table_name
+      end
+
+
+      def compose_table(dataset_row, table_schema, table_name)
+        "#{dataset_row[table_schema]}.#{dataset_row[table_name]}".downcase.to_sym
       end
 
 
       def column_from(dataset_row)
-        dataset_row[:column_name].downcase.to_sym
+        compose_column dataset_row, :column_name
       end
 
 
-      def all_constraints(sql, &block)
+      def ref_column_from(dataset_row)
+        compose_column dataset_row, :ref_column_name
+      end
+
+
+      def compose_column(dataset_row, column_name)
+        dataset_row[column_name].downcase.to_sym
+      end
+
+
+      def all_constraints(sql, contains_refs=false, &block)
         constraints = {}
         execute_sql(sql).map do |row|
-          name = row[:constraint_name]
+          name = row[:constraint_name].downcase
           unless constraints.include?(name)
             constraints[name] = block.call(name, row)
           else
             constraints[name].columns << column_from(row)
+            constraints[name].ref_columns << ref_column_from(row) if contains_refs
           end
         end
         constraints.values
@@ -98,18 +137,43 @@ private
         where so.type = 'PK';
       eos
 
+      SQL_ALL_FOREIGN_KEYS = <<-eos
+        select obj.name as constraint_name, sch.name as table_schema, t.name as table_name, col.name as column_name,
+          refsch.name as ref_table_schema, reft.name as ref_table_name, refcol.name as ref_column_name
+        from sys.foreign_key_columns as fkc
+        inner join sys.objects as obj on obj.object_id = fkc.constraint_object_id
+        inner join sys.tables as t on t.object_id = fkc.parent_object_id
+        inner join sys.schemas as sch on sch.schema_id = t.schema_id
+        inner join sys.columns as col on col.column_id = fkc.parent_column_id and col.object_id = t.object_id
+        inner join sys.tables as reft on reft.object_id = fkc.referenced_object_id
+        inner join sys.schemas as refsch on refsch.schema_id = reft.schema_id
+        inner join sys.columns as refcol on refcol.column_id = fkc.referenced_column_id and refcol.object_id = reft.object_id
+      eos
+
+      SQL_ALL_UNIQUE_CONSTRAINTS = <<-eos
+        select tc.constraint_name, tc.table_schema, tc.table_name, col.column_name
+        from information_schema.table_constraints as tc
+        inner join information_schema.constraint_column_usage as col on col.constraint_name = tc.constraint_name
+          and col.constraint_schema = tc.constraint_schema
+        where tc.constraint_type = 'UNIQUE';
+      eos
+
       SQL_ALL_CHECK_CONSTRAINTS = <<-eos
-        select cc.constraint_name, col.table_catalog as database, col.table_schema, col.table_name, col.column_name, cc.check_clause
+        select cc.constraint_name, col.table_schema, col.table_name, col.column_name, cc.check_clause
         from information_schema.check_constraints as cc
         inner join information_schema.constraint_column_usage col on cc.constraint_name = col.constraint_name;
       eos
 
       SQL_ALL_DEFAULT_CONSTRAINTS = <<-eos
-        select dc.name as constraint_name, s.name as table_schema, t.name as table_name, col.name as column_name, dc.definition
+        select dc.name as constraint_name, s.name as table_schema, t.name as table_name,
+          col.name as column_name, dc.definition
         from sys.default_constraints as dc
         inner join sys.columns as col on col.object_id = dc.parent_object_id and col.column_id = dc.parent_column_id
         inner join sys.tables as t on t.object_id = col.object_id
         inner join sys.schemas as s on s.schema_id = t.schema_id;
+      eos
+
+      SQL_ALL_INDEXES = <<-eos
       eos
     end
   end
