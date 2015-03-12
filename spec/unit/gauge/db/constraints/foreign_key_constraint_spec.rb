@@ -20,7 +20,8 @@ module Gauge
         describe '#ref_table' do
           it "equals to the table name passed in the initializer in various forms" do
             ConstraintSpecHelper.tables.each do |table_name, actual_table|
-              foreign_key = ForeignKeyConstraint.new('fk_trades_primary_reps', :direct_trades, :rep_code, table_name, :code)
+              foreign_key = ForeignKeyConstraint.new('fk_trades_primary_reps', :direct_trades, :rep_code,
+                table_name, :code)
               foreign_key.ref_table.should == actual_table
             end
           end
