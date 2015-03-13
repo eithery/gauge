@@ -1,4 +1,4 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::DB::DataTable specs.
 
 require 'spec_helper'

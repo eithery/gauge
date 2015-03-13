@@ -26,7 +26,7 @@ module Sequel
       end
 
 
-      def data_tables
+      def tables
       end
 
 
@@ -153,7 +153,7 @@ private
         inner join sys.columns as col on col.column_id = fkc.parent_column_id and col.object_id = t.object_id
         inner join sys.tables as reft on reft.object_id = fkc.referenced_object_id
         inner join sys.schemas as refsch on refsch.schema_id = reft.schema_id
-        inner join sys.columns as refcol on refcol.column_id = fkc.referenced_column_id and refcol.object_id = reft.object_id
+        inner join sys.columns as refcol on refcol.column_id = fkc.referenced_column_id and refcol.object_id = reft.object_id;
       eos
 
       SQL_ALL_UNIQUE_CONSTRAINTS = <<-eos
