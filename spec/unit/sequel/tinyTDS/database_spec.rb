@@ -98,6 +98,8 @@ module Sequel
           its(:name) { should == 'pk_account_owner' }
           its(:table) { should == :dbo_account_owners }
           its(:columns) { should include(:master_account_id, :natural_owner_id) }
+          it { should be_composite }
+          it { should be_clustered }
         end
 
         context "when the primary key is clustered" do
@@ -108,12 +110,12 @@ module Sequel
           specify { database.primary_keys.last.should_not be_clustered }
         end
 
-        context "when the primary key is regular" do
-          specify { database.primary_keys.first.should be_composite }
+        context "when the primary key is regular (one column)" do
+          specify { database.primary_keys.last.should_not be_composite }
         end
 
-        context "when the primary key is composite" do
-          specify { database.primary_keys.last.should_not be_composite }
+        context "when the primary key is composite (multiple columns)" do
+          specify { database.primary_keys.first.should be_composite }
         end
       end
 
@@ -146,6 +148,7 @@ module Sequel
           its(:columns) { should include(:account_number, :source_firm_code) }
           its(:ref_table) { should == :bnr_accounts }
           its(:ref_columns) { should include(:number, :code) }
+          it { should be_composite }
         end
 
         context "when the foreign key is regular" do
@@ -181,6 +184,7 @@ module Sequel
           its(:name) { should == 'uq_fund_account_number_cusip' }
           its(:table) { should == :dbo_fund_accounts }
           its(:columns) { should include(:fund_account_number, :cusip) }
+          it { should be_composite }
         end
 
         context "when the unique constraint is regular (applied to one data column)" do
@@ -215,6 +219,7 @@ module Sequel
           its(:table) { should == :dbo_reps }
           its(:columns) { should include(:is_active) }
           its(:expression) { should == '([is_active]>= 0) AND [is_active]<=(1))' }
+          it { should_not be_composite }
         end
       end
 
@@ -250,7 +255,55 @@ module Sequel
       describe '#indexes' do
         before do
           Sequel::Dataset.any_instance.stub(:all).and_return([
+            { constraint_name: 'idx_fund_account_info', table_schema: 'dbo', table_name: 'fund_accounts',
+              column_name: 'fund_account_number', is_unique: '1', index_type: '1' },
+            { constraint_name: 'idx_reps_rep_code', table_schema: 'bnr', table_name: 'reps', column_name: 'rep_code',
+              is_unique: '1', index_type: '1' },
+            { constraint_name: 'IDX_FUND_ACCOUNT_INFO', table_schema: 'dbo', table_name: 'fund_accounts',
+              column_name: 'cusip', is_unique: '1', index_type: '1' },
+            { constraint_name: 'idx_trades_account_number', table_schema: 'bnr', table_name: 'trades',
+              column_name: 'account_number', is_unique: '0', index_type: '2' }
           ])
+        end
+        subject { database.indexes }
+
+        it { should_not be_empty }
+        it { should have(3).indexes }
+
+        context "where the first element" do
+          subject { database.indexes.first }
+
+          it { should be_a(Gauge::DB::Index) }
+          its(:name) { should == 'idx_fund_account_info' }
+          its(:table) { should == :dbo_fund_accounts }
+          its(:columns) { should include(:fund_account_number, :cusip) }
+          it { should be_composite }
+          it { should be_unique }
+          it { should be_clustered }
+        end
+
+        context "when the index is clustered" do
+          specify { database.indexes.first.should be_clustered }
+        end
+
+        context "when the index is not clustered" do
+          specify { database.indexes.last.should_not be_clustered }
+        end
+
+        context "when the index is unique" do
+          specify { database.indexes.first.should be_unique }
+        end
+
+        context "when the index is not unique" do
+          specify { database.indexes.last.should_not be_unique }
+        end
+
+        context "when the index is regular (contains one column)" do
+          specify { database.indexes.last.should_not be_composite }
+        end
+
+        context "when the index is composite (contains multiple columns)" do
+          specify { database.indexes.first.should be_composite }
         end
       end
 

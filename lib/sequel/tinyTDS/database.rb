@@ -69,6 +69,12 @@ module Sequel
 
 
       def indexes
+        all_constraints(SQL_ALL_INDEXES) do |name, row|
+          options = {}
+          options[:clustered] = true if row[:index_type] == '1'
+          options[:unique] = true if row[:is_unique] == '1'
+          Gauge::DB::Index.new(name, table_from(row), column_from(row), options)
+        end
       end
 
 private
@@ -174,6 +180,14 @@ private
       eos
 
       SQL_ALL_INDEXES = <<-eos
+        select idx.name as constraint_name, s.name as table_schema, t.name as table_name, col.name as column_name,
+          idx.is_unique, idx.[type] as index_type
+        from sys.indexes as idx
+        inner join sys.tables as t on t.object_id = idx.object_id
+        inner join sys.schemas as s on s.schema_id = t.schema_id
+        inner join sys.index_columns as ic on ic.object_id = idx.object_id and ic.index_id = idx.index_id
+        inner join sys.columns as col on col.object_id = ic.object_id and col.column_id = ic.column_id
+        where idx.is_primary_key = 0 and idx.is_unique_constraint = 0 and t.is_ms_shipped = 0;
       eos
     end
   end
