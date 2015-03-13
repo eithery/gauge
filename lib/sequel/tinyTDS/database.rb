@@ -1,4 +1,4 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Sequel::TynyTDS::Database
 # Extends Sequel Database functionality.
 
@@ -26,7 +26,7 @@ module Sequel
       end
 
 
-      def tables
+      def data_tables
       end
 
 
