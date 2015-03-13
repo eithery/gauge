@@ -31,7 +31,7 @@ module Sequel
 
 
       def primary_keys
-        all_constraints(SQL_ALL_PRIMARY_KEYS) do |name, row|
+        @primary_keys ||= all_constraints(SQL_ALL_PRIMARY_KEYS) do |name, row|
           options = {}
           options[:clustered] = false if row[:key_type] == '2'
           Gauge::DB::Constraints::PrimaryKeyConstraint.new(name, table_from(row), column_from(row), options)
@@ -40,7 +40,7 @@ module Sequel
 
 
       def foreign_keys
-        all_constraints(SQL_ALL_FOREIGN_KEYS, contains_refs: true) do |name, row|
+        @foreign_keys ||= all_constraints(SQL_ALL_FOREIGN_KEYS, contains_refs: true) do |name, row|
           Gauge::DB::Constraints::ForeignKeyConstraint.new(name, table_from(row), column_from(row),
             ref_table_from(row), ref_column_from(row))
         end
@@ -48,28 +48,28 @@ module Sequel
 
 
       def unique_constraints
-        all_constraints(SQL_ALL_UNIQUE_CONSTRAINTS) do |name, row|
+        @unique_constraints ||= all_constraints(SQL_ALL_UNIQUE_CONSTRAINTS) do |name, row|
           Gauge::DB::Constraints::UniqueConstraint.new(name, table_from(row), column_from(row))
         end
       end
 
 
       def check_constraints
-        all_constraints(SQL_ALL_CHECK_CONSTRAINTS) do |name, row|
+        @check_constraints ||= all_constraints(SQL_ALL_CHECK_CONSTRAINTS) do |name, row|
           Gauge::DB::Constraints::CheckConstraint.new(name, table_from(row), column_from(row), row[:check_clause])
         end
       end
 
 
       def default_constraints
-        all_constraints(SQL_ALL_DEFAULT_CONSTRAINTS) do |name, row|
+        @default_constraints ||= all_constraints(SQL_ALL_DEFAULT_CONSTRAINTS) do |name, row|
           Gauge::DB::Constraints::DefaultConstraint.new(name, table_from(row), column_from(row), row[:definition])
         end
       end
 
 
       def indexes
-        all_constraints(SQL_ALL_INDEXES) do |name, row|
+        @indexes ||= all_constraints(SQL_ALL_INDEXES) do |name, row|
           options = {}
           options[:clustered] = true if row[:index_type] == '1'
           options[:unique] = true if row[:is_unique] == '1'
