@@ -33,7 +33,7 @@ module Sequel
       def primary_keys
         @primary_keys ||= all_constraints(SQL_ALL_PRIMARY_KEYS) do |name, row|
           options = {}
-          options[:clustered] = false if row[:key_type] == '2'
+          options[:clustered] = false if row[:key_type] == 2
           Gauge::DB::Constraints::PrimaryKeyConstraint.new(name, table_from(row), column_from(row), options)
         end
       end
@@ -71,8 +71,8 @@ module Sequel
       def indexes
         @indexes ||= all_constraints(SQL_ALL_INDEXES) do |name, row|
           options = {}
-          options[:clustered] = true if row[:index_type] == '1'
-          options[:unique] = true if row[:is_unique] == '1'
+          options[:clustered] = true if row[:index_type] == 1
+          options[:unique] = true if row[:is_unique] == true
           Gauge::DB::Index.new(name, table_from(row), column_from(row), options)
         end
       end

@@ -79,11 +79,11 @@ module Sequel
         before do
           Sequel::Dataset.any_instance.stub(:all).and_return([
             { constraint_name: 'pk_account_owner', table_schema: 'dbo', table_name: 'account_owners',
-              column_name: 'master_account_id', key_type: '1' },
+              column_name: 'master_account_id', key_type: 1 },
             { constraint_name: 'PK_ACCOUNT_OWNER', table_schema: 'dbo', table_name: 'Account_Owners',
-              column_name: 'natural_owner_id', key_type: '1' },
+              column_name: 'natural_owner_id', key_type: 1 },
             { constraint_name: 'pk_validation_rules', table_schema: 'vld', table_name: 'validation_rules',
-              column_name: 'id', key_type: '2' },
+              column_name: 'id', key_type: 2 },
           ])
         end
         subject { database.primary_keys }
@@ -256,13 +256,13 @@ module Sequel
         before do
           Sequel::Dataset.any_instance.stub(:all).and_return([
             { constraint_name: 'idx_fund_account_info', table_schema: 'dbo', table_name: 'fund_accounts',
-              column_name: 'fund_account_number', is_unique: '1', index_type: '1' },
+              column_name: 'fund_account_number', is_unique: true, index_type: 1 },
             { constraint_name: 'idx_reps_rep_code', table_schema: 'bnr', table_name: 'reps', column_name: 'rep_code',
-              is_unique: '1', index_type: '1' },
+              is_unique: true, index_type: 1 },
             { constraint_name: 'IDX_FUND_ACCOUNT_INFO', table_schema: 'dbo', table_name: 'fund_accounts',
-              column_name: 'cusip', is_unique: '1', index_type: '1' },
+              column_name: 'cusip', is_unique: true, index_type: 1 },
             { constraint_name: 'idx_trades_account_number', table_schema: 'bnr', table_name: 'trades',
-              column_name: 'account_number', is_unique: '0', index_type: '2' }
+              column_name: 'account_number', is_unique: false, index_type: 2 }
           ])
         end
         subject { database.indexes }
