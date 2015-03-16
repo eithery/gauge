@@ -25,6 +25,18 @@ module Gauge
 
 
       describe '#primary_key' do
+        before do
+          Sequel::TinyTDS::Database.any_instance.stub(:primary_keys).and_return([
+            PrimaryKey.new('pk_accounts', :accounts, :account_number, clustered: true),
+            @pk_reps = PrimaryKey.new('pk_primary_reps', :primary_reps, :rep_code),
+            PrimaryKey.new('pk_office_types', :office_types, :id, clustered: false)
+          ])
+          @data_table = DataTable.new(dbo_name)
+        end
+
+        it "selects the primary key from the database primary key collection" do
+          @data_table.primary_key.should eq(@pk_reps)
+        end
       end
 
 
