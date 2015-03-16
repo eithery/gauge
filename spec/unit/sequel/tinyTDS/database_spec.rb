@@ -72,6 +72,26 @@ module Sequel
 
 
       describe '#data_tables' do
+        before do
+          Sequel::Dataset.any_instance.stub(:all).and_return([
+            { table_name: 'accounts', table_schema: 'dbo' },
+            { table_name: 'reps', table_schema: 'bnr' },
+            { table_name: 'financial_info', table_schema: 'ref' },
+            { table_name: 'trades', table_schema: 'dbo' }
+          ])
+        end
+        subject { database.data_tables }
+
+        it { should_not be_empty }
+        it { should have(4).tables }
+
+        context "where the first element" do
+          subject { database.data_tables.first }
+
+          it { should be_a(Gauge::DB::DataTable) }
+          its(:name) { should == 'accounts' }
+          its(:to_sym) { should == :dbo_accounts }
+        end
       end
 
 

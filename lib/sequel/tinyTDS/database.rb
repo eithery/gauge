@@ -27,6 +27,10 @@ module Sequel
 
 
       def data_tables
+        execute_sql(SQL_ALL_TABLES).map do |row|
+          name = row[:table_name].downcase
+          Gauge::DB::DataTable.new(name, self)
+        end
       end
 
 
@@ -132,6 +136,13 @@ private
       def execute_sql(sql)
         self.[](sql).all
       end
+
+
+      SQL_ALL_TABLES = <<-eos
+        select t.name as table_name, s.name as table_schema
+        from sys.tables as t
+        inner join sys.schemas as s on s.schema_id = t.schema_id
+      eos
 
 
       SQL_ALL_PRIMARY_KEYS = <<-eos
