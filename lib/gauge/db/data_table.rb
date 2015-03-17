@@ -14,6 +14,9 @@ module Gauge
 
 
       def columns
+        @columns ||= @database.schema(name).map do |column_name, options|
+          DataColumn.new(column_name, options)
+        end
       end
 
 

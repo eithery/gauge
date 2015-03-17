@@ -25,6 +25,27 @@ module Gauge
 
 
       describe '#columns' do
+        before do
+          database.stub(:schema).and_return([
+            [:id, { db_type: 'bigint', allow_null: false }],
+            [:code, { db_type: 'nvarchar', max_chars: 10, allow_null: false }],
+            [:office_id, { db_type: 'bigint', allow_null: false }],
+            [:Is_Active, { db_type: 'tinyint', default: '((1))', allow_null: false }]
+          ])
+        end
+        subject { dbo.columns }
+
+        it { should_not be_empty }
+        it { should have(4).columns }
+
+        context "where the last column" do
+          subject { dbo.columns.last }
+
+          it { should be_a(DataColumn) }
+          its(:name) { should == 'is_active' }
+          its(:data_type) { should == :tinyint }
+          its(:to_sym) { should == :is_active }
+        end
       end
 
 
