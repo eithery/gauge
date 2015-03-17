@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Validators::ValidatorBase
 # Represents abstract validator to check a database structure.
+
 require 'gauge'
 
 module Gauge
@@ -10,11 +11,11 @@ module Gauge
       include SQL::Provider
 
       def self.check_all(validator_name, &block)
-        define_method(:do_check_all) do |dbo_schema, dba|
+        define_method(:do_check_all) do |dbo_schema, dbo|
           validator = validator_for validator_name
           block.call(dbo_schema).each do |child_schema|
             validator.errors.clear
-            validator.check child_schema, dba
+            validator.check child_schema, dbo
             collect_errors validator
           end
         end
@@ -22,10 +23,10 @@ module Gauge
 
 
       def self.check_before(validator_name, options={})
-        define_method(:do_check_before) do |dbo_schema, dba|
+        define_method(:do_check_before) do |dbo_schema, dbo|
           result = true
           validator = validator_for validator_name
-          result = validator.do_validate(dbo_schema, dba)
+          result = validator.do_validate(dbo_schema, dbo)
           collect_errors validator
           result
         end
@@ -33,11 +34,11 @@ module Gauge
 
 
       def self.check(*validators, &block)
-        define_method(:do_check) do |dbo_schema, dba|
+        define_method(:do_check) do |dbo_schema, dbo|
           validators.each do |validator_name|
             validator = validator_for validator_name
-            actual_dba = block ? block.call(dbo_schema, dba) : dba
-            validator.do_validate(dbo_schema, actual_dba)
+            actual_dbo = block ? block.call(dbo_schema, dbo) : dbo
+            validator.do_validate(dbo_schema, actual_dbo)
             collect_errors validator
           end
         end
@@ -45,8 +46,8 @@ module Gauge
 
 
       def self.validate(&block)
-        define_method :do_validate do |dbo_schema, dba|
-          instance_exec dbo_schema, dba, &block
+        define_method :do_validate do |dbo_schema, dbo|
+          instance_exec dbo_schema, dbo, &block
         end
       end
 
@@ -56,12 +57,12 @@ module Gauge
       end
 
 
-      def check(dbo_schema, dba)
+      def check(dbo_schema, dbo)
         result = true
-        result = do_check_before(dbo_schema, dba) if respond_to? :do_check_before
+        result = do_check_before(dbo_schema, dbo) if respond_to? :do_check_before
         if result
-          do_check_all(dbo_schema, dba) if respond_to? :do_check_all
-          do_check(dbo_schema, dba) if respond_to? :do_check
+          do_check_all(dbo_schema, dbo) if respond_to? :do_check_all
+          do_check(dbo_schema, dbo) if respond_to? :do_check
         end
       end
 

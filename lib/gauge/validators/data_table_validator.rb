@@ -1,6 +1,7 @@
 # Eithery Lab., 2015.
 # Class Gauge::Validators::DataTableValidator
 # Checks the specified data table structure against the predefined schema.
+
 require 'gauge'
 
 module Gauge
