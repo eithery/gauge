@@ -5,9 +5,13 @@ require 'spec_helper'
 module Gauge
   module DB
     describe DataColumn do
+      let(:dbo_name) { 'REP_CODE' }
       let(:sequel) { double('sequel') }
-      let(:column) { DataColumn.new(sequel) }
+      let(:column) { DataColumn.new(dbo_name, sequel) }
+      let(:dbo) { column }
       subject { column }
+
+      it_behaves_like "any database object"
 
       it { should respond_to :data_type }
       it { should respond_to :allow_null? }
