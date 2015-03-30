@@ -1,5 +1,6 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Sequel::TynyTDS::Database specs.
+
 require 'spec_helper'
 
 module Sequel
@@ -19,29 +20,6 @@ module Sequel
       it { should respond_to :check_constraints }
       it { should respond_to :default_constraints }
       it { should respond_to :indexes }
-
-
-      describe '#table_exists?' do
-        before do
-          @table_schema = Gauge::Schema::DataTableSchema.new(:master_accounts, sql_schema: :ref)
-          database.stub(:tables).and_return([:master_accounts, :customers])
-        end
-
-        it "performs table search in the specified SQL schema scope" do
-          database.should_receive(:tables).with(hash_including(schema: :ref)).and_return([:master_accounts])
-          database.table_exists? @table_schema
-        end
-
-        context "when table does not exist in the database" do
-          before { stub_table_local_name 'reps' }
-          specify { database.table_exists?(@table_schema).should be false }
-        end
-
-        context "when table exists in the database" do
-          before { stub_table_local_name 'customers' }
-          specify { database.table_exists?(@table_schema).should be true }
-        end
-      end
 
 
       describe '#column_exists?' do
@@ -93,6 +71,27 @@ module Sequel
           it { should be_a(Gauge::DB::DataTable) }
           its(:name) { should == 'ref.financial_info' }
           its(:to_sym) { should == :ref_financial_info }
+        end
+      end
+
+
+      describe '#table_exists?' do
+        before { stub_data_tables }
+
+        context "when data table exists in the database" do
+          it "returns true" do
+            [:dbo_accounts, :ref_financial_info, :dbo_trades, :bnr_reps].each do |table_name|
+              database.table_exists?(table_name).should be true
+            end
+          end
+        end
+
+        context "when data table does not exist in the database" do
+          it "returns false" do
+            [:accounts, :reps, :ref_accounts, :dbo_reps].each do |table_name|
+              database.table_exists?(table_name).should be false
+            end
+          end
         end
       end
 
@@ -358,11 +357,6 @@ module Sequel
       end
 
   private
-
-      def stub_table_local_name(name)
-        @table_schema.stub(:local_name).and_return(name)
-      end
-
 
       def stub_database_schema
         database.stub(:schema).and_return([

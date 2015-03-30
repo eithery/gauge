@@ -68,11 +68,6 @@ module Gauge
         end
       end
 
-
-      def db_object(dbo)
-        dbo
-      end
-
   private
 
       def validator_for(validator_name)

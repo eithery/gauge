@@ -10,7 +10,7 @@ module Gauge
 
       validate do |table_schema, database|
         result = true
-        unless database.table_exists? table_schema
+        unless database.table_exists? table_schema.to_key
           missing_table table_schema.table_name
           result = false
         end

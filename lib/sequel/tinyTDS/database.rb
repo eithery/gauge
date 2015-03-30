@@ -8,8 +8,8 @@ require 'gauge'
 module Sequel
   module TinyTDS
     class Database < Sequel::Database
-      def table_exists?(table_schema)
-        self.tables(schema: table_schema.sql_schema).include?(table_schema.local_name.downcase.to_sym)
+      def table_exists?(table_key)
+        data_tables.any? { |table| table.to_sym == table_key }
       end
 
 
