@@ -27,10 +27,17 @@ module Sequel
 
 
       def data_tables
-        execute_sql(SQL_ALL_TABLES).map do |row|
+        @data_tables ||= execute_sql(SQL_ALL_TABLES).map do |row|
+          schema = row[:table_schema].downcase
           name = row[:table_name].downcase
-          Gauge::DB::DataTable.new(name, self)
+          Gauge::DB::DataTable.new("#{schema}.#{name}", self)
         end
+      end
+
+
+      def data_table(table_name)
+        key = Gauge::Helpers::NameParser.dbo_key_of table_name
+        data_tables.select { |table| table.to_sym == key }.first
       end
 
 

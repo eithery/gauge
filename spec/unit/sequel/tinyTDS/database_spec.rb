@@ -11,6 +11,7 @@ module Sequel
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column).in_table table_schema }
 
       it { should respond_to :table_exists?, :column_exists?, :column }
+      it { should respond_to :data_table }
       it { should respond_to :data_tables }
       it { should respond_to :primary_keys }
       it { should respond_to :foreign_keys }
@@ -72,14 +73,7 @@ module Sequel
 
 
       describe '#data_tables' do
-        before do
-          Sequel::Dataset.any_instance.stub(:all).and_return([
-            { table_name: 'accounts', table_schema: 'dbo' },
-            { table_name: 'reps', table_schema: 'bnr' },
-            { table_name: 'financial_info', table_schema: 'ref' },
-            { table_name: 'trades', table_schema: 'dbo' }
-          ])
-        end
+        before { stub_data_tables }
         subject { database.data_tables }
 
         it { should_not be_empty }
@@ -89,8 +83,44 @@ module Sequel
           subject { database.data_tables.first }
 
           it { should be_a(Gauge::DB::DataTable) }
-          its(:name) { should == 'accounts' }
+          its(:name) { should == 'dbo.accounts' }
           its(:to_sym) { should == :dbo_accounts }
+        end
+
+        context "with custom SQL schema" do
+          subject { database.data_tables.last }
+
+          it { should be_a(Gauge::DB::DataTable) }
+          its(:name) { should == 'ref.financial_info' }
+          its(:to_sym) { should == :ref_financial_info }
+        end
+      end
+
+
+      describe '#data_table' do
+        before { stub_data_tables }
+
+        context "when data table exists in the database" do
+          it "returns a data table with the specified name" do
+            {
+              'dbo.accounts' => :dbo_accounts,
+              'ref.financial_info' => :ref_financial_info,
+              'DBO.Accounts' => :dbo_accounts,
+              'trades' => :dbo_trades,
+              :trades => :dbo_trades
+            }.each do |name, table|
+              database.data_table(name).should be_a(Gauge::DB::DataTable)
+              database.data_table(name).to_sym.should == table
+            end
+          end
+        end
+
+
+        context "when data table does not exist in the database" do
+          it "returns nil" do
+            database.data_table('reps').should be_nil
+            database.data_table('ref.accounts').should be_nil
+          end
         end
       end
 
@@ -339,6 +369,16 @@ module Sequel
           [:id, double('id')],
           [:account_number, double('account_number')],
           [:created_at, double('created_at')]
+        ])
+      end
+
+
+      def stub_data_tables
+        Sequel::Dataset.any_instance.stub(:all).and_return([
+          { table_name: 'accounts', table_schema: 'dbo' },
+          { table_name: 'reps', table_schema: 'bnr' },
+          { table_name: 'trades', table_schema: 'dbo' },
+          { table_name: 'financial_info', table_schema: 'ref' }
         ])
       end
     end
