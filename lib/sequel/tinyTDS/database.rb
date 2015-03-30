@@ -8,11 +8,6 @@ require 'gauge'
 module Sequel
   module TinyTDS
     class Database < Sequel::Database
-      def table_exists?(table_key)
-        data_tables.any? { |table| table.to_sym == table_key }
-      end
-
-
       def column_exists?(column_schema)
         table(column_schema).any? { |item| item.first == column_schema.to_key }
       end
@@ -26,8 +21,8 @@ module Sequel
       end
 
 
-      def data_tables
-        @data_tables ||= execute_sql(SQL_ALL_TABLES).map do |row|
+      def tables
+        @tables ||= execute_sql(SQL_ALL_TABLES).map do |row|
           schema = row[:table_schema].downcase
           name = row[:table_name].downcase
           Gauge::DB::DataTable.new("#{schema}.#{name}", self)
@@ -35,9 +30,14 @@ module Sequel
       end
 
 
+      def table_exists?(table_key)
+        tables.any? { |table| table.to_sym == table_key }
+      end
+
+
       def data_table(table_name)
-        key = Gauge::Helpers::NameParser.dbo_key_of table_name
-        data_tables.select { |table| table.to_sym == key }.first
+        table_key = Gauge::Helpers::NameParser.dbo_key_of table_name
+        tables.select { |table| table.to_sym == table_key }.first
       end
 
 

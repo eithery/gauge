@@ -12,8 +12,7 @@ module Sequel
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column).in_table table_schema }
 
       it { should respond_to :table_exists?, :column_exists?, :column }
-      it { should respond_to :data_table }
-      it { should respond_to :data_tables }
+      it { should respond_to :tables, :data_table }
       it { should respond_to :primary_keys }
       it { should respond_to :foreign_keys }
       it { should respond_to :unique_constraints }
@@ -50,15 +49,15 @@ module Sequel
       end
 
 
-      describe '#data_tables' do
+      describe '#tables' do
         before { stub_data_tables }
-        subject { database.data_tables }
+        subject { database.tables }
 
         it { should_not be_empty }
         it { should have(4).tables }
 
         context "where the first element" do
-          subject { database.data_tables.first }
+          subject { database.tables.first }
 
           it { should be_a(Gauge::DB::DataTable) }
           its(:name) { should == 'dbo.accounts' }
@@ -66,7 +65,7 @@ module Sequel
         end
 
         context "with custom SQL schema" do
-          subject { database.data_tables.last }
+          subject { database.tables.last }
 
           it { should be_a(Gauge::DB::DataTable) }
           its(:name) { should == 'ref.financial_info' }
