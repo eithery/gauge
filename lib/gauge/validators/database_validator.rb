@@ -7,7 +7,7 @@ require 'gauge'
 module Gauge
   module Validators
     class DatabaseValidator < Validators::Base
-      check_all(:data_tables) { |db_schema| db_schema.tables.values }
+      check_all :data_tables, with_schema: ->database { database.tables.values }
 
 
       def check(schema, database)

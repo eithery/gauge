@@ -1,7 +1,8 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Inspector
 # Performs various validation checks of the specified database or
 # particular database objects structure against the predefined schema.
+
 require 'gauge'
 require_relative 'logger'
 

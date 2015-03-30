@@ -1,15 +1,16 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Validators::MissingTableValidator
 # Performs check for missing data table.
+
 require 'gauge'
 
 module Gauge
   module Validators
     class MissingTableValidator < Validators::Base
 
-      validate do |table_schema, dba|
+      validate do |table_schema, database|
         result = true
-        unless dba.table_exists? table_schema
+        unless database.table_exists? table_schema
           missing_table table_schema.table_name
           result = false
         end

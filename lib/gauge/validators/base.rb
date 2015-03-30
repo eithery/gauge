@@ -10,12 +10,13 @@ module Gauge
       include Logger
       include SQL::Provider
 
-      def self.check_all(validator_name, &block)
+      def self.check_all(validator_name, options={})
         define_method(:do_check_all) do |dbo_schema, dbo|
+          db_schema_provider = options[:with_schema]
           validator = validator_for validator_name
-          block.call(dbo_schema).each do |child_schema|
+          db_schema_provider.call(dbo_schema).each do |schema|
             validator.errors.clear
-            validator.check child_schema, dbo
+            validator.check schema, dbo
             collect_errors validator
           end
         end
@@ -33,11 +34,12 @@ module Gauge
       end
 
 
-      def self.check(*validators, &block)
+      def self.check(*validators, options)
         define_method(:do_check) do |dbo_schema, dbo|
+          dbo_provider = options[:with_dbo]
           validators.each do |validator_name|
             validator = validator_for validator_name
-            actual_dbo = block ? block.call(dbo_schema, dbo) : dbo
+            actual_dbo = dbo_provider ? dbo_provider.call(dbo_schema, dbo) : dbo
             validator.do_validate(dbo_schema, actual_dbo)
             collect_errors validator
           end
@@ -64,6 +66,11 @@ module Gauge
           do_check_all(dbo_schema, dbo) if respond_to? :do_check_all
           do_check(dbo_schema, dbo) if respond_to? :do_check
         end
+      end
+
+
+      def db_object(dbo)
+        dbo
       end
 
   private
