@@ -1,5 +1,6 @@
 # Eithery Lab., 2015.
 # Class Gauge::DB::DataColumn specs.
+
 require 'spec_helper'
 
 module Gauge
@@ -17,6 +18,7 @@ module Gauge
       it { should respond_to :allow_null? }
       it { should respond_to :length }
       it { should respond_to :default_value }
+      it { should respond_to :to_sym }
 
 
       describe '#data_type' do
@@ -69,6 +71,20 @@ module Gauge
           end
           it "removes parentheses from default value" do
             column.default_value.should == 'host_name()'
+          end
+        end
+      end
+
+
+      describe '#to_sym' do
+        it "returns the data column name converted to symbol" do
+          {
+            'id' => :id,
+            'account_number' => :account_number,
+            'SOURCE_FIRM' => :source_firm,
+            :Rep_Code => :rep_code
+          }.each do |name, expected_symbol|
+            DataColumn.new(name).to_sym.should == expected_symbol
           end
         end
       end

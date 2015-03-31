@@ -35,6 +35,11 @@ module Gauge
         default
       end
 
+
+      def to_sym
+        name.to_sym
+      end
+
   private
 
       def sequel_constant(default_value)
