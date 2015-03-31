@@ -61,7 +61,7 @@ module Gauge
 
 
       def contains?(column_name)
-        columns.any? { |col| col.to_sum == column_name.downcase.to_sym }
+        columns.any? { |col| col.to_sym == column_name.downcase.to_sym }
       end
 
 

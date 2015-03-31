@@ -10,7 +10,7 @@ module Gauge
 
       validate do |column_schema, table|
         result = true
-        unless table.column_exists? column_schema.to_sum
+        unless table.column_exists? column_schema.to_sym
           missing_column column_schema.column_name
           result = false
 

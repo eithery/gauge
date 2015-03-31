@@ -2,6 +2,7 @@
 # Class Gauge::Schema::DataColumnSchema
 # Data column schema.
 # Contains metadata info defining a data table column.
+
 require 'gauge'
 
 module Gauge
@@ -97,7 +98,7 @@ module Gauge
       end
 
 
-      def to_sum
+      def to_sym
         column_name.downcase.to_sym
       end
 

@@ -1,5 +1,6 @@
 # Eithery Lab., 2015.
 # Gauge::Schema::DataColumnSchema specs.
+
 require 'spec_helper'
 
 module Gauge
@@ -14,7 +15,7 @@ module Gauge
       it { should respond_to :table }
       it { should respond_to :length, :char_column? }
       it { should respond_to :allow_null?, :default_value, :sql_default_value }
-      it { should respond_to :to_sum }
+      it { should respond_to :to_sym }
       it { should respond_to :id? }
       it { should respond_to :in_table }
       it { should respond_to :computed? }
@@ -426,9 +427,9 @@ module Gauge
       end
 
 
-      describe '#to_sum' do
+      describe '#to_sym' do
         it "returns column name converted to a symbol" do
-          column.to_sum.should == :account_number
+          column.to_sym.should == :account_number
         end
       end
 
