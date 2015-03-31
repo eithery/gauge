@@ -8,18 +8,6 @@ require 'gauge'
 module Sequel
   module TinyTDS
     class Database < Sequel::Database
-      def column_exists?(column_schema)
-        table(column_schema).any? { |item| item.first == column_schema.to_sum }
-      end
-
-
-      def column(column_schema)
-        column_options = table(column_schema).select do |item|
-          item.first == column_schema.to_sum
-        end.first.last
-        Gauge::DB::DataColumn.new(column_schema.column_name, column_options)
-      end
-
 
       def tables
         @tables ||= execute_sql(SQL_ALL_TABLES).map do |row|
@@ -89,11 +77,6 @@ module Sequel
       end
 
 private
-
-      def table(column_schema)
-        self.schema(column_schema.table.local_name)
-      end
-
 
       def table_from(dataset_row)
         compose_table dataset_row, :table_schema, :table_name

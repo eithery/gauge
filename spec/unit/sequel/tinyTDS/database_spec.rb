@@ -11,7 +11,7 @@ module Sequel
       let(:column_schema) { Gauge::Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column).in_table table_schema }
 
-      it { should respond_to :table_exists?, :column_exists?, :column }
+      it { should respond_to :table_exists? }
       it { should respond_to :tables, :data_table }
       it { should respond_to :primary_keys }
       it { should respond_to :foreign_keys }
@@ -19,34 +19,6 @@ module Sequel
       it { should respond_to :check_constraints }
       it { should respond_to :default_constraints }
       it { should respond_to :indexes }
-
-
-      describe '#column_exists?' do
-        before { stub_database_schema }
-
-        context "when data column does not exists in the table" do
-          specify { database.column_exists?(missing_column_schema).should be false }
-        end
-
-        context "when data column exists in the table" do
-          specify { database.column_exists?(column_schema).should be true }
-        end
-      end
-
-
-      describe '#column' do
-        it "retrieves SQL metadata for the data table" do
-          database.should_receive(:schema).with('accounts')
-            .and_return([[:account_number, double('account_number')]])
-          database.column column_schema
-        end
-
-        it "returns data column metadata" do
-          stub_database_schema
-          Gauge::DB::DataColumn.should_receive(:new).once
-          database.column column_schema
-        end
-      end
 
 
       describe '#tables' do
@@ -356,15 +328,6 @@ module Sequel
       end
 
   private
-
-      def stub_database_schema
-        database.stub(:schema).and_return([
-          [:id, double('id')],
-          [:account_number, double('account_number')],
-          [:created_at, double('created_at')]
-        ])
-      end
-
 
       def stub_data_tables
         Sequel::Dataset.any_instance.stub(:all).and_return([
