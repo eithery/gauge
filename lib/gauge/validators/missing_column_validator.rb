@@ -1,21 +1,22 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Validators::MissingColumnValidator
 # Performs check for missing data column.
+
 require 'gauge'
 
 module Gauge
   module Validators
     class MissingColumnValidator < Validators::Base
 
-      validate do |column, dba|
+      validate do |column_schema, table|
         result = true
-        unless dba.column_exists? column
-          missing_column column.column_name
+        unless table.column_exists? column_schema.to_key
+          missing_column column_schema.column_name
           result = false
 
-          build_sql(:add_column, column) do |sql|
-            sql.alter_table column.table
-            sql.add_column column
+          build_sql(:add_column, column_schema) do |sql|
+            sql.alter_table column_schema.table
+            sql.add_column column_schema
           end
         end
         result
