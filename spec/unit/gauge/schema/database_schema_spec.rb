@@ -10,7 +10,7 @@ module Gauge
 
       it { should respond_to :database_name, :sql_name }
       it { should respond_to :database_schema }
-      it { should respond_to :tables, :to_key }
+      it { should respond_to :tables, :to_sym }
       it { should respond_to :object_name }
       it { should respond_to :home }
 
@@ -50,8 +50,8 @@ module Gauge
       end
 
 
-      describe '#to_key' do
-        specify { db_schema.to_key.should == :rep_profile }
+      describe '#to_sym' do
+        specify { db_schema.to_sym.should == :rep_profile }
       end
 
 

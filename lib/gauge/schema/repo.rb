@@ -27,7 +27,7 @@ module Gauge
 
       def self.define_database(*args, &block)
         db_schema = DatabaseSchema.new(*args, &block)
-        databases[db_schema.to_key] = db_schema
+        databases[db_schema.to_sym] = db_schema
       end
 
 
