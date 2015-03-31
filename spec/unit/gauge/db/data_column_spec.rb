@@ -77,7 +77,7 @@ module Gauge
 
 
       describe '#to_sym' do
-        it "returns the data column name converted to symbol" do
+        it "returns the data column name converted to a symbol" do
           {
             'id' => :id,
             'account_number' => :account_number,

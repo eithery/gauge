@@ -1,6 +1,7 @@
 # Eithery Lab., 2015.
 # Class Gauge::DB::DataColumn
 # Encapsulates the actual data column attributes.
+
 require 'gauge'
 
 module Gauge

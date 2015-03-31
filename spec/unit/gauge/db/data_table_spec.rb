@@ -9,12 +9,14 @@ module Gauge
       let(:database) { Sequel::TinyTDS::Database.new }
       let(:dbo_name) { 'PRIMARY_REPS' }
       let(:dbo) { DataTable.new(dbo_name, database) }
+      let(:table) { dbo }
       let(:no_constraints_table) { DataTable.new('no_constraints_table', database) }
       subject { dbo }
 
       it_behaves_like "any database object"
 
       it { should respond_to :columns }
+      it { should respond_to :column_exists? }
       it { should respond_to :primary_key }
       it { should respond_to :foreign_keys }
       it { should respond_to :unique_constraints }
@@ -25,26 +27,40 @@ module Gauge
 
 
       describe '#columns' do
-        before do
-          database.stub(:schema).and_return([
-            [:id, { db_type: 'bigint', allow_null: false }],
-            [:code, { db_type: 'nvarchar', max_chars: 10, allow_null: false }],
-            [:office_id, { db_type: 'bigint', allow_null: false }],
-            [:Is_Active, { db_type: 'tinyint', default: '((1))', allow_null: false }]
-          ])
-        end
-        subject { dbo.columns }
+        before { stub_data_table }
+        subject { table.columns }
 
         it { should_not be_empty }
         it { should have(4).columns }
 
         context "where the last column" do
-          subject { dbo.columns.last }
+          subject { table.columns.last }
 
           it { should be_a(DataColumn) }
           its(:name) { should == 'is_active' }
           its(:data_type) { should == :tinyint }
           its(:to_sym) { should == :is_active }
+        end
+      end
+
+
+      describe '#column_exists?' do
+        before { stub_data_table }
+
+        context "when the data column exists in the table" do
+          it "returns true" do
+            [:id, :code, :office_id, :is_active, :OFFICE_ID, 'is_active', 'CODE'].each do |col|
+              table.column_exists?(col).should be true
+            end
+          end
+        end
+
+        context "when the data column does not exist in the table" do
+          it "returns false" do
+            [:rep_id, :rep_code, :is_enabled, 'is_enabled'].each do |col|
+              table.column_exists?(col).should be false
+            end
+          end
         end
       end
 
@@ -59,7 +75,7 @@ module Gauge
         end
 
         it "selects the primary key belongs to the data table" do
-          dbo.primary_key.should be_equal(@pk_reps)
+          table.primary_key.should be_equal(@pk_reps)
         end
 
         context "when the table does not have a primary key" do
@@ -81,9 +97,9 @@ module Gauge
         end
 
         it "selects all foreign keys belong to the data table" do
-          dbo.foreign_keys.should have(1).item
-          dbo.foreign_keys.should include(@fk_office_code)
-          dbo.foreign_keys.should_not include(@fk_rep_code)
+          table.foreign_keys.should have(1).item
+          table.foreign_keys.should include(@fk_office_code)
+          table.foreign_keys.should_not include(@fk_rep_code)
         end
 
         context "when the table does not have foreign keys" do
@@ -102,9 +118,9 @@ module Gauge
         end
 
         it "selects all unique constraints belong to the data table" do
-          dbo.unique_constraints.should have(2).items
-          dbo.unique_constraints.should include(@uc_office_code, @uc_rep_code)
-          dbo.unique_constraints.should_not include(@uc_account_number)
+          table.unique_constraints.should have(2).items
+          table.unique_constraints.should include(@uc_office_code, @uc_rep_code)
+          table.unique_constraints.should_not include(@uc_account_number)
         end
 
         context "when the table does not have unique constraints" do
@@ -124,9 +140,9 @@ module Gauge
         end
 
         it "selects all check constraints belong to the data table" do
-          dbo.check_constraints.should have(2).items
-          dbo.check_constraints.should include(@cc_is_enabled, @cc_ordinal)
-          dbo.check_constraints.should_not include(@cc_trade_type)
+          table.check_constraints.should have(2).items
+          table.check_constraints.should include(@cc_is_enabled, @cc_ordinal)
+          table.check_constraints.should_not include(@cc_trade_type)
         end
 
         context "when the table does not have check constraints" do
@@ -145,9 +161,9 @@ module Gauge
         end
 
         it "selects all default_constraints belongs to the data table" do
-          dbo.default_constraints.should have(1).item
-          dbo.default_constraints.should include(@df_reps_is_enabled)
-          dbo.default_constraints.should_not include(@df_address_state)
+          table.default_constraints.should have(1).item
+          table.default_constraints.should include(@df_reps_is_enabled)
+          table.default_constraints.should_not include(@df_address_state)
         end
 
         context "when the table does not have default constraints" do
@@ -166,9 +182,9 @@ module Gauge
         end
 
         it "selects all indexes belong to the data table" do
-          dbo.indexes.should have(1).item
-          dbo.indexes.should include(@idx_rep_office_code)
-          dbo.indexes.should_not include(@idx_account_number)
+          table.indexes.should have(1).item
+          table.indexes.should include(@idx_rep_office_code)
+          table.indexes.should_not include(@idx_account_number)
         end
 
         context "when the table does not have indexes" do
@@ -188,6 +204,17 @@ module Gauge
             DataTable.new(name, database).to_sym.should == expected_symbol
           end
         end
+      end
+
+  private
+
+      def stub_data_table
+        database.stub(:schema).and_return([
+          [:id, { db_type: 'bigint', allow_null: false }],
+          [:code, { db_type: 'nvarchar', max_chars: 10, allow_null: false }],
+          [:office_id, { db_type: 'bigint', allow_null: false }],
+          [:Is_Active, { db_type: 'tinyint', default: '((1))', allow_null: false }]
+        ])
       end
     end
   end

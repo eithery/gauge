@@ -20,6 +20,12 @@ module Gauge
       end
 
 
+      def column_exists?(column_name)
+        column_key = column_name.downcase.to_sym
+        columns.any? { |col| col.to_sym == column_key }
+      end
+
+
       def primary_key
         @database.primary_keys.select { |pk| pk.table == to_sym }.first
       end
