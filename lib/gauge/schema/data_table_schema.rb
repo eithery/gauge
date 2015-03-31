@@ -1,7 +1,8 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Schema::DataTableSchema
 # Data table schema.
 # Contains metadata info defining a data table structure.
+
 require 'gauge'
 
 module Gauge
@@ -54,7 +55,7 @@ module Gauge
       end
 
 
-      def to_key
+      def to_sym
         "#{sql_schema}_#{local_name}".downcase.to_sym
       end
 

@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Schema::Repo
 # Represent a repository containing metadata describing database structure.
+
 require 'gauge'
 
 module Gauge
@@ -33,7 +34,7 @@ module Gauge
       def self.define_table(table_name, options={}, &block)
         options[:database] = current_db_schema
         table_schema = DataTableSchema.new(table_name, options, &block)
-        current_db_schema.tables[table_schema.to_key] = table_schema
+        current_db_schema.tables[table_schema.to_sym] = table_schema
       end
 
 

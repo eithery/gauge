@@ -1,5 +1,6 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Gauge::Schema::Repo specs.
+
 require 'spec_helper'
 
 module Gauge
@@ -72,7 +73,7 @@ module Gauge
         end
 
         it "creates data table metadata definition" do
-          table_schema = double('participants', to_key: :participants, :database= => @db_schema)
+          table_schema = double('participants', to_sym: :participants, :database= => @db_schema)
           DataTableSchema.should_receive(:new).with(:participants, hash_including(database: @db_schema))
             .and_return(table_schema)
           Repo.define_table(:participants)

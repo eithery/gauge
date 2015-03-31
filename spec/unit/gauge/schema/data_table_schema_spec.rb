@@ -1,5 +1,6 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Gauge::Schema::DataTableSchema specs.
+
 require 'spec_helper'
 
 module Gauge
@@ -25,9 +26,10 @@ module Gauge
       it { should respond_to :object_name, :sql_name }
       it { should respond_to :reference_table? }
       it { should respond_to :columns }
-      it { should respond_to :to_key, :contains? }
+      it { should respond_to :contains? }
       it { should respond_to :col, :timestamps }
       it { should respond_to :index }
+      it { should respond_to :to_sym }
 
 
       describe '#table_name' do
@@ -108,21 +110,6 @@ module Gauge
       end
 
 
-      describe '#to_key' do
-        context "for default SQL schema" do
-          it "returns the local table name concatenated with 'dbo' and converted to symbol" do
-            dbo_table_schema.to_key.should == :dbo_master_accounts
-          end
-        end
-
-        context "for custom SQL schema" do
-          it "concatenates SQL schema and local table name" do
-            ref_table_schema.to_key.should == :ref_source_firms
-          end
-        end
-      end
-
-
       describe '#contains?' do
         context "when the column defined in table definition" do
           specify { table_schema.contains?(:account_number).should be true }
@@ -132,6 +119,21 @@ module Gauge
         context "when the column is not defined in table definition" do
           specify { table_schema.contains?(:rep_code).should be false }
           specify { table_schema.contains?('rep_code').should be false }
+        end
+      end
+
+
+      describe '#to_sym' do
+        context "for default SQL schema" do
+          it "returns the local table name concatenated with 'dbo' and converted to symbol" do
+            dbo_table_schema.to_sym.should == :dbo_master_accounts
+          end
+        end
+
+        context "for custom SQL schema" do
+          it "concatenates SQL schema and local table name" do
+            ref_table_schema.to_sym.should == :ref_source_firms
+          end
         end
       end
 
