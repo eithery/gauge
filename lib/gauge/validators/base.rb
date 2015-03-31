@@ -13,10 +13,13 @@ module Gauge
       def self.check_all(validator_name, options={})
         define_method(:do_check_all) do |dbo_schema, dbo|
           db_schema_provider = options[:with_schema]
+          dbo_provider = options[:with_dbo]
+          actual_dbo = dbo_provider ? dbo_provider.call(dbo, dbo_schema) : dbo
+
           validator = validator_for validator_name
           db_schema_provider.call(dbo_schema).each do |schema|
             validator.errors.clear
-            validator.check schema, dbo
+            validator.check schema, actual_dbo
             collect_errors validator
           end
         end
@@ -39,7 +42,7 @@ module Gauge
           dbo_provider = options[:with_dbo]
           validators.each do |validator_name|
             validator = validator_for validator_name
-            actual_dbo = dbo_provider ? dbo_provider.call(dbo_schema, dbo) : dbo
+            actual_dbo = dbo_provider ? dbo_provider.call(dbo, dbo_schema) : dbo
             validator.do_validate(dbo_schema, actual_dbo)
             collect_errors validator
           end

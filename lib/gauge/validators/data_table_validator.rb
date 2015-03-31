@@ -9,11 +9,12 @@ module Gauge
     class DataTableValidator < Validators::Base
       check_before :missing_table
       check :primary_key, {}
-      check_all :data_columns, with_schema: ->table { table.columns }
+      check_all :data_columns, with_schema: ->table { table.columns },
+        with_dbo: ->(database, table_schema) { database.data_table table_schema.table_name }
 
-      def check(table_schema, dba)
+      def check(table_schema, database)
         errors.clear
-        super(table_schema, dba)
+        super(table_schema, database)
         print_totals table_schema
       end
 

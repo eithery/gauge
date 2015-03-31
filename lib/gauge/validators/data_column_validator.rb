@@ -8,8 +8,8 @@ module Gauge
   module Validators
     class DataColumnValidator < Validators::Base
       check_before :missing_column
-      check :column_nullability, :column_type, :column_length, :default_constraint,
-        with_dbo: ->(column_schema, database) { database.column(column_schema) }
+      check :column_type, :column_length, :column_nullability, :default_constraint,
+        with_dbo: ->(table, column_schema) { table.column(column_schema.to_key) }
     end
   end
 end
