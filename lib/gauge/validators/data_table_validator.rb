@@ -10,7 +10,7 @@ module Gauge
       check_before :missing_table
       check :primary_key, {}
       check_all :data_columns, with_schema: ->table { table.columns },
-        with_dbo: ->(database, table_schema) { database.data_table table_schema.table_name }
+        with_dbo: ->(database, table_schema) { database.table table_schema.table_name }
 
       def check(table_schema, database)
         errors.clear

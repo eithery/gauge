@@ -23,7 +23,7 @@ module Sequel
       end
 
 
-      def data_table(table_name)
+      def table(table_name)
         table_key = Gauge::Helpers::NameParser.dbo_key_of table_name
         tables.select { |table| table.to_sym == table_key }.first
       end

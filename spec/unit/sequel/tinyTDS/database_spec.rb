@@ -12,7 +12,7 @@ module Sequel
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column).in_table table_schema }
 
       it { should respond_to :table_exists? }
-      it { should respond_to :tables, :data_table }
+      it { should respond_to :tables, :table }
       it { should respond_to :primary_keys }
       it { should respond_to :foreign_keys }
       it { should respond_to :unique_constraints }
@@ -67,7 +67,7 @@ module Sequel
       end
 
 
-      describe '#data_table' do
+      describe '#table' do
         before { stub_data_tables }
 
         context "when data table exists in the database" do
@@ -79,8 +79,8 @@ module Sequel
               'trades' => :dbo_trades,
               :trades => :dbo_trades
             }.each do |name, table|
-              database.data_table(name).should be_a(Gauge::DB::DataTable)
-              database.data_table(name).to_sym.should == table
+              database.table(name).should be_a(Gauge::DB::DataTable)
+              database.table(name).to_sym.should == table
             end
           end
         end
@@ -88,8 +88,8 @@ module Sequel
 
         context "when data table does not exist in the database" do
           it "returns nil" do
-            database.data_table('reps').should be_nil
-            database.data_table('ref.accounts').should be_nil
+            database.table('reps').should be_nil
+            database.table('ref.accounts').should be_nil
           end
         end
       end
