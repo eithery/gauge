@@ -97,7 +97,7 @@ module Gauge
       end
 
 
-      def to_key
+      def to_sum
         column_name.downcase.to_sym
       end
 

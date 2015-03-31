@@ -9,7 +9,7 @@ module Gauge
     class DataColumnValidator < Validators::Base
       check_before :missing_column
       check :column_type, :column_length, :column_nullability, :default_constraint,
-        with_dbo: ->(table, column_schema) { table.column(column_schema.to_key) }
+        with_dbo: ->(table, column_schema) { table.column(column_schema.to_sum) }
     end
   end
 end

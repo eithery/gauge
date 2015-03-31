@@ -9,13 +9,13 @@ module Sequel
   module TinyTDS
     class Database < Sequel::Database
       def column_exists?(column_schema)
-        table(column_schema).any? { |item| item.first == column_schema.to_key }
+        table(column_schema).any? { |item| item.first == column_schema.to_sum }
       end
 
 
       def column(column_schema)
         column_options = table(column_schema).select do |item|
-          item.first == column_schema.to_key
+          item.first == column_schema.to_sum
         end.first.last
         Gauge::DB::DataColumn.new(column_schema.column_name, column_options)
       end
