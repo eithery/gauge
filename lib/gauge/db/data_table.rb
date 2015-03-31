@@ -14,7 +14,8 @@ module Gauge
 
 
       def columns
-        @columns ||= @database.schema(name).map do |column_name, options|
+        local_name = name.split('.').last
+        @columns ||= @database.schema(local_name).map do |column_name, options|
           DataColumn.new(column_name, options)
         end
       end
@@ -23,6 +24,12 @@ module Gauge
       def column_exists?(column_name)
         column_key = column_name.downcase.to_sym
         columns.any? { |col| col.to_sym == column_key }
+      end
+
+
+      def column(column_name)
+        column_key = column_name.downcase.to_sym
+        columns.select { |col| col.to_sym == column_key }.first
       end
 
 

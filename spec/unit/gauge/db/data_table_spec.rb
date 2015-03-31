@@ -17,6 +17,7 @@ module Gauge
 
       it { should respond_to :columns }
       it { should respond_to :column_exists? }
+      it { should respond_to :column }
       it { should respond_to :primary_key }
       it { should respond_to :foreign_keys }
       it { should respond_to :unique_constraints }
@@ -60,6 +61,38 @@ module Gauge
             [:rep_id, :rep_code, :is_enabled, 'is_enabled'].each do |col|
               table.column_exists?(col).should be false
             end
+          end
+        end
+      end
+
+
+      describe '#column' do
+        before { stub_data_table }
+
+        context "when the data column exists in the table" do
+          it "returns a data column with the specified name" do
+            {
+              'id' => :id,
+              :id => :id,
+              :code => :code,
+              'CODE' => :code,
+              :office_id => :office_id,
+              'office_id' => :office_id,
+              :OFFICE_ID => :office_id,
+              'OFFICE_ID' => :office_id,
+              :is_active => :is_active,
+              'is_active' => :is_active
+            }.each do |name, column|
+              table.column(name).should be_a(Gauge::DB::DataColumn)
+              table.column(name).to_sym.should == column
+            end
+          end
+        end
+
+        context "when the data column does not exist in the table" do
+          it "returns nil" do
+            table.column(:rep_code).should be nil
+            table.column('rep_code').should be nil
           end
         end
       end
