@@ -1,17 +1,18 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Validators::ColumnTypeValidator
 # Checks the data column type against the predefined metadata.
+
 require 'gauge'
 
 module Gauge
   module Validators
     class ColumnTypeValidator < Validators::Base
 
-      validate do |column_schema, db_column|
-        if column_schema.data_type != db_column.data_type
+      validate do |column_schema, column|
+        if column_schema.data_type != column.data_type
           build_alter_column_sql column_schema
 
-          errors << "Data column '<b>#{column_schema.column_name}</b>' is '<b>#{db_column.data_type}</b>', " +
+          errors << "Data column '<b>#{column_schema.column_name}</b>' is '<b>#{column.data_type}</b>', " +
             "but it must be '<b>#{column_schema.data_type}</b>'."
         end
       end

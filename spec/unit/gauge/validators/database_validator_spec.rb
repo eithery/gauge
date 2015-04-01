@@ -7,7 +7,7 @@ module Gauge
   module Validators
     describe DatabaseValidator do
       let(:validator) { DatabaseValidator.new }
-      let(:db_column) { double('db_column', :allow_null? => false, data_type: :bigint, default_value: nil,
+      let(:db_column) { double('db_column', allow_null?: false, data_type: :bigint, default_value: nil,
           length: Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH) }
       let(:dba) { double('dba', table_exists?: true, column_exists?: true, column: db_column) }
       let(:schema) do
@@ -31,8 +31,8 @@ module Gauge
         end
 
         it "creates validator to check data tables" do
-          stub_table_validator = double('table_validator', check: true, errors: [])
-          DataTableValidator.should_receive(:new).once.and_return(stub_table_validator)
+          table_validator = double('table_validator', check: true, errors: [])
+          DataTableValidator.should_receive(:new).once.and_return(table_validator)
           validator.check schema, dba
         end
 

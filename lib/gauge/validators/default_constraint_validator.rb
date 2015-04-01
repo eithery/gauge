@@ -1,13 +1,15 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Validators::DefaultConstraintValidator
 # Checks default constraints for data columns.
+
 require 'gauge'
 
 module Gauge
   module Validators
     class DefaultConstraintValidator < Validators::Base
-      validate do |column_schema, db_column|
-        actual_default_value = column_default column_schema, db_column
+
+      validate do |column_schema, column|
+        actual_default_value = column_default column_schema, column
 
         case mismatch column_schema.default_value, actual_default_value
           when :missing_constraint
@@ -35,8 +37,8 @@ module Gauge
       end
 
 
-      def column_default(column_schema, db_column)
-        column_schema.bool? ? convert_to_bool(db_column.default_value) : db_column.default_value
+      def column_default(column_schema, column)
+        column_schema.bool? ? convert_to_bool(column.default_value) : column.default_value
       end
 
 

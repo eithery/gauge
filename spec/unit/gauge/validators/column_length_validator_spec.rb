@@ -1,5 +1,6 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Gauge::Validators::ColumnLengthValidator specs.
+
 require 'spec_helper'
 
 module Gauge

@@ -16,7 +16,7 @@ module Gauge
           db_column
       end
       let(:table) { double('table', column_exists?: true, column: column) }
-      let(:database) { double('database', sql_name: 'books_n_records', table_exists?: true, data_table: table) }
+      let(:database) { double('database', sql_name: 'books_n_records', table_exists?: true, table: table) }
       let(:table_schema) do
         Schema::DataTableSchema.new(:master_accounts, database: database) do
           col :account_number
