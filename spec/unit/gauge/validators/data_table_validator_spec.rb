@@ -15,7 +15,10 @@ module Gauge
           db_column.stub(:default_value).and_return(nil)
           db_column
       end
-      let(:table) { double('table', column_exists?: true, column: column) }
+      let(:table) do
+        primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :master_accounts, :id)
+        double('table', column_exists?: true, column: column, primary_key: primary_key)
+      end
       let(:database) { double('database', sql_name: 'books_n_records', table_exists?: true, table: table) }
       let(:table_schema) do
         Schema::DataTableSchema.new(:master_accounts, database: database) do
@@ -60,7 +63,7 @@ module Gauge
           end
 
           it "performs validation check for primary key constraint" do
-            stub_validator(PrimaryKeyValidator).should_receive(:do_validate).with(table_schema, database).once
+            stub_validator(PrimaryKeyValidator).should_receive(:do_validate).with(table_schema, table).once
             validator.check table_schema, database
           end
 
