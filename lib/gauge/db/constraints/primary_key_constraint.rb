@@ -18,6 +18,11 @@ module Gauge
         def clustered?
           @clustered
         end
+
+
+        def ==(other_key)
+          table == other_key.table && columns.sort == other_key.columns.sort && clustered? == other_key.clustered?
+        end
       end
     end
   end
