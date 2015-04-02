@@ -90,6 +90,11 @@ module Gauge
         @primary_key ||= define_primary_key
       end
 
+
+      def indexes
+        []
+      end
+
 private
 
       def has_id?

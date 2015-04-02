@@ -27,6 +27,7 @@ module Gauge
       it { should respond_to :reference_table? }
       it { should respond_to :columns }
       it { should respond_to :primary_key }
+      it { should respond_to :indexes }
       it { should respond_to :contains? }
       it { should respond_to :col, :timestamps }
       it { should respond_to :index }
@@ -356,6 +357,127 @@ module Gauge
 
           it { should be_clustered }
           it { should be_composite }
+        end
+      end
+
+
+      describe '#indexes' do
+        subject { table_schema.indexes }
+
+        it { should_not be_nil }
+
+        context "when the table does not have indexes" do
+          it { should be_empty }
+        end
+
+        context "when only one index is defined on the table" do
+          before do
+            @reps_table = DataTableSchema.new(:reps) do
+              col :rep_code, id: true
+              col :rep_name, index: true
+            end
+          end
+
+          specify { @reps_table.indexes.should have(1).item }
+          subject { @reps_table.indexes.first }
+          it { should be_a Gauge::DB::Index }
+          its(:name) { should == '' }
+          its(:table) { should == :dbo_reps }
+          its(:columns) { should have(1).column }
+          its(:columns) { should include(:rep_name) }
+          it { should_not be_clustered }
+          it { should_not be_unique }
+          it { should_not be_composite }
+        end
+
+        context "when multiple indexes are defined on the table" do
+          before do
+            @trades = DataTableSchema.new(:trades) do
+              col :trade_id, index: true
+              col :rep_code, index: true
+              col :batch_id, index: true
+            end
+          end
+        end
+
+        context "when unique index is defined on the table" do
+          before do
+            @reps_table = DataTableSchema.new(:reps) do
+              col :rep_code, id: true
+              col :rep_name, index: { unique: true }
+            end
+          end
+        end
+
+        context "when clustered index is defined on the table" do
+          context "as regular index" do
+            before do
+              @reps_table = DataTableSchema.new(:reps) do
+                col :rep_code, index: { clustered: true }
+                col :rep_name
+              end
+            end
+          end
+
+          context "as natural business key (using 'business_id')" do
+            before do
+              @reps_table = DataTableSchema.new(:reps) do
+                col :rep_code, business_id: true
+                col :rep_name
+              end
+            end
+          end
+        end
+
+        context "when composite (multicolumn) index is defined in the table" do
+          context "and it is regular (nonclustered and not unique)" do
+            before do
+              @trades_table = DataTableSchema.new(:trades) do
+                col :account_number, len: 20
+                col :source_firm, len: 10
+                index [:account_number, :source_firm]
+              end
+            end
+          end
+
+          context "and it is unique" do
+            before do
+              @trades_table = DataTableSchema.new(:trades) do
+                col :account_number, len: 20
+                col :source_firm, len: 10
+                index [:account_number, :source_firm], unique: true
+              end
+            end
+          end
+
+          context "and it is clustered" do
+            before do
+              @trades_table = DataTableSchema.new(:trades) do
+                col :account_number, len: 20
+                col :source_firm, len: 10
+                index [:account_number, :source_firm], clustered: true
+              end
+            end
+          end
+
+          context "and it is clustered but not unique" do
+            before do
+              @trades_table = DataTableSchema.new(:trades) do
+                col :account_number, len: 20
+                col :source_firm, len: 10
+                index [:account_number, :source_firm], clustered: true, unique: false
+              end
+            end
+          end
+
+          context "and it is natural business key (using 'business_id')" do
+            before do
+              @fund_accounts_table = DataTableSchema.new(:fund_accounts) do
+                col :fund_account_number, len: 20, business_id: true
+                col :cusip, len: 9, business_id: true
+              end
+            end
+          end
         end
       end
 
