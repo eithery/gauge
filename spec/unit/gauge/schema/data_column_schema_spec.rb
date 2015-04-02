@@ -16,7 +16,7 @@ module Gauge
       it { should respond_to :length, :char_column? }
       it { should respond_to :allow_null?, :default_value, :sql_default_value }
       it { should respond_to :to_sym }
-      it { should respond_to :id? }
+      it { should respond_to :id?, :business_id? }
       it { should respond_to :in_table }
       it { should respond_to :computed? }
       it { should respond_to :bool? }
@@ -443,6 +443,29 @@ module Gauge
         context "when column schema does not define surrogate id" do
           before { @not_id_column = DataColumnSchema.new(:product_id) }
           specify { @not_id_column.should_not be_id }
+        end
+
+        context "when id option value is not true" do
+          before { @not_id_column = DataColumnSchema.new(:product_id, product_id: false) }
+          specify { @not_id_column.should_not be_id }
+        end
+      end
+
+
+      describe '#business_id?' do
+        context "when column schema defines business id" do
+          before { @business_id_column = DataColumnSchema.new(:rep_code, business_id: true) }
+          specify { @business_id_column.should be_business_id }
+        end
+
+        context "when column schema does not define business id" do
+          before { @not_business_id_column = DataColumnSchema.new(:rep_code) }
+          specify { @not_business_id_column.should_not be_business_id }
+        end
+
+        context "when business_id value is not true" do
+          before { @not_business_id_column = DataColumnSchema.new(:rep_code, business_id: false) }
+          specify { @not_business_id_column.should_not be_business_id }
         end
       end
 

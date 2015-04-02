@@ -14,7 +14,7 @@ module Gauge
       end
       let(:ref_table_schema) do
         DataTableSchema.new(:source_firms, sql_schema: :ref) do
-          col :source_firm_id
+          col :source_firm_id, id: true
         end
       end
       let(:table_schema) { dbo_table_schema }
@@ -26,6 +26,7 @@ module Gauge
       it { should respond_to :object_name, :sql_name }
       it { should respond_to :reference_table? }
       it { should respond_to :columns }
+      it { should respond_to :primary_key }
       it { should respond_to :contains? }
       it { should respond_to :col, :timestamps }
       it { should respond_to :index }
@@ -276,6 +277,85 @@ module Gauge
 
         context "with 'camel' column naming convention for string columns" do
           specify { columns_should_be_added(:createdBy, :modifiedBy) { table_schema.timestamps naming: :camel }}
+        end
+      end
+
+
+      describe '#primary_key' do
+        subject { table_schema.primary_key }
+
+        it { should_not be nil }
+        it { should be_a DB::Constraints::PrimaryKeyConstraint }
+
+        it "always returns the same object instance" do
+          key = table_schema.primary_key
+          table_schema.primary_key.should be_equal(key)
+          key.should be_equal(subject)
+        end
+
+        context "when the primary key is defined by convention" do
+          its(:name) { should == 'pk_dbo_master_accounts' }
+          its(:table) { should == table_schema.to_sym }
+          specify { table_schema.primary_key.columns.should have(1).column }
+          its(:columns) { should include(:id) }
+
+          it { should be_clustered }
+          it { should_not be_composite }
+        end
+
+        context "when the primary key is defined through :id attribute" do
+          before do
+            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              col :rep_code, id: true
+              col :rep_name
+            end
+          end
+          subject { @reps_table.primary_key }
+
+          its(:name) { should == 'pk_bnr_reps' }
+          its(:table) { should == @reps_table.to_sym }
+          specify { @reps_table.primary_key.columns.should have(1).column }
+          its(:columns) { should include(:rep_code) }
+
+          it { should be_clustered }
+          it { should_not be_composite }
+        end
+
+        context "when the primary key is not clustered" do
+          before do
+            @source_firms_table = DataTableSchema.new(:source_firms, sql_schema: :ref) do
+              col :code, len: 10, business_id: true
+              col :source_name
+            end
+          end
+          subject { @source_firms_table.primary_key }
+
+          its(:name) { should == 'pk_ref_source_firms' }
+          its(:table) { should == @source_firms_table.to_sym }
+          specify { @source_firms_table.primary_key.columns.should have(1).column }
+          its(:columns) { should include(:id) }
+
+          it { should_not be_clustered }
+          it { should_not be_composite }
+        end
+
+        context "when the primary key is composite" do
+          before do
+            @account_owners_table = DataTableSchema.new(:account_owners) do
+              col :master_account_id, :ref => :br_master_account, id: true
+              col :natural_owner_id, :ref => :br_natural_owner, id: true
+              col :ordinal, type: :byte, required: true, check: '> 0'
+            end
+          end
+          subject { @account_owners_table.primary_key }
+
+          its(:name) { should == 'pk_dbo_account_owners' }
+          its(:table) { should == @account_owners_table.to_sym }
+          specify { @account_owners_table.primary_key.columns.should have(2).columns }
+          its(:columns) { should include(:master_account_id, :natural_owner_id) }
+
+          it { should be_clustered }
+          it { should be_composite }
         end
       end
 

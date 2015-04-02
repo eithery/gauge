@@ -85,6 +85,11 @@ module Gauge
       def index(columns, options={})
       end
 
+
+      def primary_key
+        @primary_key ||= define_primary_key
+      end
+
 private
 
       def has_id?
@@ -114,6 +119,14 @@ private
 
       def define_surrogate_id
         col :id, required: true, id: true
+      end
+
+
+      def define_primary_key
+        options = {}
+        options[:clustered] = false if columns.any? { |col| col.business_id? }
+        key_columns = columns.select { |col| col.id? }.map { |col| col.to_sym }
+        DB::Constraints::PrimaryKeyConstraint.new("pk_#{to_sym}", table_name, key_columns, options)
       end
     end
   end

@@ -108,6 +108,11 @@ module Gauge
       end
 
 
+      def business_id?
+        @options[:business_id] == true
+      end
+
+
       def in_table(table_schema)
         @table = table_schema
         self
@@ -143,7 +148,7 @@ module Gauge
 
 
       def identity?
-        id? || @options.include?(:business_id)
+        id? || business_id?
       end
 
 
