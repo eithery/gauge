@@ -34,14 +34,14 @@ module Gauge
 
           context "and missing the actual primary key" do
             before { @primary_key = nil }
-            it { should_append_error(/missing primary key/i) }
+            it { should_append_error(/missing (.*?)primary key(.*?) on the data table/i) }
           end
 
           context "but the actual primary key is defined on another data column" do
             before do
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts, :number)
             end
-            it { should_append_error(/primary keys mismatch/i) }
+            it { should_append_error mismatch_column_error_message([:account_id], [:number]) }
           end
 
           context "but the actual primary key is composite" do
@@ -49,7 +49,7 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts,
                 [:account_id, :number])
             end
-            it { should_append_error(/primary keys mismatch/i) }
+            it { should_append_error mismatch_column_error_message([:account_id], [:account_id, :number]) }
           end
 
           context "but the actual primary key is nonclustered" do
@@ -57,7 +57,7 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts,
                 :account_id, clustered: false)
             end
-            it { should_append_error(/primary keys mismatch/i) }
+            it { should_append_error(/Primary key should be (.*?)clustered(.*?) it is (.*?)nonclustered(.*?)/) }
           end
 
           context "but the actual primary key has a different name" do
@@ -95,7 +95,8 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_fund_accounts', :fund_accounts,
                 [:product_id, :cusip])
             end
-            it { should_append_error(/primary keys mismatch/i) }
+            it { should_append_error mismatch_column_error_message([:fund_account_number, :cusip],
+                [:product_id, :cusip]) }
           end
 
           context "but the actual primary key is simple and does not include one column" do
@@ -103,12 +104,13 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_fund_accounts', :fund_accounts,
                 [:fund_account_number])
             end
-            it { should_append_error(/primary keys mismatch/i) }
+            it { should_append_error mismatch_column_error_message([:fund_account_number, :cusip],
+              [:fund_account_number]) }
           end
         end
 
 
-        context "when primary key is unclustered" do
+        context "when primary key is nonclustered" do
           before do
             @table_schema = Gauge::Schema::DataTableSchema.new(:accounts) do
               col :account_id, id: true
@@ -119,7 +121,7 @@ module Gauge
             @table_schema.stub(:primary_key).and_return(primary_key)
           end
 
-          context "and the actual unclustered primary key is defined on the same data column" do
+          context "and the actual nonclustered primary key is defined on the same data column" do
             before do
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts,
                 :account_id, clustered: false)
@@ -131,7 +133,7 @@ module Gauge
             before do
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts, :account_id)
             end
-            it { should_append_error(/primary keys mismatch/i) }
+            it { should_append_error(/Primary key should be (.*?)nonclustered(.*?) it is (.*?)clustered(.*?)/) }
           end
         end
       end
@@ -140,6 +142,18 @@ module Gauge
 
       def dba
         table
+      end
+
+
+      def mismatch_column_error_message(expected, actual)
+        message = "primary key is defined on \\[#{error_message_for(actual)}\\] " +
+          "column\\(s\\), but should be on \\[#{error_message_for(expected)}\\]"
+        /#{message}/i
+      end
+
+
+      def error_message_for(columns)
+        columns.map { |col| "\\'(.*?)#{col}(.*?)\\'" }.join(', ')
       end
     end
   end
