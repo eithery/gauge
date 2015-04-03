@@ -113,6 +113,16 @@ module Gauge
       end
 
 
+      def has_index?
+        @options.include?(:index) && @options[:index] != false
+      end
+
+
+      def index
+        Gauge::DB::Index.new("idx_#{table.to_sym}_#{column_name}", table.to_sym, to_sym) if has_index?
+      end
+
+
       def in_table(table_schema)
         @table = table_schema
         self

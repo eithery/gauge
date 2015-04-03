@@ -8,6 +8,7 @@ module Gauge
     describe DataColumnSchema do
       let(:column) { DataColumnSchema.new(:account_number, type: :string, required: true) }
       let(:ref_column) { DataColumnSchema.new(:ref => 'br.primary_reps') }
+      let(:table_schema) { DataTableSchema.new(:reps, sql_schema: :bnr) }
       subject { column }
 
       it { should respond_to :column_name }
@@ -20,6 +21,7 @@ module Gauge
       it { should respond_to :in_table }
       it { should respond_to :computed? }
       it { should respond_to :bool? }
+      it { should respond_to :has_index?, :index }
       it { should respond_to :sql_attributes }
 
 
@@ -466,6 +468,62 @@ module Gauge
         context "when business_id value is not true" do
           before { @not_business_id_column = DataColumnSchema.new(:rep_code, business_id: false) }
           specify { @not_business_id_column.should_not be_business_id }
+        end
+      end
+
+
+      describe '#has_index?' do
+        subject { @column.has_index? }
+
+        context "when column schema defines index" do
+          context "with 'true' value" do
+            before { @column = DataColumnSchema.new(:rep_code, index: true) }
+            it { should be true }
+          end
+
+          context "with 'false' value" do
+            before { @column = DataColumnSchema.new(:rep_code, index: false) }
+            it { should be false }
+          end
+
+          context "with additional attributes" do
+            before { @column = DataColumnSchema.new(:rep_code, index: { unique: true }) }
+            it { should be true }
+          end
+        end
+
+        context "when column schema does not define index" do
+          before { @column = DataColumnSchema.new(:rep_code) }
+          it { should be false }
+        end
+      end
+
+
+      describe '#index' do
+        subject { @column.index }
+
+        context "when column schema defines index" do
+          context "with 'true' value" do
+            before { @column = DataColumnSchema.new(:rep_code, index: true).in_table table_schema }
+            it { should be_a Gauge::DB::Index }
+            its(:name) { should == "idx_bnr_reps_rep_code" }
+            its(:table) { should == table_schema.to_sym }
+          end
+
+          context "with 'false' value" do
+            before { @column = DataColumnSchema.new(:rep_code, index: false).in_table table_schema }
+            it { should be_nil }
+          end
+
+          context "with additional attributes" do
+            before { @column = DataColumnSchema.new(:rep_code, index: { unique: true }).in_table table_schema }
+            it { should be_a Gauge::DB::Index }
+          end
+        end
+
+        context "when column schema does not define index" do
+          before { @column = DataColumnSchema.new(:rep_code).in_table table_schema }
+            it { should be_nil }
         end
       end
 

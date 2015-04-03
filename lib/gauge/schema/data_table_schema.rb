@@ -92,7 +92,7 @@ module Gauge
 
 
       def indexes
-        []
+        @indexes ||= columns.select { |col| col.has_index? }.map { |col| col.index }
       end
 
 private
