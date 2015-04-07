@@ -83,6 +83,10 @@ module Gauge
 
 
       def index(columns, options={})
+        index_columns = [columns].flatten
+        index_columns.each { |col| raise "Missing column '#{col}' in #{table_name} data table." unless contains?(col) }
+        index_name = "idx_#{to_sym}_" + index_columns.flatten.map { |col| col.to_s.downcase }.join('_')
+        indexes << Gauge::DB::Index.new(index_name, table_name, columns, options)
       end
 
 

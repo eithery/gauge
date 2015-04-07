@@ -503,7 +503,7 @@ module Gauge
         subject { @column.index }
 
         context "when column schema defines index" do
-          shared_examples_for "rep code regular index" do
+          shared_examples_for "rep code index" do
             it { should be_a Gauge::DB::Index }
             its(:name) { should == "idx_bnr_reps_rep_code" }
             its(:table) { should == table_schema.to_sym }
@@ -514,7 +514,7 @@ module Gauge
 
           context "with 'true' value" do
             before { @column = DataColumnSchema.new(:rep_code, index: true).in_table table_schema }
-            it_behaves_like "rep code regular index"
+            it_behaves_like "rep code index"
             it { should_not be_clustered }
             it { should_not be_unique }
           end
@@ -526,14 +526,14 @@ module Gauge
 
           context "with 'unique' attribute" do
             before { @column = DataColumnSchema.new(:rep_code, index: { unique: true }).in_table table_schema }
-            it_behaves_like "rep code regular index"
+            it_behaves_like "rep code index"
             it { should_not be_clustered }
             it { should be_unique }
           end
 
           context "with 'clustered' attribute" do
             before { @column = DataColumnSchema.new(:rep_code, index: { clustered: true }).in_table table_schema }
-            it_behaves_like "rep code regular index"
+            it_behaves_like "rep code index"
             it { should be_clustered }
             it { should be_unique }
           end
