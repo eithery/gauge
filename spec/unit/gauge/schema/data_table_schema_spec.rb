@@ -243,21 +243,22 @@ module Gauge
 
 
       describe '#col' do
-        before do
-          @column_schema = double('column_schema', table: table_schema)
-          @column_schema.stub(in_table: @column_schema)
-        end
+        before { table_schema }
 
         it "creates new data column schema" do
-          DataColumnSchema.should_receive(:new).with(:office_code, hash_including(type: :string))
-            .and_return(@column_schema)
+          column = double('column_schema', has_index?: false)
+          column.stub(in_table: column)
+          DataColumnSchema.should_receive(:new).with(:office_code, hash_including(type: :string)).and_return(column)
           table_schema.col :office_code, type: :string
         end
 
         it "adds the new column schema to columns collection" do
-          DataColumnSchema.stub(:new).and_return(@column_schema)
           expect { table_schema.col :office_code }.to change { table_schema.columns.count }.by(1)
-          table_schema.columns.should include(@column_schema)
+        end
+
+        it "registers the index in the data table if any" do
+          expect { table_schema.col :rep_code, index: true }.to change { table_schema.indexes.count }.by(1)
+          expect { table_schema.col :rep_code }.not_to change { table_schema.indexes.count }
         end
 
         it "sets data table attribute for newly created data column" do

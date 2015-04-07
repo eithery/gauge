@@ -8,12 +8,13 @@ require 'gauge'
 module Gauge
   module Schema
     class DataTableSchema
-      attr_reader :columns
+      attr_reader :columns, :indexes
 
       def initialize(table_name, options={}, &block)
         @local_name = table_name
         @options = options
         @columns = []
+        @indexes = []
 
         instance_eval(&block) if block
         define_surrogate_id unless has_id?
@@ -66,7 +67,9 @@ module Gauge
 
 
       def col(*args, &block)
-        columns << DataColumnSchema.new(*args, &block).in_table(self)
+        column = DataColumnSchema.new(*args, &block).in_table(self)
+        indexes << column.index if column.has_index?
+        columns << column
       end
 
 
@@ -92,11 +95,6 @@ module Gauge
 
       def primary_key
         @primary_key ||= define_primary_key
-      end
-
-
-      def indexes
-        @indexes ||= columns.select { |col| col.has_index? }.map { |col| col.index }
       end
 
 private
