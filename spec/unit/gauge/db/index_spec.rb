@@ -68,6 +68,65 @@ module Gauge
           specify { @nonunique_index.should_not be_unique }
         end
       end
+
+
+      describe '#==' do
+        before { @index = Index.new('idx_reps_rep_code', :reps, :rep_code) }
+
+        context "when two indexes represent the same instance" do
+          specify "they are equal" do
+            @index.should == @index
+          end
+        end
+
+        context "when two indexes have the same state" do
+          specify "they are equal" do
+            index = Index.new('idx_reps_rep_code', :reps, :rep_code)
+            index.should_not equal(@index)
+            index.should == @index
+            @index.should == index
+          end
+        end
+
+        context "when two indexes have the same state but different names" do
+          specify "they are equal" do
+            index = Index.new('idx_primary_reps_123456', :reps, :rep_code)
+            index.should == @index
+            @index.should == index
+          end
+        end
+
+        context "when two indexes are different" do
+          specify "they are not equal" do
+            index = Index.new('idx_reps_rep_code', :reps, :rep_code, unique: true)
+            index.should_not == @index
+            @index.should_not == index
+          end
+        end
+
+        context "for composite indexes" do
+          before { @composite_index = Index.new('idx_fund_accounts', :fund_accounts, [:fund_account_number, :cusip]) }
+
+          context "with same columns in various order" do
+            specify "they are equal" do
+              index = Index.new('idx_fund_accounts', :fund_accounts, [:fund_account_number, :cusip])
+              inverse_order_index = Index.new('idx_fund_accounts', :fund_accounts, [:cusip, :fund_account_number])
+              index.should == @composite_index
+              @composite_index.should == index
+              inverse_order_index.should == @composite_index
+              @composite_index.should == inverse_order_index
+            end
+          end
+
+          context "when the number of columns are different" do
+            specify "they are not equal" do
+              index = Index.new('idx_fund_accounts', :fund_accounts, [:fund_account_number, :cusip, :ordinal])
+              index.should_not == @composite_index
+              @composite_index.should_not == index
+            end
+          end
+        end
+      end
     end
   end
 end

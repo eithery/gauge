@@ -23,6 +23,12 @@ module Gauge
       def unique?
         @unique || clustered?
       end
+
+
+      def ==(other_index)
+        table == other_index.table && columns.sort == other_index.columns.sort &&
+          clustered? == other_index.clustered? && unique? == other_index.unique?
+      end
     end
   end
 end
