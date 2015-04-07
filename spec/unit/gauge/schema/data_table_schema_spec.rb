@@ -256,11 +256,6 @@ module Gauge
           expect { table_schema.col :office_code }.to change { table_schema.columns.count }.by(1)
         end
 
-        it "registers the index in the data table if any" do
-          expect { table_schema.col :rep_code, index: true }.to change { table_schema.indexes.count }.by(1)
-          expect { table_schema.col :rep_code }.not_to change { table_schema.indexes.count }
-        end
-
         it "sets data table attribute for newly created data column" do
           table_schema.col :office_code, type: :string
           last_column_should_have_table
@@ -541,22 +536,15 @@ module Gauge
 
           context "as natural business key (using 'business_id')" do
             before do
-              @reps_table = DataTableSchema.new(:reps) do
+              @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
                 col :rep_code, business_id: true
                 col :rep_name
               end
             end
-
-#            specify { @reps_table.indexes.should have(1).item }
-#            subject { @reps_table.indexes.first }
-#            it { should be_a Gauge::DB::Index }
-#            its(:name) { should == 'idx_dbo_reps_rep_code' }
-#            its(:table) { should == :dbo_reps }
-#            its(:columns) { should have(1).column }
-#            its(:columns) { should include(:rep_code) }
-#            it { should_not be_composite }
-#            it { should be_clustered }
-#            it { should be_unique }
+            subject { @reps_table.indexes.first }
+            it_should_behave_like "rep_code index on bnr.reps table"
+            it { should be_clustered }
+            it { should be_unique }
           end
         end
 
@@ -626,6 +614,17 @@ module Gauge
                 col :cusip, len: 9, business_id: true
               end
             end
+
+            specify { @fund_accounts_table.indexes.should have(1).item }
+            subject { @fund_accounts_table.indexes.first }
+            it { should be_a Gauge::DB::Index }
+            its(:name) { should == 'idx_dbo_fund_accounts_fund_account_number_cusip' }
+            its(:table) { should == :dbo_fund_accounts }
+            its(:columns) { should have(2).columns }
+            its(:columns) { should include(:fund_account_number, :cusip) }
+            it { should be_composite }
+            it { should be_clustered }
+            it { should be_unique }
           end
         end
       end

@@ -8,13 +8,12 @@ require 'gauge'
 module Gauge
   module Schema
     class DataTableSchema
-      attr_reader :columns, :indexes
+      attr_reader :columns
 
       def initialize(table_name, options={}, &block)
         @local_name = table_name
         @options = options
         @columns = []
-        @indexes = []
 
         instance_eval(&block) if block
         define_surrogate_id unless has_id?
@@ -67,9 +66,7 @@ module Gauge
 
 
       def col(*args, &block)
-        column = DataColumnSchema.new(*args, &block).in_table(self)
-        indexes << column.index if column.has_index?
-        columns << column
+        columns << DataColumnSchema.new(*args, &block).in_table(self)
       end
 
 
@@ -95,6 +92,11 @@ module Gauge
 
       def primary_key
         @primary_key ||= define_primary_key
+      end
+
+
+      def indexes
+        @indexes ||= define_indexes + define_business_id
       end
 
 private
@@ -134,6 +136,20 @@ private
         options[:clustered] = false if columns.any? { |col| col.business_id? }
         key_columns = columns.select { |col| col.id? }.map { |col| col.to_sym }
         DB::Constraints::PrimaryKeyConstraint.new("pk_#{to_sym}", table_name, key_columns, options)
+      end
+
+
+      def define_indexes
+        columns.select { |col| col.has_index? }.map { |col| col.index }
+      end
+
+
+      def define_business_id
+        business_key_columns = columns.select { |col| col.business_id? }.map { |col| col.to_sym }
+        return [] unless business_key_columns.any?
+
+        index_name = "idx_#{to_sym}_" + business_key_columns.each { |col| col.to_s }.join('_')
+        [DB::Index.new(index_name, table_name, business_key_columns, clustered: true)]
       end
     end
   end
