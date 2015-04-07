@@ -119,7 +119,11 @@ module Gauge
 
 
       def index
-        Gauge::DB::Index.new("idx_#{table.to_sym}_#{column_name}", table.to_sym, to_sym) if has_index?
+        if has_index?
+          options = @options[:index]
+          options = {} unless options.respond_to? :[]
+          Gauge::DB::Index.new("idx_#{table.to_sym}_#{column_name}", table.table_name, to_sym, options)
+        end
       end
 
 

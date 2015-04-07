@@ -503,11 +503,20 @@ module Gauge
         subject { @column.index }
 
         context "when column schema defines index" do
-          context "with 'true' value" do
-            before { @column = DataColumnSchema.new(:rep_code, index: true).in_table table_schema }
+          shared_examples_for "rep code regular index" do
             it { should be_a Gauge::DB::Index }
             its(:name) { should == "idx_bnr_reps_rep_code" }
             its(:table) { should == table_schema.to_sym }
+            its(:columns) { should include(:rep_code) }
+            its(:columns) { should have(1).item }
+            it { should_not be_composite }
+          end
+
+          context "with 'true' value" do
+            before { @column = DataColumnSchema.new(:rep_code, index: true).in_table table_schema }
+            it_behaves_like "rep code regular index"
+            it { should_not be_clustered }
+            it { should_not be_unique }
           end
 
           context "with 'false' value" do
@@ -515,9 +524,18 @@ module Gauge
             it { should be_nil }
           end
 
-          context "with additional attributes" do
+          context "with 'unique' attribute" do
             before { @column = DataColumnSchema.new(:rep_code, index: { unique: true }).in_table table_schema }
-            it { should be_a Gauge::DB::Index }
+            it_behaves_like "rep code regular index"
+            it { should_not be_clustered }
+            it { should be_unique }
+          end
+
+          context "with 'clustered' attribute" do
+            before { @column = DataColumnSchema.new(:rep_code, index: { clustered: true }).in_table table_schema }
+            it_behaves_like "rep code regular index"
+            it { should be_clustered }
+            it { should be_unique }
           end
         end
 
