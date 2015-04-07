@@ -48,6 +48,16 @@ module Gauge
           specify { @unique_index.should be_unique }
         end
 
+        context "when specified as clustered" do
+          before { @clustered_index = Index.new('idx_rep_code', :reps, :rep_code, clustered: true) }
+          specify { @clustered_index.should be_unique }
+        end
+
+        context "when specified as clustered but not unique" do
+          before { @clustered_index = Index.new('idx_rep_code', :reps, :rep_code, clustered: true, unique: false) }
+          specify { @clustered_index.should be_unique }
+        end
+
         context "when specified as not unique" do
           before { @nonunique_index = Index.new('idx_rep_code', :reps, :rep_code, unique: false) }
           specify { @nonunique_index.should_not be_unique }

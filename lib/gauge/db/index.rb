@@ -11,7 +11,7 @@ module Gauge
       def initialize(name, table, columns, options={})
         super(name, table, columns)
         @clustered = options[:clustered] == true
-        @unique = options[:unique] == true
+        @unique = @clustered || options[:unique] == true
       end
 
 
