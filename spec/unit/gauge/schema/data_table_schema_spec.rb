@@ -462,6 +462,41 @@ module Gauge
           it { should be_clustered }
           it { should be_composite }
         end
+
+        context "when a business key is defined on the table" do
+          before do
+            @reps_table = DataTableSchema.new(:reps) do
+              col :rep_id, id: true
+              col :rep_code, business_id: true
+            end
+          end
+          subject { @reps_table.primary_key }
+          it { should_not be_clustered }
+        end
+
+        context "when a clustered index is defined on the column" do
+          before do
+            @reps_table = DataTableSchema.new(:reps) do
+              col :rep_id, id: true
+              col :rep_code, index: { clustered: true }
+            end
+          end
+          subject { @reps_table.primary_key }
+          it { should_not be_clustered }
+        end
+
+        context "when a composite clustered index is defined on the table" do
+          before do
+            @fund_accounts_table = DataTableSchema.new(:fund_accounts) do
+              col :fund_account_number
+              col :cusip, len: 9
+              index [:fund_account_number, :cusip], clustered: true
+            end
+          end
+          subject { @fund_accounts_table.primary_key }
+          its(:columns) { should include(:id) }
+          it { should_not be_clustered }
+        end
       end
 
 

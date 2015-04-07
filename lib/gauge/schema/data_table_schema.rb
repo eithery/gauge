@@ -133,7 +133,7 @@ private
 
       def define_primary_key
         options = {}
-        options[:clustered] = false if columns.any? { |col| col.business_id? }
+        options[:clustered] = false if indexes.any? { |idx| idx.clustered? }
         key_columns = columns.select { |col| col.id? }.map { |col| col.to_sym }
         DB::Constraints::PrimaryKeyConstraint.new("pk_#{to_sym}", table_name, key_columns, options)
       end
