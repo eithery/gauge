@@ -13,8 +13,9 @@ module Gauge
           when :missing_primary_key
             errors << "Missing <b>primary key</b> on the data table."
           when :column_mismatch
-            errors << "Primary key is defined on [#{columns(table.primary_key)}] column(s), " +
-              "but should be on [#{columns(table_schema.primary_key)}]."
+            errors << "Primary key is defined on [#{columns(table.primary_key)}] " +
+              "column".pluralize(table.primary_key.columns.count) +
+              ", but should be on [#{columns(table_schema.primary_key)}]."
           when :clustered_mismatch
             errors << "Primary key should be <b>#{clustered_msg(table_schema.primary_key)}</b>, " +
               "but actually it is <b>#{clustered_msg(table.primary_key)}</b>."

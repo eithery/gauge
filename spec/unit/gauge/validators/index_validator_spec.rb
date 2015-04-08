@@ -58,7 +58,7 @@ module Gauge
 
           context "when it is missing on the data table" do
             before { @indexes = [] }
-            it { should_append_error(/Missing (.*?)index(.*?) on \['(.*?)rep_code(.*?)', '(.*?)office_code(.*)'\] data column/) }
+            it { should_append_error(/Missing (.*?)index(.*?) on \['(.*?)rep_code(.*?)', '(.*?)office_code(.*)'\] data columns/) }
           end
 
           context "when one column is missing in the actual index" do

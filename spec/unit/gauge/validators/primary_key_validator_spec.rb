@@ -147,7 +147,7 @@ module Gauge
 
       def mismatch_column_error_message(expected, actual)
         message = "primary key is defined on \\[#{error_message_for(actual)}\\] " +
-          "column\\(s\\), but should be on \\[#{error_message_for(expected)}\\]"
+          "column".pluralize(actual.count) + ", but should be on \\[#{error_message_for(expected)}\\]"
         /#{message}/i
       end
 

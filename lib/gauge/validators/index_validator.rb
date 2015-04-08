@@ -12,7 +12,8 @@ module Gauge
         table_schema.indexes.each do |index|
           case mismatch(index, table)
             when :missing_index
-              errors << "Missing <b>#{kind_of(index)}</b> on [#{columns(index)}] data column(s)."
+              errors << "Missing <b>#{kind_of(index)}</b> on [#{columns(index)}] data "+
+                "column".pluralize(index.columns.count) + "."
           end
         end
       end
