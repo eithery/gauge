@@ -126,6 +126,15 @@ module Gauge
             end
           end
         end
+
+        context "for clustered indexes" do
+          before { @clustered_index = Index.new('idx_reps_rep_code', :reps, :rep_code, clustered: true) }
+          it "does not equal to the unique index on the same column but not clustered" do
+            index = Index.new('idx_reps_rep_code', :reps, :rep_code, unique: true)
+            @clustered_index.should_not == index
+            index.should_not == @clustered_index
+          end
+        end
       end
     end
   end
