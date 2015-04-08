@@ -67,6 +67,17 @@ module Gauge
             validator.check table_schema, database
           end
 
+          it "creates validator to check indexes" do
+            stub_index_validator = double('index_validator', do_validate: false, errors: [])
+            IndexValidator.should_receive(:new).once.and_return(stub_index_validator)
+            validator.check table_schema, database
+          end
+
+          it "performs validation check for indexes" do
+            stub_validator(IndexValidator).should_receive(:do_validate).with(table_schema, table).once
+            validator.check table_schema, database
+          end
+
           it "creates validator to check data columns" do
             stub_column_validator = double('data_column_validator', check: true, errors: [])
             DataColumnValidator.should_receive(:new).once.and_return(stub_column_validator)
