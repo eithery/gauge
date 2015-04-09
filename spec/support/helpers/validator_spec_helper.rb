@@ -33,12 +33,23 @@ module Gauge
       end
 
 
+      def yields_error(error, options={})
+        get_message_method = method("#{error.to_s.downcase}_message")
+        should_append_error get_message_method.call(options)
+      end
+
+
       def no_validation_errors
         expect { yield(schema, dba) }.not_to change { validator.errors.count }
 
         validator.errors.should_not_receive(:<<)
         yield schema, dba
         validator.errors.should be_empty
+      end
+
+
+      def should_not_yield_errors
+        no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }
       end
 
 
@@ -57,6 +68,11 @@ module Gauge
 
         specify { validator.errors.should_not be_nil }
         specify { validator.errors.should be_empty }
+      end
+
+
+      def displayed_names_of(columns)
+        columns.map { |col| "\\'(.*?)#{col}(.*?)\\'" }.join(', ')
       end
     end
   end

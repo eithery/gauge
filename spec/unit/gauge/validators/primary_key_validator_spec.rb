@@ -29,19 +29,19 @@ module Gauge
             before do
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts, :account_id)
             end
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) } }
+            it { should_not_yield_errors }
           end
 
           context "and missing the actual primary key" do
             before { @primary_key = nil }
-            it { should_append_error(/missing (.*?)primary key(.*?) on the data table/i) }
+            it { yields_error :missing_primary_key }
           end
 
           context "but the actual primary key is defined on another data column" do
             before do
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts, :number)
             end
-            it { should_append_error mismatch_column_error_message([:account_id], [:number]) }
+            it { yields_error :column_mismatch, expected: [:account_id], actual: [:number] }
           end
 
           context "but the actual primary key is composite" do
@@ -49,7 +49,7 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts,
                 [:account_id, :number])
             end
-            it { should_append_error mismatch_column_error_message([:account_id], [:account_id, :number]) }
+            it { yields_error :column_mismatch, expected: [:account_id], actual: [:account_id, :number] }
           end
 
           context "but the actual primary key is nonclustered" do
@@ -57,14 +57,14 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts,
                 :account_id, clustered: false)
             end
-            it { should_append_error(/Primary key should be (.*?)clustered(.*?) it is (.*?)nonclustered(.*?)/) }
+            it { yields_error :invalid_key_type, should_be: :clustered }
           end
 
           context "but the actual primary key has a different name" do
             before do
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_acc1234567', :accounts, :account_id)
             end
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) } }
+            it { should_not_yield_errors }
           end
         end
 
@@ -87,7 +87,7 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_fund_accounts', :fund_accounts,
                 [:cusip, :fund_account_number])
             end
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) } }
+            it { should_not_yield_errors }
           end
 
           context "but the actual primary key is defined on another set of data columns" do
@@ -95,8 +95,10 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_fund_accounts', :fund_accounts,
                 [:product_id, :cusip])
             end
-            it { should_append_error mismatch_column_error_message([:fund_account_number, :cusip],
-                [:product_id, :cusip]) }
+            it do
+              yields_error :column_mismatch, expected: [:fund_account_number, :cusip],
+                actual: [:product_id, :cusip]
+            end
           end
 
           context "but the actual primary key is simple and does not include one column" do
@@ -104,8 +106,10 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_fund_accounts', :fund_accounts,
                 [:fund_account_number])
             end
-            it { should_append_error mismatch_column_error_message([:fund_account_number, :cusip],
-              [:fund_account_number]) }
+            it do
+              yields_error :column_mismatch, expected: [:fund_account_number, :cusip],
+                actual: [:fund_account_number]
+            end
           end
         end
 
@@ -126,14 +130,14 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts,
                 :account_id, clustered: false)
             end
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) } }
+            it { should_not_yield_errors }
           end
 
           context "but the actual primary key is clustered" do
             before do
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts, :account_id)
             end
-            it { should_append_error(/Primary key should be (.*?)nonclustered(.*?) it is (.*?)clustered(.*?)/) }
+            it { yields_error :invalid_key_type, should_be: :nonclustered }
           end
         end
       end
@@ -145,15 +149,39 @@ module Gauge
       end
 
 
-      def mismatch_column_error_message(expected, actual)
-        message = "primary key is defined on \\[#{error_message_for(actual)}\\] " +
-          "column".pluralize(actual.count) + ", but should be on \\[#{error_message_for(expected)}\\]"
+      def column_mismatch_message(options)
+        expected = options[:expected]
+        actual = options[:actual]
+        message = "primary key is defined on \\[#{displayed_names_of(actual)}\\] " +
+          "column".pluralize(actual.count) + ", but should be on \\[#{displayed_names_of(expected)}\\]"
         /#{message}/i
       end
 
 
-      def error_message_for(columns)
-        columns.map { |col| "\\'(.*?)#{col}(.*?)\\'" }.join(', ')
+      def invalid_key_type_message(options)
+        message = "Primary key should be (.*?)#{expected_key_type(options)}(.*?), " +
+          "but actually it is (.*?)#{actual_key_type(options)}(.*?)"
+        /#{message}/
+      end
+
+
+      def missing_primary_key_message(options)
+        /Missing (.*?)primary key(.*?) on the data table/
+      end
+
+
+      def expected_key_type(options)
+        options[:should_be].to_s
+      end
+
+
+      def actual_key_type(options)
+        expected_key_type(options) == key_types.first ? key_types.last : key_types.first
+      end
+
+
+      def key_types
+        ['clustered', 'nonclustered']
       end
     end
   end
