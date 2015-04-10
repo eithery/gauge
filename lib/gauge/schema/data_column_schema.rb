@@ -118,11 +118,23 @@ module Gauge
       end
 
 
+      def has_unique_constraint?
+        @options.include?(:unique) && @options[:unique] != false
+      end
+
+
       def index
         if has_index?
           options = @options[:index]
           options = {} unless options.respond_to? :[]
           Gauge::DB::Index.new("idx_#{table.to_sym}_#{column_name}", table.table_name, to_sym, options)
+        end
+      end
+
+
+      def unique_constraint
+        if has_unique_constraint?
+          Gauge::DB::Constraints::UniqueConstraint.new("uc_#{table.to_sym}_#{column_name}", table.table_name, to_sym)
         end
       end
 

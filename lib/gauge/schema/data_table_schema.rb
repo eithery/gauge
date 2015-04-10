@@ -85,8 +85,16 @@ module Gauge
       def index(columns, options={})
         index_columns = [columns].flatten
         index_columns.each { |col| raise "Missing column '#{col}' in #{table_name} data table." unless contains?(col) }
-        index_name = "idx_#{to_sym}_" + index_columns.flatten.map { |col| col.to_s.downcase }.join('_')
+        index_name = "idx_#{to_sym}_" + index_columns.map { |col| col.to_s.downcase }.join('_')
         indexes << Gauge::DB::Index.new(index_name, table_name, columns, options)
+      end
+
+
+      def unique(columns)
+        constraint_columns = [columns].flatten
+        constraint_columns.each { |col| raise "Missing column '#{col}' in #{table_name} data table." unless contains?(col) }
+        constraint_name = "uc_#{to_sym}_" + constraint_columns.map { |col| col.to_s.downcase }.join('_')
+        unique_constraints << Gauge::DB::Constraints::UniqueConstraint.new(constraint_name, table_name, columns)
       end
 
 
@@ -97,6 +105,11 @@ module Gauge
 
       def indexes
         @indexes ||= define_indexes + define_business_id
+      end
+
+
+      def unique_constraints
+        @unique_constraints ||= define_unique_constraints
       end
 
 private
@@ -141,6 +154,11 @@ private
 
       def define_indexes
         columns.select { |col| col.has_index? }.map { |col| col.index }
+      end
+
+
+      def define_unique_constraints
+        columns.select { |col| col.has_unique_constraint? }.map { |col| col.unique_constraint }
       end
 
 

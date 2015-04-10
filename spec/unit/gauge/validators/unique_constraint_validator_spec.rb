@@ -8,7 +8,7 @@ module Gauge
     describe UniqueConstraintValidator do
       let(:validator) { UniqueConstraintValidator.new }
       let(:schema) { @table_schema }
-      let(:table) { double('table') }
+      let(:table) { double('table', unique_constraints: @unique_constraints) }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"
@@ -115,10 +115,19 @@ module Gauge
 
 
       def missing_constraint_message(options)
+        /Missing #{constraint_description(options)}/
       end
 
 
       def redundant_unique_constraint_message(options)
+        /Redundant #{constraint_description(options)}/
+      end
+
+
+      def constraint_description(options)
+        columns = options[:columns]
+        "(.*?)unique constraint(.*?) on \\[#{displayed_names_of(columns)}\\] data " +
+        "column".pluralize(columns.count)
       end
     end
   end

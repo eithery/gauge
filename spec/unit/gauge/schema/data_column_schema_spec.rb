@@ -22,6 +22,7 @@ module Gauge
       it { should respond_to :computed? }
       it { should respond_to :bool? }
       it { should respond_to :has_index?, :index }
+      it { should respond_to :has_unique_constraint?, :unique_constraint }
       it { should respond_to :sql_attributes }
 
 
@@ -475,7 +476,7 @@ module Gauge
       describe '#has_index?' do
         subject { @column.has_index? }
 
-        context "when column schema defines index" do
+        context "when the column schema defines index" do
           context "with 'true' value" do
             before { @column = DataColumnSchema.new(:rep_code, index: true) }
             it { should be true }
@@ -492,7 +493,7 @@ module Gauge
           end
         end
 
-        context "when column schema does not define index" do
+        context "when the column schema does not define index" do
           before { @column = DataColumnSchema.new(:rep_code) }
           it { should be false }
         end
@@ -502,7 +503,7 @@ module Gauge
       describe '#index' do
         subject { @column.index }
 
-        context "when column schema defines index" do
+        context "when the column schema defines index" do
           shared_examples_for "rep code index" do
             it { should be_a Gauge::DB::Index }
             its(:name) { should == "idx_bnr_reps_rep_code" }
@@ -539,7 +540,60 @@ module Gauge
           end
         end
 
-        context "when column schema does not define index" do
+        context "when the column schema does not define index" do
+          before { @column = DataColumnSchema.new(:rep_code).in_table table_schema }
+            it { should be_nil }
+        end
+      end
+
+
+      describe '#has_unique_constraint?' do
+        subject { @column.has_unique_constraint? }
+
+        context "when the column schema defines unique constraint" do
+          context "with 'true' value" do
+            before { @column = DataColumnSchema.new(:rep_code, unique: true) }
+            it { should be true }
+          end
+
+          context "with 'false' value" do
+            before { @column = DataColumnSchema.new(:rep_code, unique: false) }
+            it { should be false }
+          end
+        end
+
+        context "when the column schema does not define unique constraint" do
+          before { @column = DataColumnSchema.new(:rep_code) }
+          it { should be false }
+        end
+      end
+
+
+      describe '#unique_constraint' do
+        subject { @column.unique_constraint }
+
+        context "when the column schema defines unique constraint" do
+          shared_examples_for "rep code unique constraint" do
+            it { should be_a Gauge::DB::Constraints::UniqueConstraint }
+            its(:name) { should == "uc_bnr_reps_rep_code" }
+            its(:table) { should == table_schema.to_sym }
+            its(:columns) { should include(:rep_code) }
+            its(:columns) { should have(1).item }
+            it { should_not be_composite }
+          end
+
+          context "with 'true' value" do
+            before { @column = DataColumnSchema.new(:rep_code, unique: true).in_table table_schema }
+            it_behaves_like "rep code unique constraint"
+          end
+
+          context "with 'false' value" do
+            before { @column = DataColumnSchema.new(:rep_code, unique: false).in_table table_schema }
+            it { should be_nil }
+          end
+        end
+
+        context "when the column schema does not define unique constraint" do
           before { @column = DataColumnSchema.new(:rep_code).in_table table_schema }
             it { should be_nil }
         end

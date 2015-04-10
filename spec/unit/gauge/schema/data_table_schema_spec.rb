@@ -27,10 +27,10 @@ module Gauge
       it { should respond_to :reference_table? }
       it { should respond_to :columns }
       it { should respond_to :primary_key }
-      it { should respond_to :indexes }
+      it { should respond_to :indexes, :unique_constraints }
       it { should respond_to :contains? }
       it { should respond_to :col, :timestamps }
-      it { should respond_to :index }
+      it { should respond_to :index, :unique }
       it { should respond_to :to_sym }
 
 
@@ -51,6 +51,28 @@ module Gauge
       shared_examples_for "composite index on rep_code and office_code columns" do
         it_behaves_like "index on bnr.reps table"
         its(:name) { should == 'idx_bnr_reps_rep_code_office_code' }
+        its(:columns) { should have(2).columns }
+        its(:columns) { should include(:rep_code, :office_code) }
+        it { should be_composite }
+      end
+
+      shared_examples_for "unique constraint on bnr.reps table" do
+        specify { @reps_table.unique_constraints.should have(1).item }
+        it { should be_a Gauge::DB::Constraints::UniqueConstraint }
+        its(:table) { should == :bnr_reps }
+      end
+
+      shared_examples_for "rep_code unique constraint on bnr.reps table" do
+        it_behaves_like "unique constraint on bnr.reps table"
+        its(:name) { should == 'uc_bnr_reps_rep_code' }
+        its(:columns) { should have(1).column }
+        its(:columns) { should include(:rep_code) }
+        it { should_not be_composite }
+      end
+
+      shared_examples_for "composite unique constraint on rep_code and office_code columns" do
+        it_behaves_like "unique constraint on bnr.reps table"
+        its(:name) { should == 'uc_bnr_reps_rep_code_office_code' }
         its(:columns) { should have(2).columns }
         its(:columns) { should include(:rep_code, :office_code) }
         it { should be_composite }
@@ -270,7 +292,7 @@ module Gauge
 
 
       describe '#index' do
-        it "creates new index" do
+        it "creates the new index" do
           Gauge::DB::Index.should_receive(:new).with('idx_dbo_master_accounts_rep_code', 'dbo.master_accounts',
             :rep_code, hash_including(clustered: true))
           table_schema.col :rep_code
@@ -348,6 +370,60 @@ module Gauge
                 col :rep_code
                 col :rep_name
                 index [:rep_code, :office_code]
+              end
+            }.to raise_error(/missing column 'office_code' in bnr.reps data table/i)
+          end
+        end
+      end
+
+
+      describe '#unique' do
+        it "creates the new unique constraint" do
+          Gauge::DB::Constraints::UniqueConstraint.should_receive(:new).with('uc_dbo_master_accounts_rep_code',
+            'dbo.master_accounts', :rep_code)
+          table_schema.col :rep_code
+          table_schema.unique :rep_code
+        end
+
+        it "adds the new unique constraint to unique constraints collection" do
+          constraint_stub = double('unique_constraint')
+          Gauge::DB::Constraints::UniqueConstraint.stub(:new).and_return(constraint_stub)
+          table_schema.col :rep_code
+          expect { table_schema.unique :rep_code }.to change { table_schema.unique_constraints.count }.by(1)
+          table_schema.unique_constraints.should include(constraint_stub)
+        end
+
+        context "when the unique constraint includes only one column" do
+          before do
+            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              col :rep_code
+              col :rep_name
+              unique :rep_code
+            end
+          end
+          subject { @reps_table.unique_constraints.first }
+          it_should_behave_like "rep_code unique constraint on bnr.reps table"
+        end
+
+        context "when the unique constraint is defined on multiple columns" do
+          before do
+            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              col :rep_code
+              col :office_code
+              unique [:rep_code, :office_code]
+            end
+          end
+          subject { @reps_table.unique_constraints.first }
+          it_behaves_like "composite unique constraint on rep_code and office_code columns"
+        end
+
+        context "when the unique constraint is defined on missing column" do
+          specify do
+            expect {
+              DataTableSchema.new(:reps, sql_schema: :bnr) do
+                col :rep_code
+                col :rep_name
+                unique [:rep_code, :office_code]
               end
             }.to raise_error(/missing column 'office_code' in bnr.reps data table/i)
           end
@@ -661,6 +737,60 @@ module Gauge
             it { should be_clustered }
             it { should be_unique }
           end
+        end
+      end
+
+
+      describe '#unique_constraints' do
+        subject { table_schema.unique_constraints }
+
+        it { should_not be_nil }
+
+        context "when the table does not have unique constraints" do
+          it { should be_empty }
+        end
+
+        context "when only one unique constraint is defined on the table" do
+          before do
+            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              col :rep_code, unique: true
+            end
+          end
+          subject { @reps_table.unique_constraints.first }
+          it_should_behave_like "rep_code unique constraint on bnr.reps table"
+        end
+
+
+        context "when multiple unique constraints are defined on the table" do
+          before do
+            @trades = DataTableSchema.new(:trades) do
+              col :trade_id, unique: true
+              col :rep_code, unique: true
+              col :batch_id, unique: true
+            end
+          end
+
+          specify { @trades.unique_constraints.should have(3).items }
+          subject { @trades.unique_constraints.last }
+          it { should be_a Gauge::DB::Constraints::UniqueConstraint }
+          its(:name) { should == 'uc_dbo_trades_batch_id' }
+          its(:table) { should == :dbo_trades }
+          its(:columns) { should have(1).column }
+          its(:columns) { should include(:batch_id) }
+          it { should_not be_composite }
+        end
+
+        context "when the composite unique constraint is defined in the table" do
+          before do
+            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              col :rep_code, len: 10
+              col :rep_name
+              col :office_code, len: 10
+              unique [:rep_code, :office_code]
+            end
+          end
+          subject { @reps_table.unique_constraints.first }
+          it_behaves_like "composite unique constraint on rep_code and office_code columns"
         end
       end
 
