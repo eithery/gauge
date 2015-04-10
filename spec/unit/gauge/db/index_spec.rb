@@ -104,6 +104,11 @@ module Gauge
           end
         end
 
+        context "when other index is nil" do
+          subject { Index.new('idx_reps_rep_code', :reps, :rep_code) }
+          it { should_not == nil }
+        end
+
         context "for composite indexes" do
           before { @composite_index = Index.new('idx_fund_accounts', :fund_accounts, [:fund_account_number, :cusip]) }
 
