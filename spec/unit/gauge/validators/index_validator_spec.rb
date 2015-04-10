@@ -21,27 +21,27 @@ module Gauge
             end
           end
 
-          context "when is exists on the data table" do
+          context "existing on the data table" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, :rep_code)] }
             it { should_not_yield_errors }
           end
 
-          context "when it is missing on the data table" do
+          context "missing on the data table" do
             before { @indexes = [] }
             it { yields_error :missing_index, columns: [:rep_code] }
           end
 
-          context "when it is defined on another column" do
+          context "defined on another column" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_name)] }
             it { yields_error :missing_index, columns: [:rep_code] }
           end
 
-          context "when it is actually unique" do
+          context "which is actually unique" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code, unique: true)] }
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: 'not unique' }
           end
 
-          context "when it is actually clustered" do
+          context "which is actually clustered" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code, clustered: true)] }
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :nonclustered }
           end
@@ -57,24 +57,24 @@ module Gauge
             end
           end
 
-          context "when is exists on the data table" do
+          context "existing on the data table" do
             before do
               @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, [:rep_code, :office_code])]
             end
             it { should_not_yield_errors }
           end
 
-          context "when it is missing on the data table" do
+          context "missing on the data table" do
             before { @indexes = [] }
             it { yields_error :missing_index, columns: [:rep_code, :office_code] }
           end
 
-          context "when one column is missing in the actual index" do
+          context "with missing one column in the actual index" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, [:rep_code])] }
             it { yields_error :missing_index, columns: [:rep_code, :office_code] }
           end
 
-          context "when it includes one extra column" do
+          context "including one extra column" do
             before do
               @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps,
                 [:rep_code, :office_code, :effective_date])]
@@ -82,12 +82,12 @@ module Gauge
             it { yields_error :missing_index, columns: [:rep_code, :office_code] }
           end
 
-          context "when it is defined on same columns but in different order" do
+          context "defined on same columns but in different order" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, [:office_code, :rep_code])] }
             it { should_not_yield_errors }
           end
 
-          context "when it is actually unique" do
+          context "which is actually unique" do
             before do
               @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps,
                 [:rep_code, :office_code], unique: true)]
@@ -95,7 +95,7 @@ module Gauge
             it { yields_error :index_mismatch, columns: [:rep_code, :office_code], should_be: 'not unique' }
           end
 
-          context "when it is actually clustered" do
+          context "which is actually clustered" do
             before do
               @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps,
                 [:rep_code, :office_code], clustered: true)]
@@ -112,22 +112,22 @@ module Gauge
             end
           end
 
-          context "when it exists on the data table" do
+          context "existing on the data table" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, :rep_code, unique: true)] }
             it { should_not_yield_errors }
           end
 
-          context "when it is missing in the data table" do
+          context "missing on the data table" do
             before { @indexes = [] }
             it { yields_error :missing_index, columns: [:rep_code], unique: true }
           end
 
-          context "when the actual index is not unique" do
+          context "which is actually not unique" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code)] }
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :unique }
           end
 
-          context "when the actual index is clustered" do
+          context "which is actually clustered" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code, clustered: true)] }
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :nonclustered }
           end
@@ -141,22 +141,22 @@ module Gauge
             end
           end
 
-          context "when it exists on the data table" do
+          context "existing on the data table" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, :rep_code, clustered: true)] }
             it { should_not_yield_errors }
           end
 
-          context "when it is missing in the data table" do
+          context "missing on the data table" do
             before { @indexes = [] }
             it { yields_error :missing_index, columns: [:rep_code], clustered: true }
           end
 
-          context "when the actual index is not unique" do
+          context "which is actually not unique" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code)] }
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :clustered }
           end
 
-          context "when the actual index is unique but nonclustered" do
+          context "which is actually unique but nonclustered" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code, unique: true)] }
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :clustered }
           end
