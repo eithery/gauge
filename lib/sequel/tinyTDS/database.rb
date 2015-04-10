@@ -111,12 +111,13 @@ private
       def all_constraints(sql, contains_refs=false, &block)
         constraints = {}
         execute_sql(sql).map do |row|
-          name = row[:constraint_name].downcase
-          unless constraints.include?(name)
-            constraints[name] = block.call(name, row)
+          constraint_name = row[:constraint_name].downcase
+          key = "#{constraint_name}_#{row[:table_schema]}_#{row[:table_name]}".downcase
+          unless constraints.include?(key)
+            constraints[key] = block.call(constraint_name, row)
           else
-            constraints[name].columns << column_from(row)
-            constraints[name].ref_columns << ref_column_from(row) if contains_refs
+            constraints[key].columns << column_from(row)
+            constraints[key].ref_columns << ref_column_from(row) if contains_refs
           end
         end
         constraints.values
