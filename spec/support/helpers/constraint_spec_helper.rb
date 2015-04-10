@@ -14,8 +14,8 @@ module Gauge
           it { should respond_to :name }
 
           describe '#name' do
-            it "equals to the object name in downcase passed in the initializer" do
-              dbo.name.should == dbo_name.downcase
+            it "equals to the object name passed in the initializer" do
+              dbo.name.should == dbo_name
             end
           end
         end

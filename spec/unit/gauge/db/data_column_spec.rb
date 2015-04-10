@@ -83,9 +83,7 @@ module Gauge
             'account_number' => :account_number,
             'SOURCE_FIRM' => :source_firm,
             :Rep_Code => :rep_code
-          }.each do |name, expected_symbol|
-            DataColumn.new(name).to_sym.should == expected_symbol
-          end
+          }.each { |name, expected_symbol| DataColumn.new(name).to_sym.should == expected_symbol }
         end
       end
     end

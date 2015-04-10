@@ -38,7 +38,7 @@ module Gauge
 
 
       def to_sym
-        name.to_sym
+        name.downcase.to_sym
       end
 
   private

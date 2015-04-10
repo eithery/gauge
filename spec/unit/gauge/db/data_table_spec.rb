@@ -38,7 +38,7 @@ module Gauge
           subject { table.columns.last }
 
           it { should be_a(DataColumn) }
-          its(:name) { should == 'is_active' }
+          its(:name) { should == 'Is_Active' }
           its(:data_type) { should == :tinyint }
           its(:to_sym) { should == :is_active }
         end

@@ -8,12 +8,12 @@ module Gauge
       attr_reader :name
 
       def initialize(object_name)
-        @name = object_name.to_s.downcase
+        @name = object_name.to_s
       end
 
 
       def to_sym
-        name.gsub(/\./, '_').to_sym
+        name.downcase.gsub(/\./, '_').to_sym
       end
     end
   end
