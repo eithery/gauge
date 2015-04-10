@@ -9,34 +9,39 @@ module Gauge
     class IndexValidator < Validators::Base
 
       validate do |table_schema, table|
+        redundant_indexes = table.indexes.dup
         table_schema.indexes.each do |index|
           case mismatch(index, table)
             when :missing_index
-              errors << "Missing <b>#{kind_of(index)}</b> on [#{columns(index)}] data " +
-                "column".pluralize(index.columns.count) + "."
+              errors << "Missing #{description_of(index)}."
             when :unique_mismatch
-              errors << "Index on [#{columns(index)}] data " +
-                "column".pluralize(index.columns.count) +
-                " should be <b>#{unique_msg(index)}</b>, but actually it is <b>#{nonunique_msg(index)}</b>."
+              errors << mismatch_message(index, :unique, :nonunique)
             when :clustered_mismatch
-              errors << "Index on [#{columns(index)}] data " +
-                "column".pluralize(index.columns.count) +
-                " should be <b>#{clustered_msg(index)}</b>, but actually it is <b>#{nonclustered_msg(index)}</b>."
+              errors << mismatch_message(index, :clustered, :nonclustered)
           end
+          actual_index = take_same_index_for(index, redundant_indexes)
+          redundant_indexes.delete_if { |idx| idx.equal?(actual_index) } unless actual_index.nil?
         end
+
+        redundant_indexes.each { |idx| errors << "Redundant #{description_of(idx)}." }
       end
 
   private
 
       def mismatch(index, table)
-        actual_index = table.indexes.select { |idx| idx.columns.sort == index.columns.sort }.first
+        actual_index = take_same_index_for(index, table.indexes)
         return :missing_index if actual_index.nil?
         return :clustered_mismatch if index.clustered? != actual_index.clustered?
         return :unique_mismatch if index.unique? != actual_index.unique?
       end
 
 
-      def columns(index)
+      def take_same_index_for(index, indexes)
+        indexes.select { |idx| idx.columns.sort == index.columns.sort }.first
+      end
+
+
+      def columns_of(index)
         index.columns.map { |col| "'<b>#{col}</b>'" }.join(', ')
       end
 
@@ -48,22 +53,36 @@ module Gauge
       end
 
 
-      def clustered_msg(index)
+      def description_of(index)
+        "<b>#{kind_of(index)}</b> on [#{columns_of(index)}] data " + "column".pluralize(index.columns.count)
+      end
+
+
+      def mismatch_message(index, expected, actual)
+        expected_method = method("#{expected.to_s.downcase}_message")
+        actual_method = method("#{actual.to_s.downcase}_message")
+        "Index on [#{columns_of(index)}] data " +
+        "column".pluralize(index.columns.count) +
+        " should be <b>#{expected_method.call(index)}</b>, but actually it is <b>#{actual_method.call(index)}</b>."
+      end
+
+
+      def clustered_message(index)
         index.clustered? ? "clustered" : "nonclustered"
       end
 
 
-      def nonclustered_msg(index)
+      def nonclustered_message(index)
         index.clustered? ? "nonclustered" : "clustered"
       end
 
 
-      def unique_msg(index)
+      def unique_message(index)
         index.unique? ? "unique" : "not unique"
       end
 
 
-      def nonunique_msg(index)
+      def nonunique_message(index)
         index.unique? ? "not unique" : "unique"
       end
     end

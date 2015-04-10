@@ -17,7 +17,7 @@ module Gauge
       end
       let(:table) do
         primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :master_accounts, :id)
-        double('table', column_exists?: true, column: column, primary_key: primary_key)
+        double('table', column_exists?: true, column: column, primary_key: primary_key, indexes: [])
       end
       let(:database) { double('database', sql_name: 'books_n_records', table_exists?: true, table: table) }
       let(:table_schema) do

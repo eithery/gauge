@@ -26,6 +26,8 @@ module Gauge
 
 
       def ==(other_index)
+        return false if other_index.nil?
+
         table == other_index.table &&
         columns.sort == other_index.columns.sort &&
         clustered? == other_index.clustered? &&

@@ -169,7 +169,13 @@ module Gauge
               col :rep_code, len: 10
               col :office_code, len: 10
             end
+            @indexes = [
+              Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code, clustered: true),
+              Gauge::DB::Index.new('idx_dbo_reps_office_code', :reps, :office_code)]
           end
+
+          it { yields_error :redundant_index, columns: [:rep_code], clustered: true }
+          it { yields_error :redundant_index, columns: [:office_code] }
         end
       end
 
@@ -181,10 +187,12 @@ module Gauge
 
 
       def missing_index_message(options)
-        columns = options[:columns]
-        message = "Missing (.*?)#{kind_of_index(options)}(.*?) on \\[#{displayed_names_of(columns)}\\] data " +
-        "column".pluralize(columns.count)
-        /#{message}/
+        /Missing #{index_description(options)}/
+      end
+
+
+      def redundant_index_message(options)
+        /Redundant #{index_description(options)}/
       end
 
 
@@ -194,6 +202,13 @@ module Gauge
         "column".pluralize(columns.count) +
         " should be (.*?)#{expected_index(options)}(.*?), but actually it is (.*?)#{actual_index(options)}(.*?)"
         /#{message}/
+      end
+
+
+      def index_description(options)
+        columns = options[:columns]
+        "(.*?)#{kind_of_index(options)}(.*?) on \\[#{displayed_names_of(columns)}\\] data " +
+        "column".pluralize(columns.count)
       end
 
 
