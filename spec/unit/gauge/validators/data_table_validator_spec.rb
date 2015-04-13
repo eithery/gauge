@@ -17,7 +17,8 @@ module Gauge
       end
       let(:table) do
         primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :master_accounts, :id)
-        double('table', column_exists?: true, column: column, primary_key: primary_key, indexes: [])
+        double('table', column_exists?: true, column: column, primary_key: primary_key,
+          indexes: [], unique_constraints: [])
       end
       let(:database) { double('database', sql_name: 'books_n_records', table_exists?: true, table: table) }
       let(:table_schema) do
@@ -75,6 +76,18 @@ module Gauge
 
           it "performs validation check for indexes" do
             stub_validator(IndexValidator).should_receive(:do_validate).with(table_schema, table).once
+            validator.check table_schema, database
+          end
+
+          it "creates validator to check unique constraints" do
+            stub_unique_constraints_validator = double('unique_constraints_validator', do_validate: false,
+              errors: [])
+            UniqueConstraintValidator.should_receive(:new).once.and_return(stub_unique_constraints_validator)
+            validator.check table_schema, database
+          end
+
+          it "performs validation check for unique constraints" do
+            stub_validator(UniqueConstraintValidator).should_receive(:do_validate).with(table_schema, table).once
             validator.check table_schema, database
           end
 
