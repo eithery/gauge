@@ -1,5 +1,6 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Gauge::SQL::Builder specs.
+
 require 'spec_helper'
 
 module Gauge
@@ -19,8 +20,6 @@ module Gauge
 
       it { should respond_to :build_sql }
       it { should respond_to :alter_table, :add_column, :alter_column }
-      it { should respond_to :drop_check_constraints, :add_check_constraints }
-      it { should respond_to :drop_default_constraint, :add_default_constraint }
 
 
       describe '#build_sql' do
@@ -28,26 +27,36 @@ module Gauge
 
         it "creates SQL home folder if it does not exist" do
           File.stub(:exists? => false)
-          Dir.should_receive(:mkdir).with(/\/sql/).exactly(4).times
+          Dir.should_receive(:mkdir).with(/\/sql/).exactly(3).times
           build_sql
         end
 
         it "creates database folder if it does not exist" do
-          File.stub(:exists?).and_return(true, false, false, false)
-          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records/).exactly(3).times
+          File.stub(:exists?).and_return(true, false)
+          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records/).exactly(2).times
           build_sql
         end
 
         it "creates tables folder if it does not exist" do
-          File.stub(:exists?).and_return(true, true, false, false)
-          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records\/tables/).exactly(2).times
+          File.stub(:exists?).and_return(true, true, false)
+          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records\/tables/).once
           build_sql
         end
 
-        it "creates the separate folder for the specified data table" do
-          File.stub(:exists?).and_return(true, true, true, false)
-          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records\/tables\/bnr.customers/).once
-          build_sql
+        context "for new data tables" do
+          it "creates migration file creating the table" do
+            File.stub(:exists?).and_return(true, true, true)
+            File.should_receive(:open).with(/create_bnr_customers.sql/, 'w').once
+            build_sql
+          end
+        end
+
+        context "for existing data tables" do
+          it "creates migration file altering the table" do
+            File.stub(:exists?).and_return(true, true, true)
+            File.should_receive(:open).with(/alter_bnr_customers.sql/, 'w').once
+            build_sql
+          end
         end
 
         context "when creates SQL script file" do

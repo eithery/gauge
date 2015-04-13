@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::SQL::Builder
 # Factory class used to build SQL queries.
+
 require 'gauge'
 
 module Gauge
@@ -38,26 +39,6 @@ module Gauge
         @sql << "alter column [#{column.column_name}] #{column.sql_attributes};"
       end
 
-
-      def drop_check_constraints(table)
-#        DB::Adapter.database.check_constraints(table).each do |cc|
-#          alter_table table
-#          @sql << "drop constraint #{cc};\n"
-#        end
-      end
-
-
-      def add_check_constraints(table)
-      end
-
-
-      def drop_default_constraint(column)
-      end
-
-
-      def add_default_constraint(column)
-      end
-
   private
 
       def self.sql_home
@@ -74,7 +55,6 @@ module Gauge
       def table_home(table)
         database = create_folder "#{Builder.sql_home}/#{table.database_schema.sql_name}"
         tables = create_folder "#{database}/tables"
-        create_folder "#{tables}/#{table.table_name}"
       end
 
 
