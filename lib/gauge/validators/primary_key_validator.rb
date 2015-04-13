@@ -15,7 +15,7 @@ module Gauge
           when :column_mismatch
             errors << "Primary key is defined on [#{columns(table.primary_key)}] " +
               "column".pluralize(table.primary_key.columns.count) +
-              ", but should be on [#{columns(table_schema.primary_key)}]."
+              ", but it should be on [#{columns(table_schema.primary_key)}]."
           when :clustered_mismatch
             errors << "Primary key should be <b>#{clustered_msg(table_schema.primary_key)}</b>, " +
               "but actually it is <b>#{clustered_msg(table.primary_key)}</b>."

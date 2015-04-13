@@ -153,7 +153,7 @@ module Gauge
         expected = options[:expected]
         actual = options[:actual]
         message = "primary key is defined on \\[#{displayed_names_of(actual)}\\] " +
-          "column".pluralize(actual.count) + ", but should be on \\[#{displayed_names_of(expected)}\\]"
+          "column".pluralize(actual.count) + ", but it should be on \\[#{displayed_names_of(expected)}\\]"
         /#{message}/i
       end
 
