@@ -1,5 +1,6 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Gauge::SQL::Provider specs.
+
 require 'spec_helper'
 
 module Gauge
@@ -34,7 +35,7 @@ module Gauge
 
       describe '#build_alter_column_sql' do
         before do
-          @table = Schema::DataTableSchema.new(:primary_reps)
+          @table = Schema::DataTableSchema.new(:reps)
           @column = Schema::DataColumnSchema.new(:rep_code).in_table @table
         end
 
@@ -49,18 +50,6 @@ module Gauge
             sql_provider.stub(:build_sql) do |*args, &block|
               block.call @sql
             end
-          end
-
-          it "builds SQL script to drop and recreate check constraints" do
-            @sql.as_null_object.should_receive(:drop_check_constraints).with(@table)
-            @sql.as_null_object.should_receive(:add_check_constraints).with(@table)
-            sql_provider.build_alter_column_sql @column
-          end
-
-          it "builds SQL script to drop and recreate default constraint" do
-            @sql.as_null_object.should_receive(:drop_default_constraint).with(@column)
-            @sql.as_null_object.should_receive(:add_default_constraint).with(@column)
-            sql_provider.build_alter_column_sql @column
           end
 
           it "builds alter column SQL clause" do

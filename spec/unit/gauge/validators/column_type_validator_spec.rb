@@ -36,7 +36,7 @@ module Gauge
             validator.sql.should ==
               "alter table [dbo].[reps]\n" +
               "alter column [total_amount] decimal(18,2) null;\n" +
-              "go"
+              "go\n"
           end
         end
 

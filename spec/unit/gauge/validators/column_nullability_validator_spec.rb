@@ -69,7 +69,7 @@ module Gauge
               validator.sql.should ==
                 "alter table [dbo].[master_accounts]\n" +
                 "alter column [account_number] nvarchar(256) not null;\n" +
-                "go"
+                "go\n"
             end
           end
 

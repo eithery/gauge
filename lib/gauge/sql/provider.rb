@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Module Gauge::SQL::Provider
 # Used as mix-in module providing access to SQL build infrastructure.
+
 require 'gauge'
 
 module Gauge

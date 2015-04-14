@@ -119,7 +119,7 @@ module Gauge
               validator.sql.should ==
                 "alter table [dbo].[primary_reps]\n" +
                 "alter column [rep_code] nvarchar(10) null;\n" +
-                "go"
+                "go\n"
             end
           end
 

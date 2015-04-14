@@ -11,9 +11,9 @@ module Gauge
       let(:table_schema) { Schema::DataTableSchema.new(:customers, sql_schema: :bnr, database: database_schema) }
       let(:column_schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:sql_script) do
-        "alter table [bnr].[customers]\n\n" +
-        "add [account_number] nvarchar(256) null;\n\n" +
-        "go"
+        "alter table [bnr].[customers]\n" +
+        "add [account_number] nvarchar(256) null;\n" +
+        "go\n"
       end
 
       subject { builder }

@@ -49,7 +49,7 @@ module Gauge
             validator.sql.should ==
               "alter table [dbo].[accounts]\n" +
               "add [account_number] nvarchar(256) null;\n" +
-              "go"
+              "go\n"
           end
         end        
       end

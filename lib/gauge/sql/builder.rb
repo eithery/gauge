@@ -18,7 +18,7 @@ module Gauge
         @sql.clear
         yield self
         @sql << 'go'
-        sql = @sql.join("\n\n")
+        sql = @sql.join("\n") + "\n"
         save sql, to: file_name_for(command, schema)
         sql
       end
