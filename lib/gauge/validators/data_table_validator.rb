@@ -14,6 +14,7 @@ module Gauge
         with_dbo: ->(database, table_schema) { database.table table_schema.table_name }
 
       def check(table_schema, database)
+        delete_sql_files table_schema
         errors.clear
         super(table_schema, database)
         print_totals table_schema
