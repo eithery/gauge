@@ -13,7 +13,7 @@ module Gauge
 
       it { should respond_to :column_name }
       it { should respond_to :column_type, :data_type, :sql_type }
-      it { should respond_to :table }
+      it { should respond_to :table, :table_schema }
       it { should respond_to :length, :char_column? }
       it { should respond_to :allow_null?, :default_value, :sql_default_value }
       it { should respond_to :to_sym }
@@ -79,6 +79,14 @@ module Gauge
         context "when column schema is created explicitly" do
           before { @column = DataColumnSchema.new(:account_number) }
           specify { @column.table.should be_nil }
+        end
+      end
+
+
+      describe '#table_schema' do
+        before { @column_schema = DataColumnSchema.new(:rep_code, :reps, required: true).in_table table_schema }
+        it "alias for #table method" do
+          @column_schema.table_schema.should be_equal(@column_schema.table)
         end
       end
 

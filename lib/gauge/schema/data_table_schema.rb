@@ -50,6 +50,11 @@ module Gauge
       end
 
 
+      def table_schema
+        self
+      end
+
+
       def reference_table?
         @options[:type] == :reference || sql_schema == :ref
       end

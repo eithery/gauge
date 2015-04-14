@@ -22,7 +22,7 @@ module Gauge
       subject { dbo_table_schema }
 
       it { should respond_to :table_name, :local_name }
-      it { should respond_to :sql_schema, :database_schema }
+      it { should respond_to :sql_schema, :database_schema, :table_schema }
       it { should respond_to :object_name, :sql_name }
       it { should respond_to :reference_table? }
       it { should respond_to :columns }
@@ -133,6 +133,13 @@ module Gauge
         context "when no database schema passed in constructors args" do
           before { @table_schema = DataTableSchema.new(:master_accounts) }
           specify { @table_schema.database_schema.should be_nil }
+        end
+      end
+
+
+      describe '#table_schema' do
+        it "returns self instance" do
+          subject.table_schema.should be_equal(subject)
         end
       end
 

@@ -145,6 +145,11 @@ module Gauge
       end
 
 
+      def table_schema
+        table
+      end
+
+
       def computed?
         @options.include? :computed
       end
