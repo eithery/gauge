@@ -135,14 +135,15 @@ private
         inner join sys.schemas as s on s.schema_id = t.schema_id
       eos
 
-
       SQL_ALL_PRIMARY_KEYS = <<-eos
-        select so.name as constraint_name, schema_name(so.schema_id) as table_schema,
-        object_name(so.parent_object_id) as table_name, ccu.column_name, idx.type as key_type
-        from sys.objects as so
-        inner join information_schema.constraint_column_usage as ccu on ccu.constraint_name = so.name
-        inner join sys.indexes as idx on idx.name = so.name
-        where so.type = 'PK';
+        select idx.name as constraint_name, s.name as table_schema, t.name as table_name,
+          col.name as column_name, idx.type as key_type
+        from sys.indexes as idx
+        inner join sys.tables as t on t.object_id = idx.object_id
+        inner join sys.schemas as s on s.schema_id = t.schema_id
+        inner join sys.index_columns as ic on ic.object_id = idx.object_id and ic.index_id = idx.index_id
+        inner join sys.columns as col on col.object_id = ic.object_id and col.column_id = ic.column_id
+        where idx.is_primary_key = 1 and t.is_ms_shipped = 0;
       eos
 
       SQL_ALL_FOREIGN_KEYS = <<-eos
