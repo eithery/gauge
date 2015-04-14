@@ -11,8 +11,8 @@ module Gauge
       let(:table_schema) { Schema::DataTableSchema.new(:customers, sql_schema: :bnr, database: database_schema) }
       let(:column_schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:sql_script) do
-        "alter table [bnr].[customers]\n" +
-        "add [account_number] nvarchar(256) null;\n" +
+        "alter table [bnr].[customers]\n\n" +
+        "add [account_number] nvarchar(256) null;\n\n" +
         "go"
       end
 
@@ -28,64 +28,43 @@ module Gauge
         it "creates SQL home folder if it does not exist" do
           File.stub(:exists? => false)
           Dir.should_receive(:mkdir).with(/\/sql/).exactly(3).times
-          build_sql
+          build_add_column_sql
         end
 
         it "creates database folder if it does not exist" do
           File.stub(:exists?).and_return(true, false)
           Dir.should_receive(:mkdir).with(/\/sql\/books_n_records/).exactly(2).times
-          build_sql
+          build_add_column_sql
         end
 
         it "creates tables folder if it does not exist" do
           File.stub(:exists?).and_return(true, true, false)
           Dir.should_receive(:mkdir).with(/\/sql\/books_n_records\/tables/).once
-          build_sql
+          build_add_column_sql
         end
 
-        context "for new data tables" do
-          it "creates migration file creating the table" do
-            File.stub(:exists?).and_return(true, true, true)
-            File.should_receive(:open).with(/create_bnr_customers.sql/, 'w').once
-            build_sql
-          end
-        end
+        context "creating migration script file" do
+          before { File.stub(:exists?).and_return(true, true, true) }
 
-        context "for existing data tables" do
-          it "creates migration file altering the table" do
-            File.stub(:exists?).and_return(true, true, true)
-            File.should_receive(:open).with(/alter_bnr_customers.sql/, 'w').once
-            build_sql
-          end
-        end
-
-        context "when creates SQL script file" do
-          before { File.stub(:exists? => true) }
-
-          context "creating the new column" do
-            it "generates the file name corresponding to add column operation" do
-              File.should_receive(:open).with(/add_account_number_column.sql/, 'w')
-              builder.build_sql(:add_column, column_schema) do |b|
-                b.alter_table table_schema
-                b.add_column column_schema
+          context "to create missing data table" do
+            it "builds the script file name using 'create' clause and table name combination" do
+              File.should_receive(:open).with(/create_bnr_customers.sql/, 'a').once
+              builder.build_sql(:create_table, table_schema) do |sql|
               end
             end
           end
 
-          context "altering existing column" do
-            it "generates the file name corresponding to alter column operation" do
-              File.should_receive(:open).with(/alter_account_number_column.sql/, 'w')
-              builder.build_sql(:alter_column, column_schema) do |b|
-                b.alter_table table_schema
-                b.alter_column column_schema
-              end
+          context "to alter existing data table" do
+            it "builds the script file name using 'alter' clause and table name combination" do
+              File.should_receive(:open).with(/alter_bnr_customers.sql/, 'a').once
+              build_add_column_sql
             end
           end
         end
 
         context "builds correct SQL script" do
           before do
-            @file = double('script_file', puts: nil)
+            @file = double('migration_file', puts: nil)
             File.stub(:exists? => true)
             File.stub(:open) do |arg, arg2, &block|
               block.call(@file)
@@ -93,12 +72,12 @@ module Gauge
           end
 
           it "and returns generated script" do
-            build_sql.should == sql_script
+            build_add_column_sql.should == sql_script
           end
 
           it "and saves SQL script into the file" do
             @file.should_receive(:puts).with(sql_script)
-            build_sql
+            build_add_column_sql
           end
         end
       end
@@ -132,7 +111,7 @@ module Gauge
 
   private
   
-      def build_sql
+      def build_add_column_sql
         builder.build_sql(:add_column, column_schema) do |b|
           b.alter_table table_schema
           b.add_column column_schema

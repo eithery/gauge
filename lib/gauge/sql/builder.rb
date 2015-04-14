@@ -9,7 +9,6 @@ module Gauge
     class Builder
       @sql_home = File.expand_path(File.dirname(__FILE__) + '/../../../sql/')
 
-
       def initialize
         @sql = []
       end
@@ -19,8 +18,8 @@ module Gauge
         @sql.clear
         yield self
         @sql << 'go'
-        sql = @sql.join("\n")
-        save_sql schema.table, script_file(command, schema), sql
+        sql = @sql.join("\n\n")
+        save sql, to: file_name_for(command, schema)
         sql
       end
 
@@ -47,8 +46,9 @@ module Gauge
       end
 
 
-      def save_sql(table, script_name, sql)
-        File.open("#{table_home(table)}/#{script_name}", 'w') { |f| f.puts sql }
+      def save(sql, options)
+        file_name = options[:to]
+        File.open(file_name, 'a') { |f| f.puts sql }
       end
 
 
@@ -64,16 +64,13 @@ module Gauge
       end
 
 
-      def script_file(command, schema)
-        "#{prefix(command)}_#{schema.column_name}_column.sql"
+      def file_name_for(command, schema)
+        "#{table_home(schema.table_schema)}/#{prefix(command)}_#{schema.table_schema.to_sym}.sql"
       end
 
 
       def prefix(command)
-        case command
-          when :add_column then 'add'
-          when :alter_column then 'alter'
-        end
+        command == :create_table ? 'create' : 'alter'
       end
 
 
