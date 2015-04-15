@@ -14,8 +14,6 @@ module Gauge
 
       it_behaves_like "any database object validator"
 
-      it { should respond_to :delete_sql_files }
-
       describe '.check_all' do
         it "defines 'do_check_all' instance method" do
           expect { BaseMock.check_all(:data_tables) }

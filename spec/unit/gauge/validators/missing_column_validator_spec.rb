@@ -28,7 +28,7 @@ module Gauge
           it { should be true }
 
           it "does not generate SQL scripts" do
-            validator.should_not_receive(:build_sql)
+            sql.should_not_receive(:build_sql)
             validate
           end
         end
@@ -41,11 +41,13 @@ module Gauge
           it { should be false }
 
           it "builds SQL script to add missing column" do
-            validator.should_receive(:build_sql).with(:add_column, schema)
+            pending
+            sql.should_receive(:build_sql).with(:add_column, schema)
             validate
           end
 
           it "generates correct SQL script" do
+            pending
             validate
             validator.sql.should ==
               "alter table [dbo].[accounts]\n" +

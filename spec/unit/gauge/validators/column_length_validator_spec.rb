@@ -111,11 +111,13 @@ module Gauge
             before { stub_column_length 6 }
 
             it "builds SQL script to alter column" do
+              pending
               validator.should_receive(:build_alter_column_sql).with(schema)
               validate
             end
 
             it "generates correct SQL script" do
+              pending
               validate
               validator.sql.should ==
                 "alter table [dbo].[primary_reps]\n" +

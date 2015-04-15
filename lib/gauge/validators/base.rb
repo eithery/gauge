@@ -8,7 +8,6 @@ module Gauge
   module Validators
     class Base
       include Logger
-      include SQL::Provider
 
       def self.check_all(validator_name, options={})
         define_method(:do_check_all) do |dbo_schema, dbo, sql|
@@ -62,7 +61,7 @@ module Gauge
       end
 
 
-      def check(dbo_schema, dbo, sql=[])
+      def check(dbo_schema, dbo, sql=nil)
         result = true
         result = do_check_before(dbo_schema, dbo, sql) if respond_to? :do_check_before
         if result

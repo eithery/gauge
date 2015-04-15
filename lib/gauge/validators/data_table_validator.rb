@@ -7,6 +7,8 @@ require 'gauge'
 module Gauge
   module Validators
     class DataTableValidator < Validators::Base
+      include SQL::Provider
+
       check_before :missing_table
       check :primary_key, :indexes, :unique_constraints,
         with_dbo: ->(database, table_schema) { database.table table_schema.table_name }

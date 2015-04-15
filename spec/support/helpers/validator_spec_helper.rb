@@ -58,8 +58,6 @@ module Gauge
 
         it { should respond_to :check }
         it { should respond_to :errors }
-        it { should respond_to :build_sql }
-        it { should respond_to :build_alter_column_sql }
 
         specify { validator.class.should respond_to :check_all }
         specify { validator.class.should respond_to :check_before }

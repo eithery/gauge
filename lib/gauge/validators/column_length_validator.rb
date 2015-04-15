@@ -10,7 +10,7 @@ module Gauge
 
       validate do |column_schema, column|
         if length_mismatch? column_schema, column
-          build_alter_column_sql column_schema
+#          build_alter_column_sql column_schema
 
           errors << "The length of column '<b>#{column_schema.column_name}</b>' is '<b>#{column.length}</b>', " +
             "but it must be '<b>#{column_schema.length}</b>' chars."

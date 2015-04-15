@@ -10,7 +10,7 @@ module Gauge
 
       validate do |column_schema, column|
         if column_schema.allow_null? != column.allow_null?
-          build_alter_column_sql column_schema
+#          build_alter_column_sql column_schema
 
           should_be = column_schema.allow_null? ? 'NULL' : 'NOT NULL'
           errors << "Data column '<b>#{column_schema.column_name}</b>' must be defined as <b>#{should_be}</b>."

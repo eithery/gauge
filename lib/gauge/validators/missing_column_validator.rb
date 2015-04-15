@@ -8,16 +8,16 @@ module Gauge
   module Validators
     class MissingColumnValidator < Validators::Base
 
-      validate do |column_schema, table|
+      validate do |column_schema, table, sql|
         result = true
         unless table.column_exists? column_schema.to_sym
           missing_column column_schema.column_name
           result = false
 
-          build_sql(:add_column, column_schema) do |sql|
-            sql.alter_table column_schema.table
-            sql.add_column column_schema
-          end
+#          sql.build_sql(:add_column, column_schema) do |sql|
+#            sql.alter_table column_schema.table
+#            sql.add_column column_schema
+#          end
         end
         result
       end
