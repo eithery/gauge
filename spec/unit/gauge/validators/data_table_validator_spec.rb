@@ -40,19 +40,21 @@ module Gauge
           validator.stub(:log)
         end
 
-
         it "creates validator to check missing data table" do
           stub_missing_table_validator = double('missing_table_validator', check: true, errors: [], do_validate: false)
           MissingTableValidator.should_receive(:new).once.and_return(stub_missing_table_validator)
           validator.check table_schema, database
         end
 
-
         it "always performs check for missing data table" do
           stub_validator(MissingTableValidator).should_receive(:do_validate).with(table_schema, database)
           validator.check table_schema, database
         end
 
+        it "deletes all SQL migration script files for the data table generated during previous runs" do
+          validator.should_receive(:delete_sql_files).with(table_schema)
+          validator.check table_schema, database
+        end
 
         context "when data table exists in the database" do
           before { database.stub(:table_exists?).and_return(true) }

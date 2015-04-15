@@ -49,6 +49,13 @@ module Gauge
           validator.check empty_schema, dba
           validator.errors.should include(/cannot found data tables metadata for (.*?)test_db(.*?) database/i)
         end
+
+        it "deletes all SQL migration script files generated during previous runs" do
+          schema.stub(tables: {})
+          validator.stub(:error)
+          validator.should_receive(:delete_sql_files).with(schema)
+          validator.check schema, dba
+        end
       end
     end
   end
