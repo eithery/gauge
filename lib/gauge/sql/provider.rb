@@ -1,12 +1,12 @@
 # Eithery Lab., 2015.
-# Module Gauge::SQL::Provider
-# Used as mix-in module providing access to SQL build infrastructure.
+# Class Gauge::SQL::Provider
+# Provides infrastructure to build SQL statements.
 
 require 'gauge'
 
 module Gauge
   module SQL
-    module Provider
+    class Provider
       attr_reader :sql
 
       def build_sql(*args, &block)
@@ -23,7 +23,7 @@ module Gauge
       end
 
 
-      def delete_sql_files dbo
+      def cleanup dbo
         dbo.class == Gauge::Schema::DatabaseSchema ? delete_database_sql(dbo) : delete_data_table_sql(dbo)
       end
 

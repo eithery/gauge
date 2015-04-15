@@ -7,16 +7,15 @@ require 'gauge'
 module Gauge
   module Validators
     class DataTableValidator < Validators::Base
-      include SQL::Provider
-
       check_before :missing_table
       check :primary_key, :indexes, :unique_constraints,
         with_dbo: ->(database, table_schema) { database.table table_schema.table_name }
       check_all :data_columns, with_schema: ->table { table.columns },
         with_dbo: ->(database, table_schema) { database.table table_schema.table_name }
 
-      def check(table_schema, database, sql)
-        delete_sql_files table_schema
+      def check(table_schema, database)
+        sql = SQL::Provider.new
+        sql.cleanup table_schema
         errors.clear
         super(table_schema, database, sql)
         print_totals table_schema

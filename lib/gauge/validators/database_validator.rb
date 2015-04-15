@@ -7,13 +7,10 @@ require 'gauge'
 module Gauge
   module Validators
     class DatabaseValidator < Validators::Base
-      include SQL::Provider
-
       check_all :data_tables, with_schema: ->database { database.tables.values }
 
-
       def check(database_schema, database)
-        delete_sql_files database_schema
+        SQL::Provider.new.cleanup database_schema
         return super(database_schema, database) unless database_schema.tables.empty?
 
         errors << "Cannot found data tables metadata for '<b>#{database_schema.sql_name}</b>' database."
