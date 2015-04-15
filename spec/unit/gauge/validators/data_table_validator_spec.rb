@@ -28,7 +28,6 @@ module Gauge
         end
       end
       let(:schema) { table_schema }
-      let(:sql) { double('sql') }
 
       it_behaves_like "any database object validator"
 
@@ -48,12 +47,13 @@ module Gauge
         end
 
         it "always performs check for missing data table" do
-          stub_validator(MissingTableValidator).should_receive(:do_validate).with(table_schema, database, sql)
+          stub_validator(MissingTableValidator).should_receive(:do_validate).with(table_schema, database,
+            instance_of(SQL::Provider))
           validate
         end
 
         it "deletes all SQL migration script files for the data table generated during previous runs" do
-          validator.should_receive(:delete_sql_files).with(table_schema)
+          SQL::Provider.any_instance.should_receive(:cleanup).with(table_schema)
           validate
         end
 
@@ -67,7 +67,8 @@ module Gauge
           end
 
           it "performs validation check for primary key constraint" do
-            stub_validator(PrimaryKeyValidator).should_receive(:do_validate).with(table_schema, table, sql).once
+            stub_validator(PrimaryKeyValidator).should_receive(:do_validate).with(table_schema, table,
+              instance_of(SQL::Provider)).once
             validate
           end
 
@@ -78,7 +79,8 @@ module Gauge
           end
 
           it "performs validation check for indexes" do
-            stub_validator(IndexValidator).should_receive(:do_validate).with(table_schema, table, sql).once
+            stub_validator(IndexValidator).should_receive(:do_validate).with(table_schema, table,
+              instance_of(SQL::Provider)).once
             validate
           end
 
@@ -90,7 +92,8 @@ module Gauge
           end
 
           it "performs validation check for unique constraints" do
-            stub_validator(UniqueConstraintValidator).should_receive(:do_validate).with(table_schema, table, sql).once
+            stub_validator(UniqueConstraintValidator).should_receive(:do_validate).with(table_schema, table,
+              instance_of(SQL::Provider)).once
             validate
           end
 
@@ -102,7 +105,7 @@ module Gauge
 
           it "performs validation check for each column in the data table" do
             stub_validator(DataColumnValidator).should_receive(:check)
-              .with(instance_of(Schema::DataColumnSchema), table, sql).exactly(3).times
+              .with(instance_of(Schema::DataColumnSchema), table, instance_of(SQL::Provider)).exactly(3).times
             validate
           end
         end
@@ -125,7 +128,7 @@ module Gauge
 
         context "when no errors found" do
           specify "errors collection remains empty" do
-            no_validation_errors { |table_schema, database, sql| validator.check(table_schema, database, sql) }
+            no_validation_errors { |table_schema, database| validator.check(table_schema, database) }
           end
 
           it "displays successful validation result" do
@@ -163,7 +166,7 @@ module Gauge
 
 
         def validate
-          validator.check table_schema, database, sql
+          validator.check table_schema, database
         end
       end
     end
