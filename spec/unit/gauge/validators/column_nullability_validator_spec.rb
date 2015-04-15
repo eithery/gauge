@@ -10,6 +10,7 @@ module Gauge
       let(:database) { double('database_schema', sql_name: 'books_n_records') }
       let(:table_schema) { Schema::DataTableSchema.new(:master_accounts, database: database) }
       let(:schema) { @column_schema }
+      let(:sql) { double('sql') }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"
@@ -32,7 +33,7 @@ module Gauge
 
           context "and actual data column in DB is NOT nullable" do
             before { stub_db_column_nullability :not_null }
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) } }
+            it { should_not_yield_errors }
           end
         end
 
@@ -42,7 +43,7 @@ module Gauge
 
           context "and actual data column in DB is nullable" do
             before { stub_db_column_nullability :null }
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) } }
+            specify { should_not_yield_errors }
           end
 
           context "and actual data column in DB is NOT nullable" do
@@ -97,7 +98,7 @@ module Gauge
 
 
         def validate
-          validator.do_validate(schema, dba)
+          validator.do_validate(schema, dba, sql)
         end
       end
     end

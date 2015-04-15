@@ -38,7 +38,7 @@ module Gauge
 
         it "performs validation check for each data table in the database" do
           stub_validator(DataTableValidator).should_receive(:check)
-            .with(instance_of(Schema::DataTableSchema), dba).exactly(3).times
+            .with(instance_of(Schema::DataTableSchema), dba, anything).exactly(3).times
           validator.check schema, dba
         end
 

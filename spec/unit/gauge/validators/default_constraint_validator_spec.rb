@@ -24,7 +24,7 @@ module Gauge
 
           context "with matched column default constraint" do
             before { stub_column_default 1 }
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+            it { should_not_yield_errors }
           end
 
           context "with the column default constraint mismatch" do
@@ -44,7 +44,7 @@ module Gauge
 
           context "with matched column default constraint" do
             before { stub_column_default 1 }
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+            it { should_not_yield_errors }
           end
 
           context "with the column default constraint mismatch" do
@@ -69,7 +69,7 @@ module Gauge
 
           context "and the column also does not have default constraint" do
             before { stub_column_default nil }
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+            it { should_not_yield_errors }
           end
         end
 
@@ -79,7 +79,7 @@ module Gauge
 
           context "with matched column default constraint" do
             before { stub_column_default 'abs(CONVERT([bigint],CONVERT([varbinary],newid())))' }
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+            it { should_not_yield_errors }
           end
 
           context "with missing column default constraint" do
@@ -99,7 +99,7 @@ module Gauge
 
           context "with matched column default constraint" do
             before { stub_column_default 'host_name()' }
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+            it { should_not_yield_errors }
           end
 
           context "with missing column default constraint" do

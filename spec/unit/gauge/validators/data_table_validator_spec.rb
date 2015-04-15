@@ -28,6 +28,7 @@ module Gauge
         end
       end
       let(:schema) { table_schema }
+      let(:sql) { double('sql') }
 
       it_behaves_like "any database object validator"
       it { should respond_to :check, :do_check_before, :do_check_all }
@@ -43,17 +44,17 @@ module Gauge
         it "creates validator to check missing data table" do
           stub_missing_table_validator = double('missing_table_validator', check: true, errors: [], do_validate: false)
           MissingTableValidator.should_receive(:new).once.and_return(stub_missing_table_validator)
-          validator.check table_schema, database
+          validate
         end
 
         it "always performs check for missing data table" do
-          stub_validator(MissingTableValidator).should_receive(:do_validate).with(table_schema, database)
-          validator.check table_schema, database
+          stub_validator(MissingTableValidator).should_receive(:do_validate).with(table_schema, database, sql)
+          validate
         end
 
         it "deletes all SQL migration script files for the data table generated during previous runs" do
           validator.should_receive(:delete_sql_files).with(table_schema)
-          validator.check table_schema, database
+          validate
         end
 
         context "when data table exists in the database" do
@@ -62,47 +63,47 @@ module Gauge
           it "creates validator to check primary key contraint" do
             stub_primary_key_validator = double('primary_key_validator', do_validate: false, errors: [])
             PrimaryKeyValidator.should_receive(:new).once.and_return(stub_primary_key_validator)
-            validator.check table_schema, database
+            validate
           end
 
           it "performs validation check for primary key constraint" do
-            stub_validator(PrimaryKeyValidator).should_receive(:do_validate).with(table_schema, table).once
-            validator.check table_schema, database
+            stub_validator(PrimaryKeyValidator).should_receive(:do_validate).with(table_schema, table, sql).once
+            validate
           end
 
           it "creates validator to check indexes" do
             stub_index_validator = double('index_validator', do_validate: false, errors: [])
             IndexValidator.should_receive(:new).once.and_return(stub_index_validator)
-            validator.check table_schema, database
+            validate
           end
 
           it "performs validation check for indexes" do
-            stub_validator(IndexValidator).should_receive(:do_validate).with(table_schema, table).once
-            validator.check table_schema, database
+            stub_validator(IndexValidator).should_receive(:do_validate).with(table_schema, table, sql).once
+            validate
           end
 
           it "creates validator to check unique constraints" do
             stub_unique_constraints_validator = double('unique_constraints_validator', do_validate: false,
               errors: [])
             UniqueConstraintValidator.should_receive(:new).once.and_return(stub_unique_constraints_validator)
-            validator.check table_schema, database
+            validate
           end
 
           it "performs validation check for unique constraints" do
-            stub_validator(UniqueConstraintValidator).should_receive(:do_validate).with(table_schema, table).once
-            validator.check table_schema, database
+            stub_validator(UniqueConstraintValidator).should_receive(:do_validate).with(table_schema, table, sql).once
+            validate
           end
 
           it "creates validator to check data columns" do
             stub_column_validator = double('data_column_validator', check: true, errors: [])
             DataColumnValidator.should_receive(:new).once.and_return(stub_column_validator)
-            validator.check table_schema, database
+            validate
           end
 
           it "performs validation check for each column in the data table" do
             stub_validator(DataColumnValidator).should_receive(:check)
-              .with(instance_of(Schema::DataColumnSchema), table).exactly(3).times
-            validator.check table_schema, database
+              .with(instance_of(Schema::DataColumnSchema), table, sql).exactly(3).times
+            validate
           end
         end
 
@@ -112,25 +113,24 @@ module Gauge
 
           it "does not perform data column validation check" do
             stub_validator(DataColumnValidator).should_not_receive(:check)
-            validator.check table_schema, database
+            validate
           end
 
           it "does not perform primary key constraint validation check" do
             stub_validator(PrimaryKeyValidator).should_not_receive(:do_validate)
-            validator.check table_schema, database
+            validate
           end
         end
 
 
         context "when no errors found" do
           specify "errors collection remains empty" do
-            no_validation_errors { |table_schema, database| validator.check(table_schema, database) }
+            no_validation_errors { |table_schema, database, sql| validator.check(table_schema, database, sql) }
           end
 
           it "displays successful validation result" do
             allow(validator).to receive(:log).and_call_original
-            expect { validator.check(table_schema, database) }
-              .to output(/check 'dbo\.master_accounts' data table - (.*?)ok/i).to_stdout
+            expect { validate }.to output(/check 'dbo\.master_accounts' data table - (.*?)ok/i).to_stdout
           end
         end
 
@@ -143,14 +143,12 @@ module Gauge
 
           it "displays validation result total with errors" do
             allow(validator).to receive(:log).and_call_original
-            expect { validator.check(table_schema, database) }
-              .to output(/check '(.*?)dbo\.master_accounts(.*?)' data table - (.*?)failed/i).to_stdout
-            expect { validator.check(table_schema, database) }
-              .to output(/total 4 errors found/i).to_stdout
+            expect { validate }.to output(/check '(.*?)dbo\.master_accounts(.*?)' data table - (.*?)failed/i).to_stdout
+            expect { validate }.to output(/total 4 errors found/i).to_stdout
           end
 
           it "aggregates all errors in the errors collection" do
-            validator.check table_schema, database
+            validate
             validator.should have(4).errors
             validator.errors.should include(/but it must be '<b>nvarchar<\/b>'/)
             validator.errors.should include(/must be defined as <b>NULL<\/b>/)
@@ -161,6 +159,11 @@ module Gauge
 
         def dba
           database
+        end
+
+
+        def validate
+          validator.check table_schema, database, sql
         end
       end
     end

@@ -10,6 +10,7 @@ module Gauge
       let(:database) { double('database', sql_name: 'books_n_records') }
       let(:reps) { Schema::DataTableSchema.new(:reps, database: database) }
       let(:schema) { @column_schema }
+      let(:sql) { double('sql') }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"
@@ -42,7 +43,7 @@ module Gauge
 
         context "when the actual column type is the same as defined in metadata" do
           before { @column_schema = Schema::DataColumnSchema.new(:total_amount, type: :string).in_table reps }
-          specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) } }
+          it { should_not_yield_errors }
 
           it "does not generate SQL script" do
             validator.should_not_receive(:build_sql)
@@ -59,7 +60,7 @@ module Gauge
 
 
       def validate
-        validator.do_validate(schema, dba)
+        validator.do_validate(schema, dba, sql)
       end
     end
   end

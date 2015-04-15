@@ -11,6 +11,7 @@ module Gauge
       let(:table_schema) { Schema::DataTableSchema.new(:accounts, database: database_schema) }
       let(:schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:dba) { double('dba') }
+      let(:sql) { double('sql') }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"
@@ -23,7 +24,7 @@ module Gauge
         context "when data column exists in the table" do
           before { dba.stub(:column_exists?).and_return(true) }
 
-          specify { no_validation_errors { |schema, dba| validate } }
+          it { should_not_yield_errors }
           it { should be true }
 
           it "does not generate SQL scripts" do
@@ -57,7 +58,7 @@ module Gauge
   private
 
       def validate
-        validator.do_validate(schema, dba)
+        validator.do_validate(schema, dba, sql)
       end
     end
   end

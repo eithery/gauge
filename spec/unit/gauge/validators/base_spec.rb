@@ -10,6 +10,7 @@ module Gauge
 
     describe Base do
       let(:validator) { BaseMock.new }
+      let(:sql) { double('sql') }
 
       it_behaves_like "any database object validator"
 
@@ -53,8 +54,8 @@ module Gauge
         end
 
         it "performs preliminary check before main validation stage" do
-          validator.should_receive(:do_check_before).with(@dbo_schema, @dbo)
-          validator.check @dbo_schema, @dbo
+          validator.should_receive(:do_check_before).with(@dbo_schema, @dbo, sql)
+          validate
         end
 
 
@@ -63,14 +64,14 @@ module Gauge
 
           it "performs validation check with all inner validators" do
             validator.stub(:do_check)
-            validator.should_receive(:do_check_all).with(@dbo_schema, @dbo)
-            validator.check @dbo_schema, @dbo
+            validator.should_receive(:do_check_all).with(@dbo_schema, @dbo, sql)
+            validate
           end
 
           it "performs validation check with additional registered validators" do
             validator.stub(:do_check_all)
-            validator.should_receive(:do_check).with(@dbo_schema, @dbo)
-            validator.check @dbo_schema, @dbo
+            validator.should_receive(:do_check).with(@dbo_schema, @dbo, sql)
+            validate
           end
         end
 
@@ -81,9 +82,15 @@ module Gauge
           specify "no main validation stage performed" do
             validator.should_not_receive(:do_check_all)
             validator.should_not_receive(:do_check)
-            validator.check @dbo_schema, @dbo
+            validate
           end
         end
+      end
+
+  private
+
+      def validate
+        validator.check @dbo_schema, @dbo, sql
       end
     end
   end

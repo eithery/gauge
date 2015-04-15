@@ -10,6 +10,7 @@ module Gauge
       let(:database) { double('database_schema', sql_name: 'books_n_records') }
       let(:table_schema) { Schema::DataTableSchema.new(:primary_reps, database: database) }
       let(:schema) { @column_schema }
+      let(:sql) { double('sql') }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"
@@ -32,7 +33,7 @@ module Gauge
 
             context "in the case of equal length" do
               before { stub_column_length 10 }
-              specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+              it { should_not_yield_errors }
             end
           end
 
@@ -46,7 +47,7 @@ module Gauge
 
             context "in the case of equal length" do
               before { stub_column_length -1 }
-              specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+              it { should_not_yield_errors }
             end
           end
 
@@ -63,7 +64,7 @@ module Gauge
               before do
                 stub_column_length Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH
               end
-              specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+              it { should_not_yield_errors }
             end
           end
         end
@@ -74,7 +75,7 @@ module Gauge
             @column_schema = Schema::DataColumnSchema.new(:total_amount, type: :money).in_table table_schema
             stub_column_length nil
           end
-          specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+          it { should_not_yield_errors }
         end
 
 
@@ -88,7 +89,7 @@ module Gauge
 
           context "in the case of equal length" do
             before { stub_column_length 2 }
-            specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+            it { should_not_yield_errors }
           end
         end
 
@@ -99,7 +100,7 @@ module Gauge
               .in_table table_schema
             stub_column_length 10
           end
-          specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) }}
+          it { should_not_yield_errors }
         end
 
 
@@ -153,7 +154,7 @@ module Gauge
 
 
       def validate
-        validator.do_validate(schema, dba)
+        validator.do_validate(schema, dba, sql)
       end
     end
   end

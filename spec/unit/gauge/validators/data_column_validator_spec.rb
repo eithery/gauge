@@ -11,6 +11,7 @@ module Gauge
       let(:table_schema) { Schema::DataTableSchema.new(:accounts, database: database_schema) }
       let(:schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:dba) { double('dba', column: @db_column, column_exists?: true) }
+      let(:sql) { double('sql') }
 
       it_behaves_like "any database object validator"
       it { should respond_to :do_check_before, :do_check }
@@ -27,8 +28,8 @@ module Gauge
         end
 
         it "always performs check for missing data column" do
-          stub_validator(MissingColumnValidator).should_receive(:do_validate).with(schema, dba)
-          validator.check schema, dba
+          stub_validator(MissingColumnValidator).should_receive(:do_validate).with(schema, dba, sql)
+          validate
         end
 
 
@@ -36,13 +37,13 @@ module Gauge
           before { dba.stub(:column_exists?).and_return(true) }
 
           it "performs data column type validation" do
-            stub_validator(ColumnTypeValidator).should_receive(:do_validate).with(schema, @db_column)
-            validator.check schema, dba
+            stub_validator(ColumnTypeValidator).should_receive(:do_validate).with(schema, @db_column, sql)
+            validate
           end
 
           it "performs data column nullability check" do
-            stub_validator(ColumnNullabilityValidator).should_receive(:do_validate).with(schema, @db_column)
-            validator.check schema, dba
+            stub_validator(ColumnNullabilityValidator).should_receive(:do_validate).with(schema, @db_column, sql)
+            validate
           end
         end
 
@@ -52,12 +53,12 @@ module Gauge
 
           it "does not perform data column type validation" do
             stub_validator(ColumnTypeValidator).should_not_receive(:do_validate)
-            validator.check schema, dba
+            validate
           end
 
           it "does not perform data column nullability check" do
             stub_validator(ColumnNullabilityValidator).should_not_receive(:do_validate)
-            validator.check schema, dba
+            validate
           end
         end
 
@@ -76,12 +77,18 @@ module Gauge
           end
 
           it "aggregates all errors in the errors collection" do
-            validator.check schema, dba
+            validate
             validator.should have(2).errors
             validator.errors.should include(/but it must be '<b>nvarchar<\/b>'/)
             validator.errors.should include(/must be defined as <b>NULL<\/b>/)
           end
         end
+      end
+
+  private
+
+      def validate
+        validator.check schema, dba, sql
       end
     end
   end

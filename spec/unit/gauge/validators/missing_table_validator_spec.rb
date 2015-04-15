@@ -9,6 +9,7 @@ module Gauge
       let(:validator) { MissingTableValidator.new }
       let(:schema) { @table_schema }
       let(:dba) { double('dba') }
+      let(:sql) { double('sql') }
 
       it_behaves_like "any database object validator"
       it { should respond_to :do_validate }
@@ -22,15 +23,15 @@ module Gauge
         context "when data table exists in the database" do
           before { dba.stub(:table_exists?).and_return(true) }
 
-          specify { no_validation_errors { |schema, dba| validator.do_validate(schema, dba) } }
-          specify { validator.do_validate(schema, dba).should be true }
+          it { should_not_yield_errors }
+          specify { validator.do_validate(schema, dba, sql).should be true }
         end
 
         context "when missing data table" do
           before { dba.stub(:table_exists?).and_return(false) }
 
           it { should_append_error(/data table '(.*?)dbo\.master_accounts(.*?)' does not exist/i) }
-          specify { validator.do_validate(schema, dba).should be false }
+          specify { validator.do_validate(schema, dba, sql).should be false }
         end
       end
     end

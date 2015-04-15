@@ -13,10 +13,10 @@ module Gauge
       check_all :data_columns, with_schema: ->table { table.columns },
         with_dbo: ->(database, table_schema) { database.table table_schema.table_name }
 
-      def check(table_schema, database)
+      def check(table_schema, database, sql)
         delete_sql_files table_schema
         errors.clear
-        super(table_schema, database)
+        super(table_schema, database, sql)
         print_totals table_schema
       end
 
