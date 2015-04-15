@@ -8,9 +8,9 @@ module Gauge
   module Validators
     class ColumnLengthValidator < Validators::Base
 
-      validate do |column_schema, column|
+      validate do |column_schema, column, sql|
         if length_mismatch? column_schema, column
-#          build_alter_column_sql column_schema
+          sql.alter_column column_schema
 
           errors << "The length of column '<b>#{column_schema.column_name}</b>' is '<b>#{column.length}</b>', " +
             "but it must be '<b>#{column_schema.length}</b>' chars."

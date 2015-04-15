@@ -8,6 +8,7 @@ module Gauge
     describe DefaultConstraintValidator do
       let(:validator) { DefaultConstraintValidator.new }
       let(:schema) { @column_schema }
+      let(:sql) { SQL::Builder.new }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"

@@ -10,7 +10,7 @@ module Gauge
       let(:database) { double('database_schema', sql_name: 'books_n_records') }
       let(:table_schema) { Schema::DataTableSchema.new(:primary_reps, database: database) }
       let(:schema) { @column_schema }
-      let(:sql) { double('sql') }
+      let(:sql) { SQL::Builder.new }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"
@@ -111,8 +111,7 @@ module Gauge
             before { stub_column_length 6 }
 
             it "builds SQL script to alter column" do
-              pending
-              validator.should_receive(:build_alter_column_sql).with(schema)
+              sql.should_receive(:alter_column).with(schema)
               validate
             end
 

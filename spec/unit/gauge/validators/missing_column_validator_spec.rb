@@ -11,7 +11,7 @@ module Gauge
       let(:table_schema) { Schema::DataTableSchema.new(:accounts, database: database_schema) }
       let(:schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:dba) { double('dba') }
-      let(:sql) { double('sql') }
+      let(:sql) { SQL::Builder.new }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"
@@ -41,8 +41,7 @@ module Gauge
           it { should be false }
 
           it "builds SQL script to add missing column" do
-            pending
-            sql.should_receive(:build_sql).with(:add_column, schema)
+            sql.should_receive(:add_column).with(schema)
             validate
           end
 

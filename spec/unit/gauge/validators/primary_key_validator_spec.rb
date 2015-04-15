@@ -9,6 +9,7 @@ module Gauge
       let(:validator) { PrimaryKeyValidator.new }
       let(:schema) { @table_schema }
       let(:table) { double('table', primary_key: @primary_key) }
+      let(:sql) { SQL::Builder.new }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"

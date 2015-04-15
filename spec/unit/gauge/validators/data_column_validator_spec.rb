@@ -11,7 +11,7 @@ module Gauge
       let(:table_schema) { Schema::DataTableSchema.new(:accounts, database: database_schema) }
       let(:schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:dba) { double('dba', column: @db_column, column_exists?: true) }
-      let(:sql) { double('sql') }
+      let(:sql) { SQL::Builder.new }
 
       it_behaves_like "any database object validator"
       it { should respond_to :do_check_before, :do_check }

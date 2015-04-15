@@ -14,9 +14,8 @@ module Gauge
         with_dbo: ->(database, table_schema) { database.table table_schema.table_name }
 
       def check(table_schema, database)
-        sql = SQL::Provider.new
-        sql.cleanup table_schema
-        errors.clear
+        cleanup table_schema
+        sql = SQL::Builder.new
         super(table_schema, database, sql)
         print_totals table_schema
       end
@@ -33,6 +32,12 @@ module Gauge
           error "Total #{errors.count} errors found."
           error ""
         end
+      end
+
+
+      def cleanup(table)
+        SQL::Provider.new.cleanup table
+        errors.clear
       end
     end
   end

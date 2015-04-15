@@ -9,6 +9,7 @@ module Gauge
       let(:validator) { IndexValidator.new }
       let(:schema) { @table_schema }
       let(:table) { double('table', indexes: @indexes) }
+      let(:sql) { SQL::Builder.new }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"

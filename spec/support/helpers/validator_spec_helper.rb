@@ -29,7 +29,7 @@ module Gauge
 
       def should_append_error(error_message)
         validator.errors.as_null_object.should_receive(:<<).with(error_message)
-        validator.do_validate(schema, dba, double('sql'))
+        validator.do_validate(schema, dba, sql)
       end
 
 

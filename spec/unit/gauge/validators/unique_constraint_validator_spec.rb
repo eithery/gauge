@@ -9,6 +9,7 @@ module Gauge
       let(:validator) { UniqueConstraintValidator.new }
       let(:schema) { @table_schema }
       let(:table) { double('table', unique_constraints: @unique_constraints) }
+      let(:sql) { SQL::Builder.new }
 
       it { should respond_to :do_validate }
       it_behaves_like "any database object validator"

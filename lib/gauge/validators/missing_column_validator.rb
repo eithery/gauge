@@ -13,11 +13,7 @@ module Gauge
         unless table.column_exists? column_schema.to_sym
           missing_column column_schema.column_name
           result = false
-
-#          sql.build_sql(:add_column, column_schema) do |sql|
-#            sql.alter_table column_schema.table
-#            sql.add_column column_schema
-#          end
+          sql.add_column column_schema
         end
         result
       end
