@@ -18,8 +18,34 @@ module Gauge
 
       subject { builder }
 
+      it { should respond_to :cleanup }
+      it { should respond_to :add_column, :alter_column }
       it { should respond_to :build_sql }
-      it { should respond_to :alter_table, :add_column, :alter_column }
+      it { should respond_to :alter_table }
+
+
+      describe '#cleanup' do
+        before { @database = Gauge::Schema::DatabaseSchema.new('rep_profile') }
+
+        context "before database validation check" do
+          it "deletes all SQL migration files belong to the database to be checked" do
+            FileUtils.should_receive(:remove_dir).once.with(/\/sql\/rep_profile/, hash_including(force: true))
+            builder.cleanup @database
+          end
+        end
+
+        context "before data table validation check" do
+          before { @data_table = Gauge::Schema::DataTableSchema.new(:reps, database: @database) }
+
+          it "deletes all SQL migration files belong to the data table to be checked" do
+            FileUtils.should_receive(:remove_file).with(/\/sql\/rep_profile\/tables\/create_dbo_reps.sql/,
+              hash_including(force: true)).once
+            FileUtils.should_receive(:remove_file).with(/\/sql\/rep_profile\/tables\/alter_dbo_reps.sql/,
+              hash_including(force: true)).once
+            builder.cleanup @data_table
+          end
+        end
+      end
 
 
       describe '#build_sql' do

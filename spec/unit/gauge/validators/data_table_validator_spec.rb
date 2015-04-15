@@ -53,12 +53,12 @@ module Gauge
         end
 
         it "deletes all SQL migration script files for the data table generated during previous runs" do
-          SQL::Provider.any_instance.should_receive(:cleanup).with(table_schema)
+          SQL::Builder.any_instance.should_receive(:cleanup).with(table_schema)
           check
         end
 
         it "creates SQL builder instance" do
-          SQL::Builder.should_receive(:new)
+          SQL::Builder.should_receive(:new).once.and_return(double('sql', cleanup: nil))
           check
         end
 

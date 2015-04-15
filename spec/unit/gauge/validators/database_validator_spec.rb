@@ -53,7 +53,7 @@ module Gauge
         it "deletes all SQL migration script files generated during previous runs" do
           schema.stub(tables: {})
           validator.stub(:error)
-          SQL::Provider.any_instance.should_receive(:cleanup).with(schema)
+          SQL::Builder.any_instance.should_receive(:cleanup).with(schema)
           validator.check schema, dba
         end
       end

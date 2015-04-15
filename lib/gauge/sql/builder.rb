@@ -7,10 +7,14 @@ require 'gauge'
 module Gauge
   module SQL
     class Builder
-      @sql_home = File.expand_path(File.dirname(__FILE__) + '/../../../sql/')
-
       def initialize
         @sql = []
+        @sql_home ||= File.expand_path(File.dirname(__FILE__) + '/../../../sql/')
+      end
+
+
+      def cleanup dbo
+        dbo.class == Gauge::Schema::DatabaseSchema ? delete_database_sql(dbo) : delete_data_table_sql(dbo)
       end
 
 
@@ -40,7 +44,7 @@ module Gauge
 
   private
 
-      def self.sql_home
+      def sql_home
         Dir.mkdir(@sql_home) unless File.exists? @sql_home
         @sql_home
       end
@@ -53,7 +57,7 @@ module Gauge
 
 
       def table_home(table)
-        database = create_folder "#{Builder.sql_home}/#{table.database_schema.sql_name}"
+        database = create_folder "#{sql_home}/#{table.database_schema.sql_name}"
         tables = create_folder "#{database}/tables"
       end
 
@@ -76,6 +80,19 @@ module Gauge
 
       def default_value(column)
         " default #{column.sql_default_value}" unless column.sql_default_value.nil?
+      end
+
+
+      def delete_database_sql database
+        database_path = "#{sql_home}/#{database.sql_name}"
+        FileUtils.remove_dir database_path, force: true
+      end
+
+
+      def delete_data_table_sql table
+        tables_path = "#{sql_home}/#{table.database_schema.sql_name}/tables"
+        FileUtils.remove_file "#{tables_path}/create_#{table.to_sym}.sql", force: true
+        FileUtils.remove_file "#{tables_path}/alter_#{table.to_sym}.sql", force: true
       end
     end
   end

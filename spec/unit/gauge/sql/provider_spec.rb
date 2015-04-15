@@ -9,8 +9,6 @@ module Gauge
       let(:sql) { Provider.new }
       subject { sql }
 
-      it { should respond_to :cleanup }
-
       describe '#build_sql' do
         before do
           @column_schema = double('column_schema')
@@ -53,30 +51,6 @@ module Gauge
             @sql.as_null_object.should_receive(:alter_table).with(@table)
             @sql.as_null_object.should_receive(:alter_column).with(@column)
             sql.build_alter_column_sql @column
-          end
-        end
-      end
-
-
-      describe '#cleanup' do
-        before { @database = Gauge::Schema::DatabaseSchema.new('rep_profile') }
-
-        context "before database validation check" do
-          it "deletes all SQL migration files belong to the database to be checked" do
-            FileUtils.should_receive(:remove_dir).once.with(/\/sql\/rep_profile/, hash_including(force: true))
-            sql.cleanup @database
-          end
-        end
-
-        context "before data table validation check" do
-          before { @data_table = Gauge::Schema::DataTableSchema.new(:reps, database: @database) }
-
-          it "deletes all SQL migration files belong to the data table to be checked" do
-            FileUtils.should_receive(:remove_file).with(/\/sql\/rep_profile\/tables\/create_dbo_reps.sql/,
-              hash_including(force: true)).once
-            FileUtils.should_receive(:remove_file).with(/\/sql\/rep_profile\/tables\/alter_dbo_reps.sql/,
-              hash_including(force: true)).once
-            sql.cleanup @data_table
           end
         end
       end

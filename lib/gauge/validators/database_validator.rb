@@ -10,7 +10,7 @@ module Gauge
       check_all :data_tables, with_schema: ->database { database.tables.values }
 
       def check(database_schema, database)
-        SQL::Provider.new.cleanup database_schema
+        SQL::Builder.new.cleanup database_schema
         return super(database_schema, database) unless database_schema.tables.empty?
 
         errors << "Cannot found data tables metadata for '<b>#{database_schema.sql_name}</b>' database."
