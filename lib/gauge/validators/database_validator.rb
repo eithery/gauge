@@ -11,7 +11,7 @@ module Gauge
 
       def check(database_schema, database)
         SQL::Builder.new.cleanup database_schema
-        return super(database_schema, database) unless database_schema.tables.empty?
+        return super unless database_schema.tables.empty?
 
         errors << "Cannot found data tables metadata for '<b>#{database_schema.sql_name}</b>' database."
         error errors.first

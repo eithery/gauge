@@ -8,8 +8,9 @@ module Gauge
   module SQL
     class Builder
       def initialize
-        @sql = []
         @sql_home ||= File.expand_path(File.dirname(__FILE__) + '/../../../sql/')
+        @add_column_clauses = {}
+        @alter_column_clauses = {}
       end
 
 
@@ -18,31 +19,50 @@ module Gauge
       end
 
 
-      def build_sql(command, schema)
-        @sql.clear
-        yield self
-        @sql << 'go'
-        sql = @sql.join("\n") + "\n"
-        save sql, to: file_name_for(command, schema)
-        sql
-      end
+      def build_sql(table)
+        sql = ""
+        @add_column_clauses.each do |key, col|
+          sql += "#{alter_table_clause table}\n"
+          sql += "#{add_column_clause col}\n"
+          sql += "go\n\n"
+        end
+        save sql, to: file_name_for(:alter_table, table) unless sql.blank?
 
-
-      def alter_table(table)
-        @sql << "alter table [#{table.sql_schema}].[#{table.local_name}]"
+        sql = ""
+        @alter_column_clauses.each do |key, col|
+          sql += "#{alter_table_clause table}\n"
+          sql += "#{alter_column_clause col}\n"
+          sql += "go\n\n"
+        end
+        save sql, to: file_name_for(:alter_table, table) unless sql.blank?
       end
 
 
       def add_column(column)
-        @sql << "add [#{column.column_name}] #{column.sql_attributes}#{default_value(column)};"
+        @add_column_clauses[column.to_sym] = column
       end
 
 
       def alter_column(column)
-        @sql << "alter column [#{column.column_name}] #{column.sql_attributes};"
+        @alter_column_clauses[column.to_sym] = column
       end
 
   private
+
+      def alter_table_clause(table)
+        "alter table [#{table.sql_schema}].[#{table.local_name}]"
+      end
+
+
+      def add_column_clause(column)
+        "add [#{column.column_name}] #{column.sql_attributes}#{default_value(column)};"
+      end
+
+
+      def alter_column_clause(column)
+        "alter column [#{column.column_name}] #{column.sql_attributes};"
+      end
+
 
       def sql_home
         Dir.mkdir(@sql_home) unless File.exists? @sql_home

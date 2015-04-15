@@ -13,12 +13,13 @@ module Gauge
       check_all :data_columns, with_schema: ->table { table.columns },
         with_dbo: ->(database, table_schema) { database.table table_schema.table_name }
 
-      def check(table_schema, database)
+      def check(table_schema, database, db_sql=nil)
         errors.clear
         sql = SQL::Builder.new
         sql.cleanup table_schema
         super(table_schema, database, sql)
         print_totals table_schema
+        sql.build_sql table_schema
       end
 
   private
