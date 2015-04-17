@@ -31,11 +31,14 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts, :account_id)
             end
             it { should_not_yield_errors }
+            it { should_not_generate_sql }
           end
 
           context "and missing the actual primary key" do
             before { @primary_key = nil }
+
             it { yields_error :missing_primary_key }
+            it { should_add_primary_key }
           end
 
           context "but the actual primary key is defined on another data column" do
@@ -43,6 +46,7 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts, :number)
             end
             it { yields_error :column_mismatch, expected: [:account_id], actual: [:number] }
+            it { should_rebuild_primary_key }
           end
 
           context "but the actual primary key is composite" do
@@ -51,6 +55,7 @@ module Gauge
                 [:account_id, :number])
             end
             it { yields_error :column_mismatch, expected: [:account_id], actual: [:account_id, :number] }
+            it { should_rebuild_primary_key }
           end
 
           context "but the actual primary key is nonclustered" do
@@ -59,6 +64,7 @@ module Gauge
                 :account_id, clustered: false)
             end
             it { yields_error :invalid_key_type, should_be: :clustered }
+            it { should_rebuild_primary_key }
           end
 
           context "but the actual primary key has a different name" do
@@ -66,6 +72,7 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_acc1234567', :accounts, :account_id)
             end
             it { should_not_yield_errors }
+            it { should_not_generate_sql }
           end
         end
 
@@ -89,6 +96,7 @@ module Gauge
                 [:cusip, :fund_account_number])
             end
             it { should_not_yield_errors }
+            it { should_not_generate_sql }
           end
 
           context "but the actual primary key is defined on another set of data columns" do
@@ -100,6 +108,7 @@ module Gauge
               yields_error :column_mismatch, expected: [:fund_account_number, :cusip],
                 actual: [:product_id, :cusip]
             end
+            it { should_rebuild_primary_key }
           end
 
           context "but the actual primary key is simple and does not include one column" do
@@ -111,6 +120,7 @@ module Gauge
               yields_error :column_mismatch, expected: [:fund_account_number, :cusip],
                 actual: [:fund_account_number]
             end
+            it { should_rebuild_primary_key }
           end
         end
 
@@ -132,6 +142,7 @@ module Gauge
                 :account_id, clustered: false)
             end
             it { should_not_yield_errors }
+            it { should_not_generate_sql }
           end
 
           context "but the actual primary key is clustered" do
@@ -139,6 +150,7 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :accounts, :account_id)
             end
             it { yields_error :invalid_key_type, should_be: :nonclustered }
+            it { should_rebuild_primary_key }
           end
         end
       end
@@ -147,6 +159,11 @@ module Gauge
 
       def dba
         table
+      end
+
+
+      def validate
+        validator.do_validate schema, dba, sql
       end
 
 
@@ -183,6 +200,26 @@ module Gauge
 
       def key_types
         ['clustered', 'nonclustered']
+      end
+
+
+      def should_rebuild_primary_key
+        sql.should_receive(:drop_constraint).once.with(table.primary_key)
+        sql.should_receive(:add_primary_key).once.with(schema.primary_key)
+        validate
+      end
+
+
+      def should_add_primary_key
+        sql.should_receive(:add_primary_key).once.with(schema.primary_key)
+        validate
+      end
+
+
+      def should_not_generate_sql
+        sql.should_receive(:drop_constraint).never
+        sql.should_receive(:add_primary_key).never
+        validate
       end
     end
   end
