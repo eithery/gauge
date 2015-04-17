@@ -41,6 +41,23 @@ module Gauge
       end
 
 
+      def add_primary_key(primary_key)
+        @primary_key = primary_key
+      end
+
+
+      def add_unique_constraint(unique_constraint)
+      end
+
+
+      def drop_index(index)
+      end
+
+
+      def create_index(index)
+      end
+
+
       def build_sql(table)
         sql = method("#{@mode}_sql").call(table)
         save sql, to: file_name_for(@mode, table) unless sql.blank?
@@ -65,6 +82,16 @@ module Gauge
 
       def alter_column_clause(column)
         "alter column [#{column.column_name}] #{column.sql_attributes};"
+      end
+
+
+      def add_primary_key_clause(primary_key)
+        "add primary key#{clustered_clause(primary_key)} (#{primary_key.columns.join(', ')});"
+      end
+
+
+      def clustered_clause(index)
+        index.clustered? ? "" : " nonclustered"
       end
 
 
@@ -133,22 +160,47 @@ module Gauge
 
       def alter_table_sql(table)
         sql = []
+        drop_constraints_for table, sql
+        add_columns_for table, sql
+        alter_columns_for table, sql
+        add_primary_key_for table, sql
+        sql.join("\n")
+      end
+
+
+      def drop_constraints_for(table, sql)
         @constraints_to_drop.each do |key, constraint|
           sql << "#{alter_table_clause table}"
           sql << "drop constraint #{constraint.name};"
           sql << "go\n"
         end
+      end
+
+
+      def add_columns_for(table, sql)
         @columns_to_add.each do |key, col|
           sql << "#{alter_table_clause table}"
           sql << "#{add_column_clause col}"
           sql << "go\n"
         end
+      end
+
+
+      def alter_columns_for(table, sql)
         @columns_to_alter.each do |key, col|
           sql << "#{alter_table_clause table}"
           sql << "#{alter_column_clause col}"
           sql << "go\n"
         end
-        sql.join("\n")
+      end
+
+
+      def add_primary_key_for(table, sql)
+        unless @primary_key.nil?
+          sql << "#{alter_table_clause table}"
+          sql << "#{add_primary_key_clause @primary_key}"
+          sql << "go\n"
+        end
       end
     end
   end

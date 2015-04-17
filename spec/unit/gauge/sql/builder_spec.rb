@@ -17,6 +17,8 @@ module Gauge
       it { should respond_to :create_table }
       it { should respond_to :add_column, :alter_column }
       it { should respond_to :drop_constraint }
+      it { should respond_to :add_primary_key, :add_unique_constraint }
+      it { should respond_to :create_index, :drop_index }
       it { should respond_to :build_sql }
 
 
@@ -79,10 +81,47 @@ module Gauge
 
         describe '#drop_constraint' do
           before { @constraint = double('constraint', name: 'PK_customers_id', to_sym: :pk_customers_id) }
+
           it "builds SQL statement dropping DB constraint on data table" do
             builder.drop_constraint @constraint
             sql = builder.build_sql table_schema
             sql.should == "alter table [bnr].[customers]\ndrop constraint PK_customers_id;\ngo\n"
+          end
+        end
+
+        describe '#add_primary_key' do
+          context "for clustered primary key" do
+            before do
+              @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('PK_customers_id', :customers, :id)
+            end
+            it "builds correct SQL statement creating the primary key" do
+              target_sql.should == "alter table [bnr].[customers]\nadd primary key (id);\ngo\n"
+            end
+          end
+
+          context "for nonclustered primary key" do
+            before do
+              @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('PK_customers_id',
+                :customers, :id, clustered: false)
+            end
+            it "builds correct SQL statement creating the primary key" do
+              target_sql.should == "alter table [bnr].[customers]\nadd primary key nonclustered (id);\ngo\n"
+            end
+          end
+
+          context "for composite primary key" do
+            before do
+              @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('PK_customers_id',
+                :fund_accounts, [:fund_account_number, :cusip])
+            end
+            it "builds correct SQL statement creating the primary key" do
+              target_sql.should == "alter table [bnr].[customers]\nadd primary key (fund_account_number, cusip);\ngo\n"
+            end
+          end
+
+          def target_sql
+            builder.add_primary_key @primary_key
+            sql = builder.build_sql table_schema
           end
         end
 
