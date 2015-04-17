@@ -12,6 +12,7 @@ module Gauge
         @sql_home ||= File.expand_path(File.dirname(__FILE__) + '/../../../sql/')
         @columns_to_add = {}
         @columns_to_alter = {}
+        @constraints_to_drop = {}
       end
 
 
@@ -32,6 +33,11 @@ module Gauge
 
       def alter_column(column)
         @columns_to_alter[column.to_sym] = column
+      end
+
+
+      def drop_constraint(constraint)
+        @constraints_to_drop[constraint.to_sym] = constraint
       end
 
 
@@ -127,6 +133,11 @@ module Gauge
 
       def alter_table_sql(table)
         sql = []
+        @constraints_to_drop.each do |key, constraint|
+          sql << "#{alter_table_clause table}"
+          sql << "drop constraint #{constraint.name};"
+          sql << "go\n"
+        end
         @columns_to_add.each do |key, col|
           sql << "#{alter_table_clause table}"
           sql << "#{add_column_clause col}"

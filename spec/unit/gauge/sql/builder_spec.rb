@@ -16,6 +16,7 @@ module Gauge
       it { should respond_to :cleanup }
       it { should respond_to :create_table }
       it { should respond_to :add_column, :alter_column }
+      it { should respond_to :drop_constraint }
       it { should respond_to :build_sql }
 
 
@@ -73,6 +74,15 @@ module Gauge
             columns.each { |col| builder.alter_column(column_schema(col, table_schema)) }
             sql = builder.build_sql table_schema
             columns.each { |col| sql.should include("alter table [bnr].[customers]\nalter column #{col[1]}\ngo\n") }
+          end
+        end
+
+        describe '#drop_constraint' do
+          before { @constraint = double('constraint', name: 'PK_customers_id', to_sym: :pk_customers_id) }
+          it "builds SQL statement dropping DB constraint on data table" do
+            builder.drop_constraint @constraint
+            sql = builder.build_sql table_schema
+            sql.should == "alter table [bnr].[customers]\ndrop constraint PK_customers_id;\ngo\n"
           end
         end
 
