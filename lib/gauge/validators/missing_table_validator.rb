@@ -8,11 +8,12 @@ module Gauge
   module Validators
     class MissingTableValidator < Validators::Base
 
-      validate do |table_schema, database|
+      validate do |table_schema, database, sql|
         result = true
         unless database.table_exists? table_schema.to_sym
           missing_table table_schema.table_name
           result = false
+          sql.create_table table_schema
         end
         result
       end
