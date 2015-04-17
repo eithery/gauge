@@ -58,7 +58,7 @@ module Gauge
         end
 
         it "creates SQL builder instance" do
-          SQL::Builder.should_receive(:new).once.and_return(double('sql', cleanup: nil))
+          SQL::Builder.should_receive(:new).once.and_return(double('sql', cleanup: nil, build_sql: nil))
           check
         end
 

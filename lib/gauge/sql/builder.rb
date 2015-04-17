@@ -8,9 +8,10 @@ module Gauge
   module SQL
     class Builder
       def initialize
+        @mode = :alter_table
         @sql_home ||= File.expand_path(File.dirname(__FILE__) + '/../../../sql/')
-        @add_column_clauses = {}
-        @alter_column_clauses = {}
+        @columns_to_add = {}
+        @columns_to_alter = {}
       end
 
 
@@ -19,35 +20,32 @@ module Gauge
       end
 
 
-      def build_sql(table)
-        sql = ""
-        @add_column_clauses.each do |key, col|
-          sql += "#{alter_table_clause table}\n"
-          sql += "#{add_column_clause col}\n"
-          sql += "go\n\n"
-        end
-        save sql, to: file_name_for(:alter_table, table) unless sql.blank?
-
-        sql = ""
-        @alter_column_clauses.each do |key, col|
-          sql += "#{alter_table_clause table}\n"
-          sql += "#{alter_column_clause col}\n"
-          sql += "go\n\n"
-        end
-        save sql, to: file_name_for(:alter_table, table) unless sql.blank?
+      def create_table(table)
+        @mode = :create_table
       end
 
 
       def add_column(column)
-        @add_column_clauses[column.to_sym] = column
+        @columns_to_add[column.to_sym] = column
       end
 
 
       def alter_column(column)
-        @alter_column_clauses[column.to_sym] = column
+        @columns_to_alter[column.to_sym] = column
+      end
+
+
+      def build_sql(table)
+        sql = method("#{@mode}_sql").call(table)
+        save sql, to: file_name_for(@mode, table) unless sql.blank?
       end
 
   private
+
+      def create_table_clause(table)
+        "create table [#{table.sql_schema}].[#{table.local_name}]"
+      end
+
 
       def alter_table_clause(table)
         "alter table [#{table.sql_schema}].[#{table.local_name}]"
@@ -73,6 +71,7 @@ module Gauge
       def save(sql, options)
         file_name = options[:to]
         File.open(file_name, 'a') { |f| f.puts sql }
+        sql
       end
 
 
@@ -113,6 +112,32 @@ module Gauge
         tables_path = "#{sql_home}/#{table.database_schema.sql_name}/tables"
         FileUtils.remove_file "#{tables_path}/create_#{table.to_sym}.sql", force: true
         FileUtils.remove_file "#{tables_path}/alter_#{table.to_sym}.sql", force: true
+      end
+
+
+      def create_table_sql(table)
+        sql = []
+        sql << "#{create_table_clause table}"
+        sql << "("
+        sql << ");"
+        sql << "go"
+        sql.join("\n")
+      end
+
+
+      def alter_table_sql(table)
+        sql = []
+        @columns_to_add.each do |key, col|
+          sql << "#{alter_table_clause table}"
+          sql << "#{add_column_clause col}"
+          sql << "go\n"
+        end
+        @columns_to_alter.each do |key, col|
+          sql << "#{alter_table_clause table}"
+          sql << "#{alter_column_clause col}"
+          sql << "go\n"
+        end
+        sql.join("\n")
       end
     end
   end

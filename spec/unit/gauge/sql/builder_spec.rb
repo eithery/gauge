@@ -19,13 +19,16 @@ module Gauge
       subject { builder }
 
       it { should respond_to :cleanup }
+      it { should respond_to :create_table }
       it { should respond_to :add_column, :alter_column }
       it { should respond_to :build_sql }
-      it { should respond_to :alter_table }
 
 
       describe '#cleanup' do
-        before { @database = Gauge::Schema::DatabaseSchema.new('rep_profile') }
+        before do
+          Dir.stub(:mkdir)
+          @database = Gauge::Schema::DatabaseSchema.new('rep_profile')
+        end
 
         context "before database validation check" do
           it "deletes all SQL migration files belong to the database to be checked" do
@@ -48,100 +51,113 @@ module Gauge
       end
 
 
+      describe '#create_table' do
+      end
+
+
+      describe "(SQL generation methods)" do
+        before do
+          Dir.stub(:mkdir)
+          File.stub(:open)
+        end
+
+        describe '#add_column' do
+          it "creates SQL statement to add the new data column" do
+            all_columns.each { |col| builder.add_column(column_schema(col, table_schema)) }
+            sql = builder.build_sql table_schema
+            sql.should include('alter table [bnr].[customers]')
+            all_columns.each { |col| sql.should include("add #{col[1]}") }
+          end
+        end
+
+        describe '#alter_column' do
+          it "creates SQL statement altering existing data column" do
+            columns.each { |col| builder.alter_column(column_schema(col, table_schema)) }
+            sql = builder.build_sql table_schema
+            sql.should include('alter table [bnr].[customers]')
+            columns.each { |col| sql.should include("alter column #{col[1]}") }
+          end
+        end
+
+        def column_schema(col, table_schema)
+          Schema::DataColumnSchema.new(col[0][0], col[0][1]).in_table table_schema
+        end
+      end
+
+
       describe '#build_sql' do
         before { File.stub(:open) }
 
-        it "creates SQL home folder if it does not exist" do
-          File.stub(:exists? => false)
-          Dir.should_receive(:mkdir).with(/\/sql/).exactly(3).times
-          build_add_column_sql
+        context "determining the target folder for SQL script" do
+          before { builder.add_column column_schema }
+
+          it "creates SQL home folder if it does not exist" do
+            File.stub(:exists? => false)
+            Dir.should_receive(:mkdir).with(/\/sql/).exactly(3).times
+            builder.build_sql table_schema
+          end
+
+          it "creates database folder if it does not exist" do
+            File.stub(:exists?).and_return(true, false)
+            Dir.should_receive(:mkdir).with(/\/sql\/books_n_records/).exactly(2).times
+            builder.build_sql table_schema
+          end
+
+          it "creates tables folder if it does not exist" do
+            File.stub(:exists?).and_return(true, true, false)
+            Dir.should_receive(:mkdir).with(/\/sql\/books_n_records\/tables/).once
+            builder.build_sql table_schema
+          end
         end
 
-        it "creates database folder if it does not exist" do
-          File.stub(:exists?).and_return(true, false)
-          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records/).exactly(2).times
-          build_add_column_sql
-        end
-
-        it "creates tables folder if it does not exist" do
-          File.stub(:exists?).and_return(true, true, false)
-          Dir.should_receive(:mkdir).with(/\/sql\/books_n_records\/tables/).once
-          build_add_column_sql
-        end
 
         context "creating migration script file" do
           before { File.stub(:exists?).and_return(true, true, true) }
 
-          context "to create missing data table" do
+          context "for missing data table" do
+            before { builder.create_table table_schema }
+
             it "builds the script file name using 'create' clause and table name combination" do
               File.should_receive(:open).with(/create_bnr_customers.sql/, 'a').once
-              builder.build_sql(:create_table, table_schema) do |sql|
-              end
+              builder.build_sql table_schema
             end
           end
 
-          context "to alter existing data table" do
+          context "for existing data table" do
+            before { builder.add_column column_schema }
+
             it "builds the script file name using 'alter' clause and table name combination" do
               File.should_receive(:open).with(/alter_bnr_customers.sql/, 'a').once
-              build_add_column_sql
+              builder.build_sql table_schema
             end
           end
         end
 
         context "builds correct SQL script" do
           before do
-            @file = double('migration_file', puts: nil)
+            @file = double('sql_file', puts: nil)
             File.stub(:exists? => true)
             File.stub(:open) do |arg, arg2, &block|
               block.call(@file)
             end
+            builder.add_column column_schema
           end
 
           it "and returns generated script" do
-            build_add_column_sql.should == sql_script
+            builder.build_sql(table_schema).should == sql_script
           end
 
           it "and saves SQL script into the file" do
             @file.should_receive(:puts).with(sql_script)
-            build_add_column_sql
-          end
-        end
-      end
-
-
-      describe '#alter_table' do
-        it "creates ALTER TABLE SQL clause" do
-          builder.alter_table(table_schema).should == ["alter table [bnr].[customers]"]
-        end
-      end
-
-
-      describe '#add_column' do
-        it "creates SQL statement to add the new data column" do
-          (columns + columns_with_defaults).each do |col|
-            schema = Schema::DataColumnSchema.new(col[0][0], col[0][1]).in_table table_schema
-            Builder.new.add_column(schema).should == ["add #{col[1]}"]
-          end
-        end
-      end
-
-
-      describe '#alter_column' do
-        it "creates SQL statement altering existing data column" do
-          columns.each do |col|
-            schema = Schema::DataColumnSchema.new(col[0][0], col[0][1]).in_table table_schema
-            Builder.new.alter_column(schema).should == ["alter column #{col[1]}"]
+            builder.build_sql table_schema
           end
         end
       end
 
   private
-  
-      def build_add_column_sql
-        builder.build_sql(:add_column, column_schema) do |b|
-          b.alter_table table_schema
-          b.add_column column_schema
-        end
+
+      def all_columns
+        columns + columns_with_defaults
       end
 
 
@@ -151,7 +167,7 @@ module Gauge
           [[:rep_code, {len: 10}],                                  '[rep_code] nvarchar(10) null;'],
           [[:description, {len: :max}],                             '[description] nvarchar(max) null;'],
           [[:total_amount, {type: :money}],                         '[total_amount] decimal(18,2) null;'],
-          [[:rate, {type: :percent, required: true}],               '[rate] decimal(18,4) not null;'],
+          [[:rep_rate, {type: :percent, required: true}],           '[rep_rate] decimal(18,4) not null;'],
           [[:state_code, {type: :us_state}],                        '[state_code] nchar(2) null;'],
           [[:country, {type: :country, required: true}],            '[country] nchar(2) not null;'],
           [[:service_flag, {type: :char}],                          '[service_flag] nchar(1) null;'],
@@ -164,9 +180,9 @@ module Gauge
           [[:snapshot, {type: :xml}],                               '[snapshot] xml null;'],
           [[:photo, {type: :blob, required: true}],                 '[photo] varbinary(max) not null;'],
           [[:hash_code, {type: :binary, len: 10, required: true}],  '[hash_code] binary(10) not null;'],
-          [[:is_active, {}],                                        '[is_active] tinyint null;'],
-          [[:status, {type: :short, required: true}],               '[status] smallint not null;'],
-          [[:risk_tolerance, {type: :enum, required: true}],        '[risk_tolerance] tinyint not null;']
+          [[:is_enabled, {}],                                       '[is_enabled] tinyint null;'],
+          [[:batch_state, {type: :short, required: true}],          '[batch_state] smallint not null;'],
+          [[:time_horizon, {type: :enum, required: true}],          '[time_horizon] tinyint not null;']
         ]
       end
 
@@ -176,8 +192,8 @@ module Gauge
           [[:is_active, {required: true}], '[is_active] tinyint not null default 0;'],
           [[:status, {type: :short, required: true, default: -1}], '[status] smallint not null default -1;'],
           [[:has_dependents, {required: true, default: true}], '[has_dependents] tinyint not null default 1;'],
-          [[:created_on, {required: true, default: {function: :getdate}}],
-            '[created_on] date not null default current_timestamp;'],
+          [[:updated_on, {required: true, default: {function: :getdate}}],
+            '[updated_on] date not null default current_timestamp;'],
           [[:rate, {type: :percent, required: true, default: 100.01}],
             '[rate] decimal(18,4) not null default 100.01;'],
           [[:risk_tolerance, {type: :enum, required: true, default: 1}],
