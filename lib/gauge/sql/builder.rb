@@ -120,7 +120,7 @@ module Gauge
         sql << "#{create_table_clause table}"
         sql << "("
         sql << ");"
-        sql << "go"
+        sql << "go\n"
         sql.join("\n")
       end
 

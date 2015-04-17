@@ -10,11 +10,6 @@ module Gauge
       let(:database_schema) { double('database', sql_name: 'books_n_records') }
       let(:table_schema) { Schema::DataTableSchema.new(:customers, sql_schema: :bnr, database: database_schema) }
       let(:column_schema) { Schema::DataColumnSchema.new(:account_number).in_table table_schema }
-      let(:sql_script) do
-        "alter table [bnr].[customers]\n" +
-        "add [account_number] nvarchar(256) null;\n" +
-        "go\n"
-      end
 
       subject { builder }
 
@@ -51,31 +46,33 @@ module Gauge
       end
 
 
-      describe '#create_table' do
-      end
-
-
       describe "(SQL generation methods)" do
         before do
           Dir.stub(:mkdir)
           File.stub(:open)
         end
 
+        describe '#create_table' do
+          it "builds SQL statement creating the new data table" do
+            builder.create_table table_schema
+            sql = builder.build_sql table_schema
+            sql.should == "create table [bnr].[customers]\n(\n);\ngo\n"
+          end
+        end
+
         describe '#add_column' do
-          it "creates SQL statement to add the new data column" do
+          it "builds SQL statement adding the new data column" do
             all_columns.each { |col| builder.add_column(column_schema(col, table_schema)) }
             sql = builder.build_sql table_schema
-            sql.should include('alter table [bnr].[customers]')
-            all_columns.each { |col| sql.should include("add #{col[1]}") }
+            all_columns.each { |col| sql.should include("alter table [bnr].[customers]\nadd #{col[1]}\ngo\n") }
           end
         end
 
         describe '#alter_column' do
-          it "creates SQL statement altering existing data column" do
+          it "builds SQL statement altering existing data column" do
             columns.each { |col| builder.alter_column(column_schema(col, table_schema)) }
             sql = builder.build_sql table_schema
-            sql.should include('alter table [bnr].[customers]')
-            columns.each { |col| sql.should include("alter column #{col[1]}") }
+            columns.each { |col| sql.should include("alter table [bnr].[customers]\nalter column #{col[1]}\ngo\n") }
           end
         end
 
@@ -150,6 +147,12 @@ module Gauge
           it "and saves SQL script into the file" do
             @file.should_receive(:puts).with(sql_script)
             builder.build_sql table_schema
+          end
+
+          def sql_script
+            "alter table [bnr].[customers]\n" +
+            "add [account_number] nvarchar(256) null;\n" +
+            "go\n"
           end
         end
       end
