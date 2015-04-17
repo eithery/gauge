@@ -31,15 +31,6 @@ module Gauge
             sql.should_receive(:alter_column).with(schema)
             validate
           end
-
-          it "generates correct SQL script" do
-            pending
-            validate
-            validator.sql.should ==
-              "alter table [dbo].[reps]\n" +
-              "alter column [total_amount] decimal(18,2) null;\n" +
-              "go\n"
-          end
         end
 
         context "when the actual column type is the same as defined in metadata" do

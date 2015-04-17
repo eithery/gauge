@@ -44,16 +44,7 @@ module Gauge
             sql.should_receive(:add_column).with(schema)
             validate
           end
-
-          it "generates correct SQL script" do
-            pending
-            validate
-            validator.sql.should ==
-              "alter table [dbo].[accounts]\n" +
-              "add [account_number] nvarchar(256) null;\n" +
-              "go\n"
-          end
-        end        
+        end
       end
 
   private

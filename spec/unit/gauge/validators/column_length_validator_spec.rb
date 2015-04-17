@@ -114,15 +114,6 @@ module Gauge
               sql.should_receive(:alter_column).with(schema)
               validate
             end
-
-            it "generates correct SQL script" do
-              pending
-              validate
-              validator.sql.should ==
-                "alter table [dbo].[primary_reps]\n" +
-                "alter column [rep_code] nvarchar(10) null;\n" +
-                "go\n"
-            end
           end
 
           context "when validation check is passed" do
