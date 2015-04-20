@@ -117,6 +117,11 @@ module Gauge
         @unique_constraints ||= define_unique_constraints
       end
 
+
+      def foreign_keys
+        @foreign_keys ||= define_foreign_keys
+      end
+
 private
 
       def has_id?
@@ -173,6 +178,11 @@ private
 
         index_name = "idx_#{to_sym}_" + business_key_columns.each { |col| col.to_s }.join('_')
         [DB::Index.new(index_name, table_name, business_key_columns, clustered: true)]
+      end
+
+
+      def define_foreign_keys
+        columns.select { |col| col.has_foreign_key? }.map { |col| col.foreign_key }
       end
     end
   end

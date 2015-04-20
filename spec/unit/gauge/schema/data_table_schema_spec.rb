@@ -27,6 +27,7 @@ module Gauge
       it { should respond_to :reference_table? }
       it { should respond_to :columns }
       it { should respond_to :primary_key }
+      it { should respond_to :foreign_keys }
       it { should respond_to :indexes, :unique_constraints }
       it { should respond_to :contains? }
       it { should respond_to :col, :timestamps }
@@ -76,6 +77,19 @@ module Gauge
         its(:columns) { should have(2).columns }
         its(:columns) { should include(:rep_code, :office_code) }
         it { should be_composite }
+      end
+
+      shared_examples_for "product_id foreign key on bnr.trades table" do
+        specify { @trades_table.foreign_keys.should have(1).item }
+        it { should be_a Gauge::DB::Constraints::ForeignKeyConstraint }
+        its(:table) { should == :bnr_trades }
+        its(:name) { should == 'fk_bnr_trades_bnr_products_product_id' }
+        its(:columns) { should have(1).column }
+        its(:columns) { should include(:product_id) }
+        its(:ref_table) { should == :bnr_products }
+        its(:ref_columns) { should have(1).column }
+        its(:ref_columns) { should include(:id) }
+        it { should_not be_composite }
       end
 
 
@@ -666,7 +680,7 @@ module Gauge
           end
         end
 
-        context "when composite (multicolumn) index is defined in the table" do
+        context "when composite (multicolumn) index is defined on the table" do
           subject { @reps_table.indexes.first }
 
           context "and it is regular (nonclustered and not unique)" do
@@ -787,7 +801,7 @@ module Gauge
           it { should_not be_composite }
         end
 
-        context "when the composite unique constraint is defined in the table" do
+        context "when the composite unique constraint is defined on the table" do
           before do
             @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code, len: 10
@@ -798,6 +812,33 @@ module Gauge
           end
           subject { @reps_table.unique_constraints.first }
           it_behaves_like "composite unique constraint on rep_code and office_code columns"
+        end
+      end
+
+
+      describe '#foreign_keys' do
+        subject { table_schema.foreign_keys }
+
+        it { should_not be_nil }
+
+        context "when the table does not have foreign keys" do
+          it { should be_empty }
+        end
+
+        context "when only one foreign key is defined on the table" do
+          before do
+            @trades_table = DataTableSchema.new(:trades, sql_schema: :bnr) do
+              col :ref => 'bnr.products'
+            end
+          end
+          subject { @trades_table.foreign_keys.first }
+          it_should_behave_like "product_id foreign key on bnr.trades table"
+        end
+
+        context "when multiple foreign keys are defined on the table" do
+        end
+
+        context "when composite foreign key is defined on the table" do
         end
       end
 
