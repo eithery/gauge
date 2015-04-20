@@ -23,6 +23,7 @@ module Gauge
       it { should respond_to :bool? }
       it { should respond_to :has_index?, :index }
       it { should respond_to :has_unique_constraint?, :unique_constraint }
+      it { should respond_to :has_foreign_key?, :foreign_key }
       it { should respond_to :sql_attributes }
 
 
@@ -201,7 +202,7 @@ module Gauge
         context "when data column represents a foreign key reference" do
           context "to ref data table" do
             context "defined explicitly" do
-              before { @ref_column = DataColumnSchema.new(:ref => :risk_tolerance, schema: :ref) }
+              before { @ref_column = DataColumnSchema.new(:ref => { table: :risk_tolerance, schema: :ref }) }
               specify { @ref_column.data_type.should == :tinyint }
             end
 
@@ -608,6 +609,103 @@ module Gauge
       end
 
 
+      describe '#has_foreign_key?' do
+        subject { @column.has_foreign_key? }
+
+        context "when the column schema defines a foreign key" do
+          context "with default SQL schema" do
+            before { @column = DataColumnSchema.new(:ref => :offices) }
+            it { should be true }
+          end
+
+          context "with custom SQL schema combined with ref table name" do
+            before { @column = DataColumnSchema.new(:ref => 'bnr.offices') }
+            it { should be true }
+          end
+
+          context "with custom SQL schema defined using hash based option" do
+            before { @column = DataColumnSchema.new(:ref => { table: :offices, sql_schema: :bnr }) }
+            it { should be true }
+          end
+
+          context "with ref to custom data column" do
+            before { @column = DataColumnSchema.new(:ref => { table: :offices, column: :office_code }) }
+            it { should be true }
+          end
+        end
+
+        context "when the column schema does not define a foreign key" do
+          before { @column = DataColumnSchema.new(:rep_code) }
+          it { should be false }
+        end
+      end
+
+
+      describe '#foreign_key' do
+        subject { @column.foreign_key }
+
+        context "when the column schema defines a foreign key" do
+          shared_examples_for "foreign key constraint" do
+            it { should be_a Gauge::DB::Constraints::ForeignKeyConstraint }
+            its(:table) { should == table_schema.to_sym }
+            its(:columns) { should have(1).item }
+            its(:ref_columns) { should have(1).column }
+            it { should_not be_composite }
+          end
+
+          context "with default SQL schema" do
+            before { @column = DataColumnSchema.new(:ref => :offices).in_table table_schema }
+
+            it_behaves_like "foreign key constraint"
+            its(:name) { should == 'fk_bnr_reps_dbo_offices_office_id' }
+            its(:columns) { should include(:office_id) }
+            its(:ref_table) { should == :dbo_offices }
+            its(:ref_columns) { should include(:id) }
+          end
+
+          context "with custom SQL schema combined with ref table name" do
+            before { @column = DataColumnSchema.new(:ref => 'bnr.offices').in_table table_schema }
+
+            it_behaves_like "foreign key constraint"
+            its(:name) { should == 'fk_bnr_reps_bnr_offices_office_id' }
+            its(:columns) { should include(:office_id) }
+            its(:ref_table) { should == :bnr_offices }
+            its(:ref_columns) { should include(:id) }
+          end
+
+          context "with custom SQL schema defined using hash based option" do
+            before do
+              @column = DataColumnSchema.new(:ref => { table: :offices, schema: :bnr }).in_table table_schema
+            end
+
+            it_behaves_like "foreign key constraint"
+            its(:name) { should == 'fk_bnr_reps_bnr_offices_office_id' }
+            its(:columns) { should include(:office_id) }
+            its(:ref_table) { should == :bnr_offices }
+            its(:ref_columns) { should include(:id) }
+          end
+
+          context "with ref to custom data column" do
+            before do
+              @column = DataColumnSchema.new(:office_code,
+                :ref => { table: :offices, column: :office_code }).in_table table_schema
+            end
+
+            it_behaves_like "foreign key constraint"
+            its(:name) { should == 'fk_bnr_reps_dbo_offices_office_code' }
+            its(:columns) { should include(:office_code) }
+            its(:ref_table) { should == :dbo_offices }
+            its(:ref_columns) { should include(:office_code) }
+          end
+        end
+
+        context "when the column schema does not define a foreign key" do
+          before { @column = DataColumnSchema.new(:rep_code) }
+          it { should be_nil }
+        end
+      end
+
+
       describe '#in_table' do
         before { @table_schema = double('table_schema') }
 
@@ -615,7 +713,6 @@ module Gauge
           column.in_table @table_schema
           column.table.should == @table_schema
         end
-
 
         it "returns self (column schema instance)" do
           column.in_table(@table_schema).should be_equal(column)

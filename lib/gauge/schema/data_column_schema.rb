@@ -26,7 +26,7 @@ module Gauge
 
       def column_name
         return @column_name.to_s unless @column_name.blank?
-        col_name = name_from_ref || name_from_id
+        col_name = column_name_from_ref || column_name_from_id
         return col_name.to_s unless col_name.blank?
 
         raise "Data column name is not specified."
@@ -123,6 +123,11 @@ module Gauge
       end
 
 
+      def has_foreign_key?
+        contains_ref_id?
+      end
+
+
       def index
         if has_index?
           options = @options[:index]
@@ -135,6 +140,16 @@ module Gauge
       def unique_constraint
         if has_unique_constraint?
           Gauge::DB::Constraints::UniqueConstraint.new("uc_#{table.to_sym}_#{column_name}", table.table_name, to_sym)
+        end
+      end
+
+
+      def foreign_key
+        if has_foreign_key?
+          ref_table_name = "#{ref_table_options[:schema]}.#{ref_table_options[:table]}"
+          ref_table = Gauge::Helpers::NameParser.dbo_key_of ref_table_name
+          Gauge::DB::Constraints::ForeignKeyConstraint.new("fk_#{table.to_sym}_#{ref_table}_#{to_sym}",
+            table.table_name, to_sym, ref_table_name, ref_column)
         end
       end
 
@@ -161,14 +176,13 @@ module Gauge
 
   private
 
-      def name_from_ref
+      def column_name_from_ref
         return nil unless contains_ref_id?
-        ref_name = @options[:ref]
-        ref_name.to_s.split('.').last.singularize + '_id'
+        ref_table_options[:table].to_s.singularize + '_id'
       end
 
 
-      def name_from_id
+      def column_name_from_id
         :id if id?
       end
 
@@ -214,17 +228,30 @@ module Gauge
 
 
       def id_data_type
-        return :tinyint if contains_ref_id? && ref_table_sql_schema == :ref
+        return :tinyint if contains_ref_id? && ref_table_options[:schema] == :ref
         !table.nil? && table.reference_table? ? :tinyint : :bigint
       end
 
 
-      def ref_table_sql_schema
-        return nil unless contains_ref_id?
-        return @options[:schema] if @options.include? :schema
+      def ref_table_options
+        @ref_table_options ||= define_ref_table_options
+      end
 
+
+      def define_ref_table_options
+        return {} unless @options.include? :ref
+        return @options[:ref] if @options[:ref].kind_of? Hash
+
+        options = {}
         parts = @options[:ref].to_s.split('.')
-        parts.first.downcase.to_sym if parts.length > 1
+        options[:schema] = parts.length > 1 ? parts.first.downcase.to_sym : :dbo
+        options[:table] = parts.last.downcase.to_sym
+        options
+      end
+
+
+      def ref_column
+        ref_table_options.include?(:column) ? ref_table_options[:column] : :id
       end
 
 
