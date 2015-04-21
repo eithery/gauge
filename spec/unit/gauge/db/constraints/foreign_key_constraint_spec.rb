@@ -47,6 +47,57 @@ module Gauge
         end
 
 
+        describe '#==' do
+          before do
+            @foreign_key = ForeignKeyConstraint.new('fk_bnr_reps_office_code',
+              :bnr_reps, :office_id, :bnr_offices, :id)
+          end
+
+          context "when two foreign keys have the same state" do
+            specify "they are equal" do
+              foreign_key = ForeignKeyConstraint.new('fk_bnr_reps_office_code',
+                :bnr_reps, :office_id, :bnr_offices, :id)
+              @foreign_key.should_not equal(foreign_key)
+              @foreign_key.should == foreign_key
+              foreign_key.should == @foreign_key
+            end
+          end
+
+          context "when two foreign keys have the same state but different names" do
+            specify "they are equal" do
+              foreign_key = ForeignKeyConstraint.new('fk_bnr_reps_1234',
+                :bnr_reps, :office_id, :bnr_offices, :id)
+              @foreign_key.should == foreign_key
+              foreign_key.should == @foreign_key
+            end
+          end
+
+          context "when two foreign keys are different" do
+            before do
+              key_name = 'fk_bnr_reps_office_code'
+              @keys = [
+                ForeignKeyConstraint.new(key_name, :dbo_reps, :office_id, :bnr_offices, :id),
+                ForeignKeyConstraint.new(key_name, :bnr_reps, :office_code, :bnr_offices, :id),
+                ForeignKeyConstraint.new(key_name, :bnr_reps, :office_id, :dbo_offices, :id),
+                ForeignKeyConstraint.new(key_name, :bnr_reps, :office_id, :bnr_offices, :office_id),
+              ]
+            end
+
+            specify "they are not equal" do
+              @keys.each do |foreign_key|
+                @foreign_key.should_not == foreign_key
+                foreign_key.should_not == @foreign_key
+              end
+            end
+          end
+
+          context "when other foreign key is nil" do
+            subject { ForeignKeyConstraint.new('fk_bnr_reps_office_code', :bnr_reps, :office_id, :bnr_offices, :id) }
+            it { should_not == nil }
+          end
+        end
+
+
         def constraint_for(*args)
           ForeignKeyConstraint.new(*args, :primary_reps, :code)
         end

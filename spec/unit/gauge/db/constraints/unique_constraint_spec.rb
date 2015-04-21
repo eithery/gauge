@@ -16,12 +16,6 @@ module Gauge
         describe '#==' do
           before { @unique_constraint = UniqueConstraint.new('uc_reps_rep_code', :reps, :rep_code) }
 
-          context "when two constraints represent the same instance" do
-            specify "they are equal" do
-              @unique_constraint.should == @unique_constraint
-            end
-          end
-
           context "when two constraints have the same state" do
             specify "they are equal" do
               constraint = UniqueConstraint.new('uc_reps_rep_code', :reps, :rep_code)

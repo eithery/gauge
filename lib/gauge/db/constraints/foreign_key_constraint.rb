@@ -15,6 +15,13 @@ module Gauge
           @ref_table = Gauge::Helpers::NameParser.dbo_key_of ref_table
           @ref_columns = flatten_array_of ref_columns
         end
+
+
+        def ==(other_key)
+          return false if other_key.nil?
+          table == other_key.table && columns.sort == other_key.columns.sort &&
+          ref_table == other_key.ref_table && ref_columns.sort == other_key.ref_columns.sort
+        end
       end
     end
   end
