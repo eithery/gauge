@@ -35,64 +35,6 @@ module Gauge
       it { should respond_to :to_sym }
 
 
-      shared_examples_for "index on bnr.reps table" do
-        specify { @reps_table.indexes.should have(1).item }
-        it { should be_a Gauge::DB::Index }
-        its(:table) { should == :bnr_reps }
-      end
-
-      shared_examples_for "rep_code index on bnr.reps table" do
-        it_behaves_like "index on bnr.reps table"
-        its(:name) { should == 'idx_bnr_reps_rep_code' }
-        its(:columns) { should have(1).column }
-        its(:columns) { should include(:rep_code) }
-        it { should_not be_composite }
-      end
-
-      shared_examples_for "composite index on rep_code and office_code columns" do
-        it_behaves_like "index on bnr.reps table"
-        its(:name) { should == 'idx_bnr_reps_rep_code_office_code' }
-        its(:columns) { should have(2).columns }
-        its(:columns) { should include(:rep_code, :office_code) }
-        it { should be_composite }
-      end
-
-      shared_examples_for "unique constraint on bnr.reps table" do
-        specify { @reps_table.unique_constraints.should have(1).item }
-        it { should be_a Gauge::DB::Constraints::UniqueConstraint }
-        its(:table) { should == :bnr_reps }
-      end
-
-      shared_examples_for "rep_code unique constraint on bnr.reps table" do
-        it_behaves_like "unique constraint on bnr.reps table"
-        its(:name) { should == 'uc_bnr_reps_rep_code' }
-        its(:columns) { should have(1).column }
-        its(:columns) { should include(:rep_code) }
-        it { should_not be_composite }
-      end
-
-      shared_examples_for "composite unique constraint on rep_code and office_code columns" do
-        it_behaves_like "unique constraint on bnr.reps table"
-        its(:name) { should == 'uc_bnr_reps_rep_code_office_code' }
-        its(:columns) { should have(2).columns }
-        its(:columns) { should include(:rep_code, :office_code) }
-        it { should be_composite }
-      end
-
-      shared_examples_for "product_id foreign key on bnr.trades table" do
-        specify { @trades_table.foreign_keys.should have(1).item }
-        it { should be_a Gauge::DB::Constraints::ForeignKeyConstraint }
-        its(:table) { should == :bnr_trades }
-        its(:name) { should == 'fk_bnr_trades_bnr_products_product_id' }
-        its(:columns) { should have(1).column }
-        its(:columns) { should include(:product_id) }
-        its(:ref_table) { should == :bnr_products }
-        its(:ref_columns) { should have(1).column }
-        its(:ref_columns) { should include(:id) }
-        it { should_not be_composite }
-      end
-
-
       describe '#table_name' do
         context "when data table is defined in default SQL schema" do
           specify { dbo_table_schema.table_name.should == 'dbo.master_accounts' }
@@ -313,14 +255,16 @@ module Gauge
 
 
       describe '#index' do
-        it "creates the new index" do
+        subject { @reps.indexes.first }
+
+        it "creates new index" do
           Gauge::DB::Index.should_receive(:new).with('idx_dbo_master_accounts_rep_code', 'dbo.master_accounts',
             :rep_code, hash_including(clustered: true))
           table_schema.col :rep_code
           table_schema.index :rep_code, clustered: true
         end
 
-        it "adds the new index to indexes collection" do
+        it "adds new index to indexes collection" do
           index_stub = double('index')
           Gauge::DB::Index.stub(:new).and_return(index_stub)
           table_schema.col :rep_code
@@ -328,63 +272,70 @@ module Gauge
           table_schema.indexes.should include(index_stub)
         end
 
-        context "when the index includes only one column" do
+        context "when index includes one column" do
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :rep_name
               index :rep_code
             end
           end
-          subject { @reps_table.indexes.first }
-          it_should_behave_like "rep_code index on bnr.reps table"
-          it { should_not be_clustered }
-          it { should_not be_unique }
+
+          specify { @reps.indexes.should have(1).item }
+          it_behaves_like "an index", name: 'idx_bnr_reps_rep_code', table: :bnr_reps, column: :rep_code
+          it { is_expected.not_to be_clustered }
+          it { is_expected.not_to be_unique }
         end
 
-        context "when the index is defined on multiple columns" do
+        context "when index defined on multiple columns" do
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :office_code
               index [:rep_code, :office_code]
             end
           end
-          subject { @reps_table.indexes.first }
-          it_behaves_like "composite index on rep_code and office_code columns"
-          it { should_not be_clustered }
-          it { should_not be_unique }
+
+          specify { @reps.indexes.should have(1).item }
+          it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
+            table: :bnr_reps, columns: [:rep_code, :office_code]
+          it { is_expected.not_to be_clustered }
+          it { is_expected.not_to be_unique }
         end
 
-        context "when the index is defined as unique" do
+        context "when index defined as unique" do
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :office_code
               index [:rep_code, :office_code], unique: true
             end
           end
-          subject { @reps_table.indexes.first }
-          it_behaves_like "composite index on rep_code and office_code columns"
-          it { should_not be_clustered }
-          it { should be_unique }
+
+          specify { @reps.indexes.should have(1).item }
+          it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
+            table: :bnr_reps, columns: [:rep_code, :office_code]
+          it { is_expected.not_to be_clustered }
+          it { is_expected.to be_unique }
         end
 
-        context "when the index is defined as clustered" do
+        context "when index is defined as clustered" do
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :office_code
               index [:rep_code, :office_code], clustered: true
             end
           end
-          subject { @reps_table.indexes.first }
-          it_behaves_like "composite index on rep_code and office_code columns"
-          it { should be_clustered }
-          it { should be_unique }
+
+          specify { @reps.indexes.should have(1).item }
+          it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
+            table: :bnr_reps, columns: [:rep_code, :office_code]
+          it { is_expected.to be_clustered }
+          it { is_expected.to be_unique }
         end
 
-        context "when the index is defined on missing column" do
+        context "when index defined on missing column" do
           specify do
             expect {
               DataTableSchema.new(:reps, sql_schema: :bnr) do
@@ -399,14 +350,16 @@ module Gauge
 
 
       describe '#unique' do
-        it "creates the new unique constraint" do
+        subject { @reps.unique_constraints.first }
+
+        it "creates new unique constraint" do
           Gauge::DB::Constraints::UniqueConstraint.should_receive(:new).with('uc_dbo_master_accounts_rep_code',
             'dbo.master_accounts', :rep_code)
           table_schema.col :rep_code
           table_schema.unique :rep_code
         end
 
-        it "adds the new unique constraint to unique constraints collection" do
+        it "adds new unique constraint" do
           constraint_stub = double('unique_constraint')
           Gauge::DB::Constraints::UniqueConstraint.stub(:new).and_return(constraint_stub)
           table_schema.col :rep_code
@@ -414,31 +367,34 @@ module Gauge
           table_schema.unique_constraints.should include(constraint_stub)
         end
 
-        context "when the unique constraint includes only one column" do
+        context "when unique constraint defined one column" do
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :rep_name
               unique :rep_code
             end
           end
-          subject { @reps_table.unique_constraints.first }
-          it_should_behave_like "rep_code unique constraint on bnr.reps table"
+
+          specify { @reps.unique_constraints.should have(1).item }
+          it_behaves_like "a unique constraint", name: 'uc_bnr_reps_rep_code', table: :bnr_reps, column: :rep_code
         end
 
-        context "when the unique constraint is defined on multiple columns" do
+        context "when unique constraint defined on multiple columns" do
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :office_code
               unique [:rep_code, :office_code]
             end
           end
-          subject { @reps_table.unique_constraints.first }
-          it_behaves_like "composite unique constraint on rep_code and office_code columns"
+
+          specify { @reps.unique_constraints.should have(1).item }
+          it_behaves_like "a unique constraint", name: 'uc_bnr_reps_rep_code_office_code',
+            table: :bnr_reps, columns: [:rep_code, :office_code]
         end
 
-        context "when the unique constraint is defined on missing column" do
+        context "when unique constraint defined on missing column" do
           specify do
             expect {
               DataTableSchema.new(:reps, sql_schema: :bnr) do
@@ -486,113 +442,102 @@ module Gauge
       describe '#primary_key' do
         subject { table_schema.primary_key }
 
-        it { should_not be nil }
-        it { should be_a DB::Constraints::PrimaryKeyConstraint }
+        it { is_expected.not_to be_nil }
+        it { is_expected.to be_a DB::Constraints::PrimaryKeyConstraint }
 
-        it "always returns the same object instance" do
+        it "returns the same object instance" do
           key = table_schema.primary_key
           table_schema.primary_key.should be_equal(key)
           key.should be_equal(subject)
         end
 
-        context "when the primary key is defined by convention" do
-          its(:name) { should == 'pk_dbo_master_accounts' }
-          its(:table) { should == table_schema.to_sym }
+        context "when primary key defined by convention" do
           specify { table_schema.primary_key.columns.should have(1).column }
-          its(:columns) { should include(:id) }
-
-          it { should be_clustered }
-          it { should_not be_composite }
+          it_behaves_like "a primary key", name: 'pk_dbo_master_accounts', table: :dbo_master_accounts, column: :id
+          it { is_expected.to be_clustered }
         end
 
-        context "when the primary key is defined through :id attribute" do
+        context "when primary key defined using :id attribute" do
+          subject { @reps.primary_key }
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code, id: true
               col :rep_name
             end
           end
-          subject { @reps_table.primary_key }
 
-          its(:name) { should == 'pk_bnr_reps' }
-          its(:table) { should == @reps_table.to_sym }
-          specify { @reps_table.primary_key.columns.should have(1).column }
-          its(:columns) { should include(:rep_code) }
-
-          it { should be_clustered }
-          it { should_not be_composite }
+          specify { @reps.primary_key.columns.should have(1).column }
+          it_behaves_like "a primary key", name: 'pk_bnr_reps', table: :bnr_reps, column: :rep_code
+          it { is_expected.to be_clustered }
         end
 
-        context "when the primary key is not clustered" do
+        context "when nonclustered primary key " do
+          subject { @source_firms.primary_key }
           before do
-            @source_firms_table = DataTableSchema.new(:source_firms, sql_schema: :ref) do
+            @source_firms = DataTableSchema.new(:source_firms, sql_schema: :ref) do
               col :code, len: 10, business_id: true
               col :source_name
             end
           end
-          subject { @source_firms_table.primary_key }
 
-          its(:name) { should == 'pk_ref_source_firms' }
-          its(:table) { should == @source_firms_table.to_sym }
-          specify { @source_firms_table.primary_key.columns.should have(1).column }
-          its(:columns) { should include(:id) }
-
-          it { should_not be_clustered }
-          it { should_not be_composite }
+          specify { @source_firms.primary_key.columns.should have(1).column }
+          it_behaves_like "a primary key", name: 'pk_ref_source_firms', table: :ref_source_firms, column: :id
+          it { is_expected.not_to be_clustered }
         end
 
-        context "when the primary key is composite" do
+        context "when primary key is composite" do
+          subject { @account_owners.primary_key }
           before do
-            @account_owners_table = DataTableSchema.new(:account_owners) do
+            @account_owners = DataTableSchema.new(:account_owners) do
               col :master_account_id, :ref => :br_master_account, id: true
               col :natural_owner_id, :ref => :br_natural_owner, id: true
               col :ordinal, type: :byte, required: true, check: '> 0'
             end
           end
-          subject { @account_owners_table.primary_key }
 
-          its(:name) { should == 'pk_dbo_account_owners' }
-          its(:table) { should == @account_owners_table.to_sym }
-          specify { @account_owners_table.primary_key.columns.should have(2).columns }
-          its(:columns) { should include(:master_account_id, :natural_owner_id) }
-
-          it { should be_clustered }
-          it { should be_composite }
+          its(:table) { should == @account_owners.to_sym }
+          specify { @account_owners.primary_key.columns.should have(2).columns }
+          it_behaves_like "a primary key", name: 'pk_dbo_account_owners',
+            table: :dbo_account_owners, columns: [:master_account_id, :natural_owner_id]
+          it { is_expected.to be_clustered }
         end
 
-        context "when a business key is defined on the table" do
+        context "when business key defined" do
+          subject { @reps.primary_key }
           before do
-            @reps_table = DataTableSchema.new(:reps) do
+            @reps = DataTableSchema.new(:reps) do
               col :rep_id, id: true
               col :rep_code, business_id: true
             end
           end
-          subject { @reps_table.primary_key }
-          it { should_not be_clustered }
+
+          it { is_expected.not_to be_clustered }
         end
 
-        context "when a clustered index is defined on the column" do
+        context "when clustered index defined" do
+          subject { @reps.primary_key }
           before do
-            @reps_table = DataTableSchema.new(:reps) do
+            @reps = DataTableSchema.new(:reps) do
               col :rep_id, id: true
               col :rep_code, index: { clustered: true }
             end
           end
-          subject { @reps_table.primary_key }
-          it { should_not be_clustered }
+
+          it { is_expected.not_to be_clustered }
         end
 
-        context "when a composite clustered index is defined on the table" do
+        context "when composite clustered index defined" do
+          subject { @fund_accounts.primary_key }
           before do
-            @fund_accounts_table = DataTableSchema.new(:fund_accounts) do
+            @fund_accounts = DataTableSchema.new(:fund_accounts) do
               col :fund_account_number
               col :cusip, len: 9
               index [:fund_account_number, :cusip], clustered: true
             end
           end
-          subject { @fund_accounts_table.primary_key }
+
           its(:columns) { should include(:id) }
-          it { should_not be_clustered }
+          it { is_expected.not_to be_clustered }
         end
       end
 
@@ -600,25 +545,28 @@ module Gauge
       describe '#indexes' do
         subject { table_schema.indexes }
 
-        it { should_not be_nil }
+        it { is_expected.not_to be_nil }
 
-        context "when the table does not have indexes" do
-          it { should be_empty }
+        context "when no indexes defined" do
+          it { is_expected.to be_empty }
         end
 
-        context "when only one index is defined on the table" do
+        context "when one index is defined" do
+          subject { @reps.indexes.first }
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code, index: true
             end
           end
-          subject { @reps_table.indexes.first }
-          it_should_behave_like "rep_code index on bnr.reps table"
-          it { should_not be_clustered }
-          it { should_not be_unique }
+
+          specify { @reps.indexes.should have(1).item }
+          it_behaves_like "an index", name: 'idx_bnr_reps_rep_code', table: :bnr_reps, column: :rep_code
+          it { is_expected.not_to be_clustered }
+          it { is_expected.not_to be_unique }
         end
 
-        context "when multiple indexes are defined on the table" do
+        context "when multiple indexes defined" do
+          subject { @trades.indexes.last }
           before do
             @trades = DataTableSchema.new(:trades) do
               col :trade_id, index: true
@@ -628,135 +576,143 @@ module Gauge
           end
 
           specify { @trades.indexes.should have(3).items }
-          subject { @trades.indexes.last }
-          it { should be_a Gauge::DB::Index }
-          its(:name) { should == 'idx_dbo_trades_batch_id' }
-          its(:table) { should == :dbo_trades }
-          its(:columns) { should have(1).column }
-          its(:columns) { should include(:batch_id) }
-          it { should_not be_composite }
-          it { should_not be_clustered }
-          it { should_not be_unique }
+          it_behaves_like "an index", name: 'idx_dbo_trades_batch_id',
+            table: :dbo_trades, column: :batch_id
+          it { is_expected.not_to be_clustered }
+          it { is_expected.not_to be_unique }
         end
 
-        context "when unique index is defined on the table" do
+        context "when unique index is defined" do
+          subject { @reps.indexes.first }
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_id, id: true
               col :rep_code, index: { unique: true }
             end
           end
-          subject { @reps_table.indexes.first }
-          it_should_behave_like "rep_code index on bnr.reps table"
-          it { should_not be_clustered }
-          it { should be_unique }
+
+          specify { @reps.indexes.should have(1).item }
+          it_behaves_like "an index", name: 'idx_bnr_reps_rep_code', table: :bnr_reps, column: :rep_code
+          it { is_expected.not_to be_clustered }
+          it { is_expected.to be_unique }
         end
 
-        context "when clustered index is defined on the table" do
+        context "when clustered index is defined" do
+          subject { @reps.indexes.first }
           context "as regular index" do
             before do
-              @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
                 col :rep_code, index: { clustered: true }
                 col :rep_name
               end
             end
-            subject { @reps_table.indexes.first }
-            it_should_behave_like "rep_code index on bnr.reps table"
-            it { should be_clustered }
-            it { should be_unique }
+
+            specify { @reps.indexes.should have(1).item }
+            it_behaves_like "an index", name: 'idx_bnr_reps_rep_code', table: :bnr_reps, column: :rep_code
+            it { is_expected.to be_clustered }
+            it { is_expected.to be_unique }
           end
 
           context "as natural business key (using 'business_id')" do
+            subject { @reps.indexes.first }
             before do
-              @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
                 col :rep_code, business_id: true
                 col :rep_name
               end
             end
-            subject { @reps_table.indexes.first }
-            it_should_behave_like "rep_code index on bnr.reps table"
-            it { should be_clustered }
-            it { should be_unique }
+
+            specify { @reps.indexes.should have(1).item }
+            it_behaves_like "an index", name: 'idx_bnr_reps_rep_code', table: :bnr_reps, column: :rep_code
+            it { is_expected.to be_clustered }
+            it { is_expected.to be_unique }
           end
         end
 
-        context "when composite (multicolumn) index is defined on the table" do
-          subject { @reps_table.indexes.first }
+        context "when composite (multicolumn) index defined" do
+          subject { @reps.indexes.first }
 
           context "and it is regular (nonclustered and not unique)" do
             before do
-              @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
                 col :rep_code, len: 10
                 col :rep_name
                 col :office_code, len: 10
                 index [:rep_code, :office_code]
               end
             end
-            it_behaves_like "composite index on rep_code and office_code columns"
-            it { should_not be_clustered }
-            it { should_not be_unique }
+
+            specify { @reps.indexes.should have(1).item }
+            it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
+              table: :bnr_reps, columns: [:rep_code, :office_code]
+            it { is_expected.not_to be_clustered }
+            it { is_expected.not_to be_unique }
           end
 
           context "and it is unique" do
             before do
-              @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
                 col :rep_code, len: 10
                 col :rep_name
                 col :office_code, len: 10
                 index [:rep_code, :office_code], unique: true
               end
             end
-            it_behaves_like "composite index on rep_code and office_code columns"
-            it { should_not be_clustered }
-            it { should be_unique }
+
+            specify { @reps.indexes.should have(1).item }
+            it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
+              table: :bnr_reps, columns: [:rep_code, :office_code]
+            it { is_expected.not_to be_clustered }
+            it { is_expected.to be_unique }
           end
 
           context "and it is clustered" do
             before do
-              @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
                 col :rep_code, len: 10
                 col :rep_name
                 col :office_code, len: 10
                 index [:rep_code, :office_code], clustered: true
               end
-            it_behaves_like "composite index on rep_code and office_code columns"
-            it { should be_clustered }
-            it { should be_unique }
             end
+
+            specify { @reps.indexes.should have(1).item }
+            it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
+              table: :bnr_reps, columns: [:rep_code, :office_code]
+            it { is_expected.to be_clustered }
+            it { is_expected.to be_unique }
           end
 
           context "and it is clustered but not unique" do
             before do
-              @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+              @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
                 col :rep_code, len: 10
                 col :rep_name
                 col :office_code, len: 10
                 index [:rep_code, :office_code], clustered: true, unique: false
               end
             end
-            it_behaves_like "composite index on rep_code and office_code columns"
-            it { should be_clustered }
-            it { should be_unique }
+            specify { @reps.indexes.should have(1).item }
+            it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
+              table: :bnr_reps, columns: [:rep_code, :office_code]
+            it { is_expected.to be_clustered }
+            it { is_expected.to be_unique }
           end
 
           context "and it is natural business key (using 'business_id')" do
+            subject { @fund_accounts.indexes.first }
             before do
-              @fund_accounts_table = DataTableSchema.new(:fund_accounts) do
+              @fund_accounts = DataTableSchema.new(:fund_accounts) do
                 col :fund_account_number, len: 20, business_id: true
                 col :cusip, len: 9, business_id: true
               end
             end
 
-            specify { @fund_accounts_table.indexes.should have(1).item }
-            subject { @fund_accounts_table.indexes.first }
-            it { should be_a Gauge::DB::Index }
-            its(:name) { should == 'idx_dbo_fund_accounts_fund_account_number_cusip' }
-            its(:table) { should == :dbo_fund_accounts }
-            its(:columns) { should have(2).columns }
-            its(:columns) { should include(:fund_account_number, :cusip) }
-            it { should be_composite }
-            it { should be_clustered }
-            it { should be_unique }
+            specify { @fund_accounts.indexes.should have(1).item }
+            it_behaves_like "an index", name: 'idx_dbo_fund_accounts_fund_account_number_cusip',
+              table: :dbo_fund_accounts, columns: [:fund_account_number, :cusip]
+            it { is_expected.to be_clustered }
+            it { is_expected.to be_unique }
           end
         end
       end
@@ -765,24 +721,27 @@ module Gauge
       describe '#unique_constraints' do
         subject { table_schema.unique_constraints }
 
-        it { should_not be_nil }
+        it { is_expected.not_to be_nil }
 
-        context "when the table does not have unique constraints" do
-          it { should be_empty }
+        context "when no unique constraints defined" do
+          it { is_expected.to be_empty }
         end
 
-        context "when only one unique constraint is defined on the table" do
+        context "when one unique constraint defined" do
+          subject { @reps.unique_constraints.first }
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code, unique: true
             end
           end
-          subject { @reps_table.unique_constraints.first }
-          it_should_behave_like "rep_code unique constraint on bnr.reps table"
+
+          specify { @reps.unique_constraints.should have(1).item }
+          it_behaves_like "a unique constraint", name: 'uc_bnr_reps_rep_code',
+            table: :bnr_reps, column: :rep_code
         end
 
-
-        context "when multiple unique constraints are defined on the table" do
+        context "when multiple unique constraints defined" do
+          subject { @trades.unique_constraints.last }
           before do
             @trades = DataTableSchema.new(:trades) do
               col :trade_id, unique: true
@@ -792,26 +751,23 @@ module Gauge
           end
 
           specify { @trades.unique_constraints.should have(3).items }
-          subject { @trades.unique_constraints.last }
-          it { should be_a Gauge::DB::Constraints::UniqueConstraint }
-          its(:name) { should == 'uc_dbo_trades_batch_id' }
-          its(:table) { should == :dbo_trades }
-          its(:columns) { should have(1).column }
-          its(:columns) { should include(:batch_id) }
-          it { should_not be_composite }
+          it_behaves_like "a unique constraint", name: 'uc_dbo_trades_batch_id', table: :dbo_trades, column: :batch_id
         end
 
-        context "when the composite unique constraint is defined on the table" do
+        context "when composite unique constraint defined" do
+          subject { @reps.unique_constraints.first }
           before do
-            @reps_table = DataTableSchema.new(:reps, sql_schema: :bnr) do
+            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code, len: 10
               col :rep_name
               col :office_code, len: 10
               unique [:rep_code, :office_code]
             end
           end
-          subject { @reps_table.unique_constraints.first }
-          it_behaves_like "composite unique constraint on rep_code and office_code columns"
+
+          specify { @reps.unique_constraints.should have(1).item }
+          it_behaves_like "a unique constraint", name: 'uc_bnr_reps_rep_code_office_code',
+            table: :bnr_reps, columns: [:rep_code, :office_code]
         end
       end
 
@@ -819,23 +775,37 @@ module Gauge
       describe '#foreign_keys' do
         subject { table_schema.foreign_keys }
 
-        it { should_not be_nil }
+        it { is_expected.not_to be_nil }
 
-        context "when the table does not have foreign keys" do
-          it { should be_empty }
+        context "when no foreign keys defined" do
+          it { is_expected.to be_empty }
         end
 
-        context "when only one foreign key is defined on the table" do
+        context "when one foreign key defined" do
+          subject { @trades_table.foreign_keys.first }
           before do
             @trades_table = DataTableSchema.new(:trades, sql_schema: :bnr) do
               col :ref => 'bnr.products'
             end
           end
-          subject { @trades_table.foreign_keys.first }
-          it_should_behave_like "product_id foreign key on bnr.trades table"
+
+          specify { @trades_table.foreign_keys.should have(1).item }
+          it_behaves_like "a foreign key constraint", name: 'fk_bnr_trades_bnr_products_product_id',
+            table: :bnr_trades, column: :product_id, ref_table: :bnr_products, ref_column: :id
         end
 
-        context "when multiple foreign keys are defined on the table" do
+        context "when multiple foreign keys defined" do
+          subject { @trades_table.foreign_keys.first }
+          before do
+            @trades_table = DataTableSchema.new(:trades, sql_schema: :bnr) do
+              col :rep_code, :ref => { table: :reps, column: :code }
+              col :ref => 'bnr.products'
+            end
+          end
+
+          specify { @trades_table.foreign_keys.should have(2).items }
+          it_behaves_like "a foreign key constraint", name: 'fk_bnr_trades_dbo_reps_rep_code',
+            table: :bnr_trades, column: :rep_code, ref_table: :dbo_reps, ref_column: :code
         end
 
         context "when composite foreign key is defined on the table" do
