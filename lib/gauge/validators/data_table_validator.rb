@@ -8,7 +8,7 @@ module Gauge
   module Validators
     class DataTableValidator < Validators::Base
       check_before :missing_table
-      check :primary_key, :indexes, :unique_constraints,
+      check :primary_key, :indexes, :unique_constraints, :foreign_keys,
         with_dbo: ->(database, table_schema) { database.table table_schema.table_name }
       check_all :data_columns, with_schema: ->table { table.columns },
         with_dbo: ->(database, table_schema) { database.table table_schema.table_name }
