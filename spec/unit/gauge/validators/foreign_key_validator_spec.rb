@@ -107,7 +107,7 @@ module Gauge
 
 
       def missing_foreign_key_message(options)
-        /Missing #{foreign_key_description(options)}/
+        /(.*?)Missing(.*?) #{foreign_key_description(options)}/
       end
 
 

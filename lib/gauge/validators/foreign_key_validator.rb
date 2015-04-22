@@ -13,7 +13,7 @@ module Gauge
           actual_key = foreign_key_on(table, expected_key.columns)
           case mismatch(expected_key, actual_key)
             when :missing_foreign_key
-              errors << "Missing #{description_of(expected_key)}"
+              errors << "<b>Missing</b> #{description_of(expected_key)}"
             when :ref_table_mismatch
               errors << ref_table_mismatch_message(expected_key, actual_key)
             when :ref_columns_mismatch
