@@ -18,6 +18,7 @@ module Gauge
       it { should respond_to :add_column, :alter_column }
       it { should respond_to :drop_constraint }
       it { should respond_to :add_primary_key, :add_unique_constraint }
+      it { should respond_to :add_foreign_key }
       it { should respond_to :create_index, :drop_index }
       it { should respond_to :build_sql }
 
@@ -122,6 +123,19 @@ module Gauge
           def target_sql
             builder.add_primary_key @primary_key
             sql = builder.build_sql table_schema
+          end
+        end
+
+        describe '#add_foreign_key' do
+          before do
+            @foreign_key = Gauge::DB::Constraints::ForeignKeyConstraint.new('FK_dbo_accounts_rep_code',
+              'bnr.customers', :rep_code, 'bnr.reps', :code)
+          end
+          it "builds SQL creating new foreign key" do
+            builder.add_foreign_key @foreign_key
+            sql = builder.build_sql table_schema
+            sql.should == "alter table [bnr].[customers]\n" +
+              "add foreign key (rep_code) references [bnr].[reps] (code);\ngo\n"
           end
         end
 

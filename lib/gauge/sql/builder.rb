@@ -13,6 +13,7 @@ module Gauge
         @columns_to_add = {}
         @columns_to_alter = {}
         @constraints_to_drop = {}
+        @foreign_keys = []
       end
 
 
@@ -43,6 +44,11 @@ module Gauge
 
       def add_primary_key(primary_key)
         @primary_key = primary_key
+      end
+
+
+      def add_foreign_key(foreign_key)
+        @foreign_keys << foreign_key
       end
 
 
@@ -87,6 +93,12 @@ module Gauge
 
       def add_primary_key_clause(primary_key)
         "add primary key#{clustered_clause(primary_key)} (#{primary_key.columns.join(', ')});"
+      end
+
+
+      def add_foreign_key_clause(foreign_key)
+        "add foreign key (#{foreign_key.columns.join(', ')}) references #{foreign_key.ref_table_sql} " +
+        "(#{foreign_key.ref_columns.join(', ')});"
       end
 
 
@@ -164,6 +176,7 @@ module Gauge
         add_columns_for table, sql
         alter_columns_for table, sql
         add_primary_key_for table, sql
+        add_foreign_keys_for table, sql
         sql.join("\n")
       end
 
@@ -199,6 +212,15 @@ module Gauge
         unless @primary_key.nil?
           sql << "#{alter_table_clause table}"
           sql << "#{add_primary_key_clause @primary_key}"
+          sql << "go\n"
+        end
+      end
+
+
+      def add_foreign_keys_for(table, sql)
+        @foreign_keys.each do |fk|
+          sql << "#{alter_table_clause table}"
+          sql << "#{add_foreign_key_clause fk}"
           sql << "go\n"
         end
       end
