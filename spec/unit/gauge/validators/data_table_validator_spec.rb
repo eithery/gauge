@@ -18,7 +18,7 @@ module Gauge
       let(:table) do
         primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('pk_accounts', :master_accounts, :id)
         double('table', column_exists?: true, column: column, primary_key: primary_key,
-          indexes: [], unique_constraints: [])
+          indexes: [], unique_constraints: [], foreign_keys: [])
       end
       let(:database) { double('database', sql_name: 'books_n_records', table_exists?: true, table: table) }
       let(:table_schema) do
@@ -99,6 +99,18 @@ module Gauge
 
           it "performs validation check for unique constraints" do
             stub_validator(UniqueConstraintValidator).should_receive(:do_validate).with(table_schema, table,
+              instance_of(SQL::Builder)).once
+            check
+          end
+
+          it "creates validator to check foreign keys" do
+            stub_foreign_keys_validator = double('foreign_keys_validator', do_validate: false, errors: [])
+            ForeignKeyValidator.should_receive(:new).once.and_return(stub_foreign_keys_validator)
+            check
+          end
+
+          it "performs validation check for foreign keys" do
+            stub_validator(ForeignKeyValidator).should_receive(:do_validate).with(table_schema, table,
               instance_of(SQL::Builder)).once
             check
           end
