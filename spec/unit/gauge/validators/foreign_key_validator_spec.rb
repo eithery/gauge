@@ -56,6 +56,7 @@ module Gauge
             end
 
             it { yields_error :missing_foreign_key, columns: [:rep_id], ref_table: :bnr_reps, ref_columns: [:id] }
+            it { yields_error :redundant_foreign_key, columns: [:office_id], ref_table: :bnr_reps, ref_columns: [:id] }
           end
 
           context "when actual foreign key references to another table" do
@@ -83,7 +84,27 @@ module Gauge
           end
         end
 
+
         context "for composite foreign key" do
+        end
+
+
+        context "for redundant foreign keys" do
+          before do
+            @table_schema = Gauge::Schema::DataTableSchema.new(:accounts) do
+              col :number, len: 20
+            end
+            @foreign_keys = [
+              Gauge::DB::Constraints::ForeignKeyConstraint.new('fk_dbo_accounts_rep_id',
+                :accounts, :rep_id, 'bnr.reps', :id),
+              Gauge::DB::Constraints::ForeignKeyConstraint.new('fk_dbo_accounts_source_code',
+                :accounts, :source_code, :source_firms, :code)
+            ]
+          end
+
+          it { yields_error :redundant_foreign_key, columns: [:rep_id], ref_table: :bnr_reps, ref_columns: [:id] }
+          it { yields_error :redundant_foreign_key, columns: [:source_code], ref_table: :dbo_source_firms,
+            ref_columns: [:code] }
         end
       end
 
@@ -108,6 +129,11 @@ module Gauge
 
       def missing_foreign_key_message(options)
         /(.*?)Missing(.*?) #{foreign_key_description(options)}/
+      end
+
+
+      def redundant_foreign_key_message(options)
+        /(.*?)Redundant(.*?) #{foreign_key_description(options)}/
       end
 
 

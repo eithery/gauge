@@ -9,8 +9,11 @@ module Gauge
     class ForeignKeyValidator < Validators::Base
 
       validate do |table_schema, table, sql|
+        redundant_foreign_keys = table.foreign_keys.dup
         table_schema.foreign_keys.each do |expected_key|
           actual_key = foreign_key_on(table, expected_key.columns)
+          redundant_foreign_keys.delete_if { |fk| fk.equal?(actual_key) } unless actual_key.nil?
+
           case mismatch(expected_key, actual_key)
             when :missing_foreign_key
               errors << "<b>Missing</b> #{description_of(expected_key)}"
@@ -20,6 +23,8 @@ module Gauge
               errors << ref_columns_mismatch_message(expected_key, actual_key)
           end
         end
+
+        redundant_foreign_keys.each { |fk| errors << "<b>Redundant</b> #{description_of(fk)}" }
       end
 
   private
