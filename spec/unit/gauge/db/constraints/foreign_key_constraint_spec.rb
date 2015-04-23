@@ -14,6 +14,7 @@ module Gauge
         it_behaves_like "any composite database constraint"
 
         it { should respond_to :ref_table }
+        it { should respond_to :ref_table_sql }
         it { should respond_to :ref_columns }
 
 
@@ -23,6 +24,27 @@ module Gauge
               foreign_key = ForeignKeyConstraint.new('fk_trades_primary_reps', :direct_trades, :rep_code,
                 table_name, :code)
               foreign_key.ref_table.should == actual_table
+            end
+          end
+        end
+
+
+        describe '#ref_table_sql' do
+          before do
+            @ref_tables = {
+              :direct_trades => '[dbo].[direct_trades]',
+              'ref.source_firms' => '[ref].[source_firms]',
+              :REPS => '[dbo].[reps]',
+              'bnr.Master_Accounts' => '[bnr].[master_accounts]',
+              'dbo.master_account_registration_types' => '[dbo].[master_account_registration_types]'
+            }
+          end
+
+          it "returns a full table name for SQL statements" do
+            @ref_tables.each do |ref_table, sql|
+              foreign_key = ForeignKeyConstraint.new('fk_some_name', :some_table, :some_column,
+                ref_table, :some_ref_column)
+              foreign_key.ref_table_sql.should == sql
             end
           end
         end
