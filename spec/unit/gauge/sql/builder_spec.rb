@@ -93,7 +93,7 @@ module Gauge
         describe '#add_primary_key' do
           context "for clustered primary key" do
             before do
-              @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('PK_customers_id', :customers, :id)
+              @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('PK_customers_id', 'bnr.customers', :id)
             end
             it "builds correct SQL statement creating the primary key" do
               target_sql.should == "alter table [bnr].[customers]\nadd primary key (id);\ngo\n"
@@ -103,7 +103,7 @@ module Gauge
           context "for nonclustered primary key" do
             before do
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('PK_customers_id',
-                :customers, :id, clustered: false)
+                'bnr.customers', :id, clustered: false)
             end
             it "builds correct SQL statement creating the primary key" do
               target_sql.should == "alter table [bnr].[customers]\nadd primary key nonclustered (id);\ngo\n"
@@ -113,7 +113,7 @@ module Gauge
           context "for composite primary key" do
             before do
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('PK_customers_id',
-                :fund_accounts, [:fund_account_number, :cusip])
+                'bnr.customers', [:fund_account_number, :cusip])
             end
             it "builds correct SQL statement creating the primary key" do
               target_sql.should == "alter table [bnr].[customers]\nadd primary key (fund_account_number, cusip);\ngo\n"

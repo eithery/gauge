@@ -17,14 +17,24 @@ module Gauge
           case mismatch(expected_key, actual_key)
             when :missing_foreign_key
               errors << "<b>Missing</b> #{description_of(expected_key)}"
+              sql.add_foreign_key expected_key
+
             when :ref_table_mismatch
               errors << ref_table_mismatch_message(expected_key, actual_key)
+              sql.drop_constraint actual_key
+              sql.add_foreign_key expected_key
+
             when :ref_columns_mismatch
               errors << ref_columns_mismatch_message(expected_key, actual_key)
+              sql.drop_constraint actual_key
+              sql.add_foreign_key expected_key
           end
         end
 
-        redundant_foreign_keys.each { |fk| errors << "<b>Redundant</b> #{description_of(fk)}" }
+        redundant_foreign_keys.each do |fk|
+          errors << "<b>Redundant</b> #{description_of(fk)}"
+          sql.drop_constraint fk
+        end
       end
 
   private

@@ -34,7 +34,7 @@ module Gauge
             it { should_not_generate_sql }
           end
 
-          context "and missing the actual primary key" do
+          context "and missing actual primary key" do
             before { @primary_key = nil }
 
             it { yields_error :missing_primary_key }

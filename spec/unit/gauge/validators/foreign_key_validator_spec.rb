@@ -47,6 +47,7 @@ module Gauge
           context "when missing actual foreign key" do
             before { @foreign_keys = [] }
             it { yields_error :missing_foreign_key, columns: [:rep_id], ref_table: :bnr_reps, ref_columns: [:id] }
+            it { is_expected_to_add schema.foreign_keys.first }
           end
 
           context "when actual foreign key defined on another column" do
@@ -57,6 +58,8 @@ module Gauge
 
             it { yields_error :missing_foreign_key, columns: [:rep_id], ref_table: :bnr_reps, ref_columns: [:id] }
             it { yields_error :redundant_foreign_key, columns: [:office_id], ref_table: :bnr_reps, ref_columns: [:id] }
+            it { is_expected_to_drop table.foreign_keys.first }
+            it { is_expected_to_add schema.foreign_keys.first }
           end
 
           context "when actual foreign key references to another table" do
@@ -69,6 +72,8 @@ module Gauge
               yields_error :ref_table_mismatch, columns: [:rep_id],
                 ref_table: :bnr_reps, actual_ref_table: :dbo_reps
             end
+            it { is_expected_to_drop table.foreign_keys.first }
+            it { is_expected_to_add schema.foreign_keys.first }
           end
 
           context "when actual foreign key references to another column" do
@@ -81,6 +86,8 @@ module Gauge
               yields_error :ref_columns_mismatch, columns: [:rep_id],
                 ref_columns: [:id], actual_ref_columns: [:rep_id]
             end
+            it { is_expected_to_drop table.foreign_keys.first }
+            it { is_expected_to_add schema.foreign_keys.first }
           end
         end
 
@@ -105,6 +112,8 @@ module Gauge
           it { yields_error :redundant_foreign_key, columns: [:rep_id], ref_table: :bnr_reps, ref_columns: [:id] }
           it { yields_error :redundant_foreign_key, columns: [:source_code], ref_table: :dbo_source_firms,
             ref_columns: [:code] }
+          it { is_expected_to_drop table.foreign_keys.first }
+          it { is_expected_to_drop table.foreign_keys.last }
         end
       end
 
@@ -123,6 +132,18 @@ module Gauge
       def is_expected_not_to_generate_sql
         sql.should_receive(:drop_constraint).never
         sql.should_receive(:add_foreign_key).never
+        validate
+      end
+
+
+      def is_expected_to_drop(foreign_key)
+        sql.as_null_object.should_receive(:drop_constraint).once.with(foreign_key)
+        validate
+      end
+
+
+      def is_expected_to_add(foreign_key)
+        sql.should_receive(:add_foreign_key).once.with(foreign_key)
         validate
       end
 
