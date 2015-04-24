@@ -11,7 +11,7 @@ module Gauge
       validate do |table_schema, table, sql|
         case mismatch(table_schema.primary_key, table.primary_key)
           when :missing_primary_key
-            errors << "Missing <b>primary key</b> on the data table."
+            errors << "<b>Missing primary key</b> on the data table."
             sql.add_primary_key table_schema.primary_key
 
           when :column_mismatch

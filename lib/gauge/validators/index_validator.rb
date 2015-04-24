@@ -16,7 +16,7 @@ module Gauge
 
           case mismatch(expected_index, actual_index)
             when :missing_index
-              errors << "Missing #{description_of(expected_index)}."
+              errors << "<b>Missing</b> #{description_of(expected_index)}."
               sql.create_index expected_index
 
             when :unique_mismatch
@@ -30,7 +30,7 @@ module Gauge
         end
 
         redundant_indexes.each do |index|
-          errors << "Redundant #{description_of(index)}."
+          errors << "<b>Redundant</b> #{description_of(index)}."
           sql.drop_index index
         end
       end

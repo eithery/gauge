@@ -261,12 +261,12 @@ module Gauge
 
 
       def missing_index_message(options)
-        /Missing #{index_description(options)}/
+        /(.*?)Missing(.*?) #{index_description(options)}/
       end
 
 
       def redundant_index_message(options)
-        /Redundant #{index_description(options)}/
+        /(.*?)Redundant(.*?) #{index_description(options)}/
       end
 
 

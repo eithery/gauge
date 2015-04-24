@@ -12,7 +12,7 @@ module Gauge
         redundant_constraints = table.unique_constraints.dup
         table_schema.unique_constraints.each do |constraint|
           if missing?(constraint, table)
-            errors << "Missing #{description_of(constraint)}."
+            errors << "<b>Missing</b> #{description_of(constraint)}."
             sql.add_unique_constraint constraint
           end
 
@@ -21,7 +21,7 @@ module Gauge
         end
 
         redundant_constraints.each do
-          |constraint| errors << "Redundant #{description_of(constraint)}."
+          |constraint| errors << "<b>Redundant</b> #{description_of(constraint)}."
           sql.drop_constraint constraint
         end
       end

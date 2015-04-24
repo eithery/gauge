@@ -155,12 +155,12 @@ module Gauge
 
 
       def missing_constraint_message(options)
-        /Missing #{constraint_description(options)}/
+        /(.*?)Missing(.*?) #{constraint_description(options)}/
       end
 
 
       def redundant_unique_constraint_message(options)
-        /Redundant #{constraint_description(options)}/
+        /(.*?)Redundant(.*?) #{constraint_description(options)}/
       end
 
 
