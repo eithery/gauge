@@ -32,11 +32,11 @@ module Gauge
         describe '#ref_table_sql' do
           before do
             @ref_tables = {
-              :direct_trades => '[dbo].[direct_trades]',
-              'ref.source_firms' => '[ref].[source_firms]',
-              :REPS => '[dbo].[reps]',
-              'bnr.Master_Accounts' => '[bnr].[master_accounts]',
-              'dbo.master_account_registration_types' => '[dbo].[master_account_registration_types]'
+              :direct_trades => 'dbo.direct_trades',
+              'ref.source_firms' => 'ref.source_firms',
+              :REPS => 'dbo.reps',
+              'bnr.Master_Accounts' => 'bnr.master_accounts',
+              'dbo.master_account_registration_types' => 'dbo.master_account_registration_types'
             }
           end
 

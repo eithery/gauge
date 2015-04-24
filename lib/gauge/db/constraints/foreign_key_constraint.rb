@@ -25,7 +25,7 @@ module Gauge
 
 
         def ref_table_sql
-          "[#{ref_table_sql_schema}].[#{ref_table_local_name}]"
+          "#{ref_table_sql_schema}.#{ref_table_local_name}"
         end
 
   private
