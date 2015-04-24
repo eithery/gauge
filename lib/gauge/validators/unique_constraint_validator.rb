@@ -8,15 +8,22 @@ module Gauge
   module Validators
     class UniqueConstraintValidator < Validators::Base
 
-      validate do |table_schema, table|
+      validate do |table_schema, table, sql|
         redundant_constraints = table.unique_constraints.dup
         table_schema.unique_constraints.each do |constraint|
-          errors << "Missing #{description_of(constraint)}." if missing?(constraint, table)
+          if missing?(constraint, table)
+            errors << "Missing #{description_of(constraint)}."
+            sql.add_unique_constraint constraint
+          end
+
           actual_constraint = take_same_constraint_for(constraint, redundant_constraints)
           redundant_constraints.delete_if { |uc| uc.equal?(actual_constraint) } unless actual_constraint.nil?
         end
 
-        redundant_constraints.each { |uc| errors << "Redundant #{description_of(uc)}." }
+        redundant_constraints.each do
+          |constraint| errors << "Redundant #{description_of(constraint)}."
+          sql.drop_constraint constraint
+        end
       end
 
   private

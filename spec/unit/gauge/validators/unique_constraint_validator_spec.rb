@@ -29,11 +29,13 @@ module Gauge
                 :reps, :rep_code)]
             end
             it { should_not_yield_errors }
+            it { is_expected_not_to_generate_sql }
           end
 
           context "missing on the data table" do
             before { @unique_constraints = [] }
             it { yields_error :missing_constraint, columns: [:rep_code] }
+            it { is_expected_to_add schema.unique_constraints.first }
           end
 
           context "defined on another column" do
@@ -42,6 +44,8 @@ module Gauge
                 :reps, :rep_name)]
             end
             it { yields_error :missing_constraint, columns: [:rep_code] }
+            it { is_expected_to_drop table.unique_constraints.first }
+            it { is_expected_to_add schema.unique_constraints.first }
           end
         end
 
@@ -59,12 +63,16 @@ module Gauge
               @unique_constraints = [Gauge::DB::Constraints::UniqueConstraint.new('uc_dbo_reps_12345',
                 :reps, [:rep_code, :office_code])]
             end
+
             it { should_not_yield_errors }
+            it { is_expected_not_to_generate_sql }
           end
 
           context "missing on the data table" do
             before { @unique_constraints = [] }
+
             it { yields_error :missing_constraint, columns: [:rep_code, :office_code] }
+            it { is_expected_to_add schema.unique_constraints.first }
           end
 
           context "with missing one column in the actual constraint" do
@@ -73,6 +81,8 @@ module Gauge
                 :reps, [:rep_code])]
             end
             it { yields_error :missing_constraint, columns: [:rep_code, :office_code] }
+            it { is_expected_to_drop table.unique_constraints.first }
+            it { is_expected_to_add schema.unique_constraints.first }
           end
 
           context "including one extra column" do
@@ -81,6 +91,8 @@ module Gauge
                 :reps, [:rep_code, :office_code, :effective_date])]
             end
             it { yields_error :missing_constraint, columns: [:rep_code, :office_code] }
+            it { is_expected_to_drop table.unique_constraints.first }
+            it { is_expected_to_add schema.unique_constraints.first }
           end
 
           context "defined on same columns but in different order" do
@@ -89,6 +101,7 @@ module Gauge
                 :reps, [:office_code, :rep_code])]
             end
             it { should_not_yield_errors }
+            it { is_expected_not_to_generate_sql }
           end
         end
 
@@ -105,6 +118,8 @@ module Gauge
 
           it { yields_error :redundant_unique_constraint, columns: [:rep_code] }
           it { yields_error :redundant_unique_constraint, columns: [:office_code] }
+          it { is_expected_to_drop table.unique_constraints.first }
+          it { is_expected_to_drop table.unique_constraints.last }
         end
       end
 
@@ -112,6 +127,30 @@ module Gauge
 
       def dba
         table
+      end
+
+
+      def validate
+        validator.do_validate schema, dba, sql
+      end
+
+
+      def is_expected_not_to_generate_sql
+        sql.should_receive(:drop_constraint).never
+        sql.should_receive(:add_unique_constraint).never
+        validate
+      end
+
+
+      def is_expected_to_drop(unique_constraint)
+        sql.as_null_object.should_receive(:drop_constraint).once.with(unique_constraint)
+        validate
+      end
+
+
+      def is_expected_to_add(unique_constraint)
+        sql.should_receive(:add_unique_constraint).once.with(unique_constraint)
+        validate
       end
 
 
