@@ -24,27 +24,39 @@ module Gauge
 
           context "existing on the data table" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, :rep_code)] }
+
             it { should_not_yield_errors }
+            it { is_expected_not_to_generate_sql }
           end
 
           context "missing on the data table" do
             before { @indexes = [] }
+
             it { yields_error :missing_index, columns: [:rep_code] }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "defined on another column" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_name)] }
+
             it { yields_error :missing_index, columns: [:rep_code] }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "which is actually unique" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code, unique: true)] }
+
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: 'not unique' }
+            it { is_expected_to_drop table.indexes.first }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "which is actually clustered" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code, clustered: true)] }
+
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :nonclustered }
+            it { is_expected_to_drop table.indexes.first }
+            it { is_expected_to_create schema.indexes.first }
           end
         end
 
@@ -63,16 +75,21 @@ module Gauge
               @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, [:rep_code, :office_code])]
             end
             it { should_not_yield_errors }
+            it { is_expected_not_to_generate_sql }
           end
 
           context "missing on the data table" do
             before { @indexes = [] }
+
             it { yields_error :missing_index, columns: [:rep_code, :office_code] }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "with missing one column in the actual index" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, [:rep_code])] }
+
             it { yields_error :missing_index, columns: [:rep_code, :office_code] }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "including one extra column" do
@@ -80,12 +97,16 @@ module Gauge
               @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps,
                 [:rep_code, :office_code, :effective_date])]
             end
+
             it { yields_error :missing_index, columns: [:rep_code, :office_code] }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "defined on same columns but in different order" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, [:office_code, :rep_code])] }
+
             it { should_not_yield_errors }
+            it { is_expected_not_to_generate_sql }
           end
 
           context "which is actually unique" do
@@ -93,7 +114,10 @@ module Gauge
               @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps,
                 [:rep_code, :office_code], unique: true)]
             end
+
             it { yields_error :index_mismatch, columns: [:rep_code, :office_code], should_be: 'not unique' }
+            it { is_expected_to_drop table.indexes.first }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "which is actually clustered" do
@@ -101,7 +125,10 @@ module Gauge
               @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps,
                 [:rep_code, :office_code], clustered: true)]
             end
+
             it { yields_error :index_mismatch, columns: [:rep_code, :office_code], should_be: :nonclustered }
+            it { is_expected_to_drop table.indexes.first }
+            it { is_expected_to_create schema.indexes.first }
           end
         end
 
@@ -115,22 +142,32 @@ module Gauge
 
           context "existing on the data table" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, :rep_code, unique: true)] }
+
             it { should_not_yield_errors }
+            it { is_expected_not_to_generate_sql }
           end
 
           context "missing on the data table" do
             before { @indexes = [] }
+
             it { yields_error :missing_index, columns: [:rep_code], unique: true }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "which is actually not unique" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code)] }
+
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :unique }
+            it { is_expected_to_drop table.indexes.first }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "which is actually clustered" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code, clustered: true)] }
+
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :nonclustered }
+            it { is_expected_to_drop table.indexes.first }
+            it { is_expected_to_create schema.indexes.first }
           end
         end
 
@@ -144,22 +181,32 @@ module Gauge
 
           context "existing on the data table" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_12345', :reps, :rep_code, clustered: true)] }
+
             it { should_not_yield_errors }
+            it { is_expected_not_to_generate_sql }
           end
 
           context "missing on the data table" do
             before { @indexes = [] }
+
             it { yields_error :missing_index, columns: [:rep_code], clustered: true }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "which is actually not unique" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code)] }
+
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :clustered }
+            it { is_expected_to_drop table.indexes.first }
+            it { is_expected_to_create schema.indexes.first }
           end
 
           context "which is actually unique but nonclustered" do
             before { @indexes = [Gauge::DB::Index.new('idx_dbo_reps_rep_code', :reps, :rep_code, unique: true)] }
+
             it { yields_error :index_mismatch, columns: [:rep_code], should_be: :clustered }
+            it { is_expected_to_drop table.indexes.first }
+            it { is_expected_to_create schema.indexes.first }
           end
         end
 
@@ -177,6 +224,8 @@ module Gauge
 
           it { yields_error :redundant_index, columns: [:rep_code], clustered: true }
           it { yields_error :redundant_index, columns: [:office_code] }
+          it { is_expected_to_drop table.indexes.first }
+          it { is_expected_to_drop table.indexes.last }
         end
       end
 
@@ -184,6 +233,30 @@ module Gauge
 
       def dba
         table
+      end
+
+
+      def validate
+        validator.do_validate schema, dba, sql
+      end
+
+
+      def is_expected_not_to_generate_sql
+        sql.should_receive(:drop_index).never
+        sql.should_receive(:create_index).never
+        validate
+      end
+
+
+      def is_expected_to_drop(index)
+        sql.as_null_object.should_receive(:drop_index).once.with(index)
+        validate
+      end
+
+
+      def is_expected_to_create(index)
+        sql.should_receive(:create_index).once.with(index)
+        validate
       end
 
 

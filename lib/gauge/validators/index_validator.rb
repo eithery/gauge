@@ -8,36 +8,50 @@ module Gauge
   module Validators
     class IndexValidator < Validators::Base
 
-      validate do |table_schema, table|
+      validate do |table_schema, table, sql|
         redundant_indexes = table.indexes.dup
-        table_schema.indexes.each do |index|
-          case mismatch(index, table)
-            when :missing_index
-              errors << "Missing #{description_of(index)}."
-            when :unique_mismatch
-              errors << mismatch_message(index, :unique, :nonunique)
-            when :clustered_mismatch
-              errors << mismatch_message(index, :clustered, :nonclustered)
-          end
-          actual_index = take_same_index_for(index, redundant_indexes)
+        table_schema.indexes.each do |expected_index|
+          actual_index = take_same_index_for(expected_index, redundant_indexes)
           redundant_indexes.delete_if { |idx| idx.equal?(actual_index) } unless actual_index.nil?
+
+          case mismatch(expected_index, actual_index)
+            when :missing_index
+              errors << "Missing #{description_of(expected_index)}."
+              sql.create_index expected_index
+
+            when :unique_mismatch
+              errors << mismatch_message(expected_index, :unique, :nonunique)
+              rebuild_index expected_index, actual_index, sql
+
+            when :clustered_mismatch
+              errors << mismatch_message(expected_index, :clustered, :nonclustered)
+              rebuild_index expected_index, actual_index, sql
+          end
         end
 
-        redundant_indexes.each { |idx| errors << "Redundant #{description_of(idx)}." }
+        redundant_indexes.each do |index|
+          errors << "Redundant #{description_of(index)}."
+          sql.drop_index index
+        end
       end
 
   private
 
-      def mismatch(index, table)
-        actual_index = take_same_index_for(index, table.indexes)
+      def mismatch(expected_index, actual_index)
         return :missing_index if actual_index.nil?
-        return :clustered_mismatch if index.clustered? != actual_index.clustered?
-        return :unique_mismatch if index.unique? != actual_index.unique?
+        return :clustered_mismatch if expected_index.clustered? != actual_index.clustered?
+        return :unique_mismatch if expected_index.unique? != actual_index.unique?
       end
 
 
       def take_same_index_for(index, indexes)
         indexes.select { |idx| idx.columns.sort == index.columns.sort }.first
+      end
+
+
+      def rebuild_index(expected_index, actual_index, sql)
+        sql.drop_index actual_index
+        sql.create_index expected_index
       end
 
 
