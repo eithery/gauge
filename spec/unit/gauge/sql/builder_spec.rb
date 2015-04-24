@@ -17,8 +17,9 @@ module Gauge
       it { should respond_to :create_table }
       it { should respond_to :add_column, :alter_column }
       it { should respond_to :drop_constraint }
-      it { should respond_to :add_primary_key, :add_unique_constraint }
+      it { should respond_to :add_primary_key }
       it { should respond_to :add_foreign_key }
+      it { should respond_to :add_unique_constraint }
       it { should respond_to :create_index, :drop_index }
       it { should respond_to :build_sql }
 
@@ -60,25 +61,28 @@ module Gauge
           it "builds SQL statement creating the new data table" do
             builder.create_table table_schema
             sql = builder.build_sql table_schema
-            sql.should == "create table [bnr].[customers]\n(\n);\ngo\n"
+            sql.should == "create table bnr.customers\n(\n);\ngo\n"
           end
         end
+
 
         describe '#add_column' do
           it "builds SQL statement adding the new data column" do
             all_columns.each { |col| builder.add_column(column_schema(col, table_schema)) }
             sql = builder.build_sql table_schema
-            all_columns.each { |col| sql.should include("alter table [bnr].[customers]\nadd #{col[1]}\ngo\n") }
+            all_columns.each { |col| sql.should include("alter table bnr.customers\nadd #{col[1]}\ngo\n") }
           end
         end
+
 
         describe '#alter_column' do
           it "builds SQL statement altering existing data column" do
             columns.each { |col| builder.alter_column(column_schema(col, table_schema)) }
             sql = builder.build_sql table_schema
-            columns.each { |col| sql.should include("alter table [bnr].[customers]\nalter column #{col[1]}\ngo\n") }
+            columns.each { |col| sql.should include("alter table bnr.customers\nalter column #{col[1]}\ngo\n") }
           end
         end
+
 
         describe '#drop_constraint' do
           before { @constraint = double('constraint', name: 'PK_customers_id', to_sym: :pk_customers_id) }
@@ -86,9 +90,10 @@ module Gauge
           it "builds SQL statement dropping DB constraint on data table" do
             builder.drop_constraint @constraint
             sql = builder.build_sql table_schema
-            sql.should == "alter table [bnr].[customers]\ndrop constraint PK_customers_id;\ngo\n"
+            sql.should == "alter table bnr.customers\ndrop constraint PK_customers_id;\ngo\n"
           end
         end
+
 
         describe '#add_primary_key' do
           context "for clustered primary key" do
@@ -96,7 +101,7 @@ module Gauge
               @primary_key = Gauge::DB::Constraints::PrimaryKeyConstraint.new('PK_customers_id', 'bnr.customers', :id)
             end
             it "builds correct SQL statement creating the primary key" do
-              target_sql.should == "alter table [bnr].[customers]\nadd primary key (id);\ngo\n"
+              target_sql.should == "alter table bnr.customers\nadd primary key (id);\ngo\n"
             end
           end
 
@@ -106,7 +111,7 @@ module Gauge
                 'bnr.customers', :id, clustered: false)
             end
             it "builds correct SQL statement creating the primary key" do
-              target_sql.should == "alter table [bnr].[customers]\nadd primary key nonclustered (id);\ngo\n"
+              target_sql.should == "alter table bnr.customers\nadd primary key nonclustered (id);\ngo\n"
             end
           end
 
@@ -116,7 +121,7 @@ module Gauge
                 'bnr.customers', [:fund_account_number, :cusip])
             end
             it "builds correct SQL statement creating the primary key" do
-              target_sql.should == "alter table [bnr].[customers]\nadd primary key (fund_account_number, cusip);\ngo\n"
+              target_sql.should == "alter table bnr.customers\nadd primary key (fund_account_number, cusip);\ngo\n"
             end
           end
 
@@ -126,6 +131,7 @@ module Gauge
           end
         end
 
+
         describe '#add_foreign_key' do
           before do
             @foreign_key = Gauge::DB::Constraints::ForeignKeyConstraint.new('FK_dbo_accounts_rep_code',
@@ -134,10 +140,98 @@ module Gauge
           it "builds SQL creating new foreign key" do
             builder.add_foreign_key @foreign_key
             sql = builder.build_sql table_schema
-            sql.should == "alter table [bnr].[customers]\n" +
-              "add foreign key (rep_code) references [bnr].[reps] (code);\ngo\n"
+            sql.should == "alter table bnr.customers with check\n" +
+              "add foreign key (rep_code) references bnr.reps (code);\ngo\n"
           end
         end
+
+
+        describe '#add_unique_constraint' do
+          context "for regular (one column) unique constraint" do
+            before do
+              @unique_constraint = Gauge::DB::Constraints::UniqueConstraint.new('UK_bnr_customers',
+                'bnr.customers', :CRD_number)
+            end
+            it "builds SQL creating new unique constraint" do
+              builder.add_unique_constraint @unique_constraint
+              sql = builder.build_sql table_schema
+              sql.should == "alter table bnr.customers\nadd unique (crd_number);\ngo\n"
+            end
+          end
+
+          context "for composite unique constraint" do
+            before do
+              @unique_constraint = Gauge::DB::Constraints::UniqueConstraint.new('UK_bnr_customers',
+                'bnr.customers', [:tax_ID, :tax_id_type])
+            end
+            it "builds SQL creating new unique constraint" do
+              builder.add_unique_constraint @unique_constraint
+              sql = builder.build_sql table_schema
+              sql.should == "alter table bnr.customers\nadd unique (tax_id, tax_id_type);\ngo\n"
+            end
+          end
+        end
+
+
+        describe '#create_index' do
+          context "for regular not unique index" do
+            before { @index = Gauge::DB::Index.new('IDX_bnr_customers_tax_id', 'bnr.customers', :tax_ID) }
+
+            it "builds SQL creating new index" do
+              target_sql.should == "create index IDX_bnr_customers_tax_id on bnr.customers (tax_id);\ngo\n"
+            end
+          end
+
+          context "for clustered index" do
+            before do
+              @index = Gauge::DB::Index.new('idx_bnr_customers_tax_id', 'bnr.customers', :tax_ID, clustered: true)
+            end
+
+            it "builds SQL creating new unique clustered index" do
+              target_sql.should == "create unique clustered index idx_bnr_customers_tax_id " +
+                "on bnr.customers (tax_id);\ngo\n"
+            end
+          end
+
+          context "for unique index" do
+            before do
+              @index = Gauge::DB::Index.new('idx_bnr_customers_tax_id', 'bnr.customers', :tax_ID, unique: true)
+            end
+
+            it "builds SQL creating new unique index" do
+              target_sql.should == "create unique index idx_bnr_customers_tax_id " +
+                "on bnr.customers (tax_id);\ngo\n"
+            end
+          end
+
+          context "for composite index" do
+            before do
+              @index = Gauge::DB::Index.new('idx_bnr_customers_tax_id', 'bnr.customers', [:tax_ID, :tax_id_type])
+            end
+
+            it "builds SQL creating new composite index" do
+              target_sql.should == "create index idx_bnr_customers_tax_id on bnr.customers " +
+                "(tax_id, tax_id_type);\ngo\n"
+            end
+          end
+
+          def target_sql
+            builder.create_index @index
+            sql = builder.build_sql table_schema
+          end
+        end
+
+
+        describe '#drop_index' do
+          before { @index = Gauge::DB::Index.new('IDX_bnr_customers_tax_id', 'bnr.customers', :tax_ID) }
+
+          it "builds SQL droping index" do
+            builder.drop_index @index
+            sql = builder.build_sql table_schema
+            sql.should == "drop index IDX_bnr_customers_tax_id on bnr.customers;\ngo\n"
+          end
+        end
+
 
         def column_schema(col, table_schema)
           Schema::DataColumnSchema.new(col[0][0], col[0][1]).in_table table_schema
@@ -213,8 +307,8 @@ module Gauge
           end
 
           def sql_script
-            "alter table [bnr].[customers]\n" +
-            "add [account_number] nvarchar(256) null;\n" +
+            "alter table bnr.customers\n" +
+            "add account_number nvarchar(256) null;\n" +
             "go\n"
           end
         end
@@ -229,45 +323,45 @@ module Gauge
 
       def columns
         [
-          [[:last_name, {}],                                        '[last_name] nvarchar(256) null;'],
-          [[:rep_code, {len: 10}],                                  '[rep_code] nvarchar(10) null;'],
-          [[:description, {len: :max}],                             '[description] nvarchar(max) null;'],
-          [[:total_amount, {type: :money}],                         '[total_amount] decimal(18,2) null;'],
-          [[:rep_rate, {type: :percent, required: true}],           '[rep_rate] decimal(18,4) not null;'],
-          [[:state_code, {type: :us_state}],                        '[state_code] nchar(2) null;'],
-          [[:country, {type: :country, required: true}],            '[country] nchar(2) not null;'],
-          [[:service_flag, {type: :char}],                          '[service_flag] nchar(1) null;'],
-          [[:account_id, {id: true}],                               '[account_id] bigint not null;'],
-          [[:total_years, {type: :int, required: true}],            '[total_years] int not null;'],
-          [[nil, {id: true}],                                       '[id] bigint not null;'],
-          [[nil, {:ref => :primary_reps}],                          '[primary_rep_id] bigint null;'],
-          [[:created_at, {}],                                       '[created_at] datetime null;'],
-          [[:created_on, {required: true}],                         '[created_on] date not null;'],
-          [[:snapshot, {type: :xml}],                               '[snapshot] xml null;'],
-          [[:photo, {type: :blob, required: true}],                 '[photo] varbinary(max) not null;'],
-          [[:hash_code, {type: :binary, len: 10, required: true}],  '[hash_code] binary(10) not null;'],
-          [[:is_enabled, {}],                                       '[is_enabled] tinyint null;'],
-          [[:batch_state, {type: :short, required: true}],          '[batch_state] smallint not null;'],
-          [[:time_horizon, {type: :enum, required: true}],          '[time_horizon] tinyint not null;']
+          [[:last_name, {}],                                        'last_name nvarchar(256) null;'],
+          [[:rep_code, {len: 10}],                                  'rep_code nvarchar(10) null;'],
+          [[:description, {len: :max}],                             'description nvarchar(max) null;'],
+          [[:total_amount, {type: :money}],                         'total_amount decimal(18,2) null;'],
+          [[:rep_rate, {type: :percent, required: true}],           'rep_rate decimal(18,4) not null;'],
+          [[:state_code, {type: :us_state}],                        'state_code nchar(2) null;'],
+          [[:country, {type: :country, required: true}],            'country nchar(2) not null;'],
+          [[:service_flag, {type: :char}],                          'service_flag nchar(1) null;'],
+          [[:account_id, {id: true}],                               'account_id bigint not null;'],
+          [[:total_years, {type: :int, required: true}],            'total_years int not null;'],
+          [[nil, {id: true}],                                       'id bigint not null;'],
+          [[nil, {:ref => :primary_reps}],                          'primary_rep_id bigint null;'],
+          [[:created_at, {}],                                       'created_at datetime null;'],
+          [[:created_on, {required: true}],                         'created_on date not null;'],
+          [[:snapshot, {type: :xml}],                               'snapshot xml null;'],
+          [[:photo, {type: :blob, required: true}],                 'photo varbinary(max) not null;'],
+          [[:hash_code, {type: :binary, len: 10, required: true}],  'hash_code binary(10) not null;'],
+          [[:is_enabled, {}],                                       'is_enabled tinyint null;'],
+          [[:batch_state, {type: :short, required: true}],          'batch_state smallint not null;'],
+          [[:time_horizon, {type: :enum, required: true}],          'time_horizon tinyint not null;']
         ]
       end
 
 
       def columns_with_defaults
         [
-          [[:is_active, {required: true}], '[is_active] tinyint not null default 0;'],
-          [[:status, {type: :short, required: true, default: -1}], '[status] smallint not null default -1;'],
-          [[:has_dependents, {required: true, default: true}], '[has_dependents] tinyint not null default 1;'],
+          [[:is_active, {required: true}], 'is_active tinyint not null default 0;'],
+          [[:status, {type: :short, required: true, default: -1}], 'status smallint not null default -1;'],
+          [[:has_dependents, {required: true, default: true}], 'has_dependents tinyint not null default 1;'],
           [[:updated_on, {required: true, default: {function: :getdate}}],
-            '[updated_on] date not null default current_timestamp;'],
+            'updated_on date not null default current_timestamp;'],
           [[:rate, {type: :percent, required: true, default: 100.01}],
-            '[rate] decimal(18,4) not null default 100.01;'],
+            'rate decimal(18,4) not null default 100.01;'],
           [[:risk_tolerance, {type: :enum, required: true, default: 1}],
-            '[risk_tolerance] tinyint not null default 1;'],
+            'risk_tolerance tinyint not null default 1;'],
           [[:account_number, len: 20, required: true, default: 'A0001'],
-            "[account_number] nvarchar(20) not null default 'A0001';"],
+            "account_number nvarchar(20) not null default 'A0001';"],
           [[:trade_id, {id: true, default: :uid}],
-            "[trade_id] bigint not null default abs(convert(bigint,convert(varbinary,newid())));"]
+            "trade_id bigint not null default abs(convert(bigint,convert(varbinary,newid())));"]
         ]
       end
     end

@@ -13,7 +13,10 @@ module Gauge
         @columns_to_add = {}
         @columns_to_alter = {}
         @constraints_to_drop = {}
+        @indexes_to_drop = []
         @foreign_keys = []
+        @unique_constraints = []
+        @indexes = []
       end
 
 
@@ -53,14 +56,17 @@ module Gauge
 
 
       def add_unique_constraint(unique_constraint)
-      end
-
-
-      def drop_index(index)
+        @unique_constraints << unique_constraint
       end
 
 
       def create_index(index)
+        @indexes << index
+      end
+
+
+      def drop_index(index)
+        @indexes_to_drop << index
       end
 
 
@@ -72,22 +78,22 @@ module Gauge
   private
 
       def create_table_clause(table)
-        "create table [#{table.sql_schema}].[#{table.local_name}]"
+        "create table #{table.sql_schema}.#{table.local_name}"
       end
 
 
       def alter_table_clause(table)
-        "alter table [#{table.sql_schema}].[#{table.local_name}]"
+        "alter table #{table.sql_schema}.#{table.local_name}"
       end
 
 
       def add_column_clause(column)
-        "add [#{column.column_name}] #{column.sql_attributes}#{default_value(column)};"
+        "add #{column.column_name} #{column.sql_attributes}#{default_value(column)};"
       end
 
 
       def alter_column_clause(column)
-        "alter column [#{column.column_name}] #{column.sql_attributes};"
+        "alter column #{column.column_name} #{column.sql_attributes};"
       end
 
 
@@ -99,6 +105,19 @@ module Gauge
       def add_foreign_key_clause(foreign_key)
         "add foreign key (#{foreign_key.columns.join(', ')}) references #{foreign_key.ref_table_sql} " +
         "(#{foreign_key.ref_columns.join(', ')});"
+      end
+
+
+      def add_unique_constraint_clause(unique_constraint)
+        "add unique (#{unique_constraint.columns.join(', ')});"
+      end
+
+
+      def create_index_clause(table, index)
+        unique = index.unique? ? 'unique ' : ''
+        clustered = index.clustered? ? 'clustered ' : ''
+        "create #{unique}#{clustered}index #{index.name} on #{table.sql_schema}.#{table.local_name} " +
+        "(#{index.columns.join(', ')});"
       end
 
 
@@ -172,55 +191,83 @@ module Gauge
 
       def alter_table_sql(table)
         sql = []
-        drop_constraints_for table, sql
-        add_columns_for table, sql
-        alter_columns_for table, sql
-        add_primary_key_for table, sql
-        add_foreign_keys_for table, sql
+        drop_indexes_on table, sql
+        drop_constraints_on table, sql
+        add_columns_on table, sql
+        alter_columns_on table, sql
+        add_primary_key_on table, sql
+        add_unique_constraints_on table, sql
+        add_foreign_keys_on table, sql
+        create_indexes_on table, sql
         sql.join("\n")
       end
 
 
-      def drop_constraints_for(table, sql)
+      def drop_constraints_on(table, sql)
         @constraints_to_drop.each do |key, constraint|
-          sql << "#{alter_table_clause table}"
+          sql << alter_table_clause(table)
           sql << "drop constraint #{constraint.name};"
           sql << "go\n"
         end
       end
 
 
-      def add_columns_for(table, sql)
+      def drop_indexes_on(table, sql)
+        @indexes_to_drop.each do |index|
+          sql << "drop index #{index.name} on #{table.sql_schema}.#{table.local_name};"
+          sql << "go\n"
+        end
+      end
+
+
+      def add_columns_on(table, sql)
         @columns_to_add.each do |key, col|
-          sql << "#{alter_table_clause table}"
-          sql << "#{add_column_clause col}"
+          sql << alter_table_clause(table)
+          sql << add_column_clause(col)
           sql << "go\n"
         end
       end
 
 
-      def alter_columns_for(table, sql)
+      def alter_columns_on(table, sql)
         @columns_to_alter.each do |key, col|
-          sql << "#{alter_table_clause table}"
-          sql << "#{alter_column_clause col}"
+          sql << alter_table_clause(table)
+          sql << alter_column_clause(col)
           sql << "go\n"
         end
       end
 
 
-      def add_primary_key_for(table, sql)
+      def add_primary_key_on(table, sql)
         unless @primary_key.nil?
-          sql << "#{alter_table_clause table}"
-          sql << "#{add_primary_key_clause @primary_key}"
+          sql << alter_table_clause(table)
+          sql << add_primary_key_clause(@primary_key)
           sql << "go\n"
         end
       end
 
 
-      def add_foreign_keys_for(table, sql)
+      def add_foreign_keys_on(table, sql)
         @foreign_keys.each do |fk|
-          sql << "#{alter_table_clause table}"
-          sql << "#{add_foreign_key_clause fk}"
+          sql << "#{alter_table_clause table} with check"
+          sql << add_foreign_key_clause(fk)
+          sql << "go\n"
+        end
+      end
+
+
+      def add_unique_constraints_on(table, sql)
+        @unique_constraints.each do |constraint|
+          sql << alter_table_clause(table)
+          sql << add_unique_constraint_clause(constraint)
+          sql << "go\n"
+        end
+      end
+
+
+      def create_indexes_on(table, sql)
+        @indexes.each do |index|
+          sql << create_index_clause(table, index)
           sql << "go\n"
         end
       end
