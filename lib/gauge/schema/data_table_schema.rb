@@ -109,7 +109,7 @@ module Gauge
 
 
       def indexes
-        @indexes ||= define_indexes + define_business_id
+        @indexes ||= define_indexes + define_business_id + define_indexes_on_foreign_keys
       end
 
 
@@ -183,6 +183,13 @@ private
 
       def define_foreign_keys
         columns.select { |col| col.has_foreign_key? }.map { |col| col.foreign_key }
+      end
+
+
+      def define_indexes_on_foreign_keys
+        foreign_keys.map do |foreign_key|
+          Gauge::DB::Index.new("idx_#{to_sym}_#{foreign_key.columns.join('_')}", table_name, foreign_key.columns)
+        end
       end
     end
   end

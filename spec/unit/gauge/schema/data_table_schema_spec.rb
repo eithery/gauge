@@ -627,6 +627,21 @@ module Gauge
             it { is_expected.to be_clustered }
             it { is_expected.to be_unique }
           end
+
+          context "as implicit index defined on foreign key column" do
+            subject { @reps.indexes.first }
+            before do
+              @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
+                col :rep_code
+                col :ref => 'bnr.offices', required: true
+              end
+            end
+
+            specify { @reps.indexes.should have(1).item }
+            it_behaves_like "an index", name: 'idx_bnr_reps_office_id', table: :bnr_reps, column: :office_id
+            it { is_expected.not_to be_clustered }
+            it { is_expected.not_to be_unique }
+          end
         end
 
         context "when composite (multicolumn) index defined" do
