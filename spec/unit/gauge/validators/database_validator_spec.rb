@@ -21,7 +21,7 @@ module Gauge
       end
 
       it_behaves_like "any database object validator"
-      it { should respond_to :do_check_all }
+      it { should respond_to :check_all_data_tables, :check_all_data_views }
 
 
       describe '#check' do

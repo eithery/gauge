@@ -31,7 +31,8 @@ module Gauge
 
       it_behaves_like "any database object validator"
 
-      it { should respond_to :check, :do_check_before, :do_check_all }
+      it { should respond_to :check, :do_check_before }
+      it { should respond_to :check_all_data_columns }
 
       describe '#check' do
         before do

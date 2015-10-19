@@ -10,7 +10,8 @@ module Gauge
       include Logger
 
       def self.check_all(validator_name, options={})
-        define_method(:do_check_all) do |dbo_schema, dbo, sql|
+        check_all_methods << method_name = "check_all_#{validator_name}".to_sym
+        define_method(method_name) do |dbo_schema, dbo, sql|
           db_schema_provider = options[:with_schema]
           dbo_provider = options[:with_dbo]
           actual_dbo = dbo_provider ? dbo_provider.call(dbo, dbo_schema) : dbo
@@ -65,7 +66,7 @@ module Gauge
         result = true
         result = do_check_before(dbo_schema, dbo, sql) if respond_to? :do_check_before
         if result
-          do_check_all(dbo_schema, dbo, sql) if respond_to? :do_check_all
+          self.class.check_all_methods.each { |method| __send__(method, dbo_schema, dbo, sql) }
           do_check(dbo_schema, dbo, sql) if respond_to? :do_check
         end
       end
@@ -80,6 +81,11 @@ module Gauge
 
       def collect_errors(validator)
         errors.concat validator.errors
+      end
+
+
+      def self.check_all_methods
+        @check_all_methods ||= []
       end
     end
   end

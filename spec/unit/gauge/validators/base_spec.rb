@@ -5,7 +5,9 @@ require 'spec_helper'
 
 module Gauge
   module Validators
+    class DummyTableValidator < Validators::Base; end
     class BaseMock < Base
+      check_all :dummy_tables, with_schema: ->db {[]}
     end
 
     describe Base do
@@ -16,8 +18,10 @@ module Gauge
 
       describe '.check_all' do
         it "defines 'do_check_all' instance method" do
-          expect { BaseMock.check_all(:data_tables) }
-            .to change { validator.respond_to? :do_check_all }.from(false).to(true)
+          [:data_tables, :data_views, :data_columns].each do |target|
+            expect { BaseMock.check_all(target, with_schema: ->db {[]}) }
+              .to change { validator.respond_to? "check_all_#{target}" }.from(false).to(true)
+          end
         end
       end
 
@@ -62,7 +66,7 @@ module Gauge
 
           it "performs validation check with all inner validators" do
             validator.stub(:do_check)
-            validator.should_receive(:do_check_all).with(@dbo_schema, @dbo, sql)
+            validator.should_receive(:check_all_dummy_tables).with(@dbo_schema, @dbo, sql)
             validate
           end
 
@@ -78,7 +82,7 @@ module Gauge
           before { validator.stub(:do_check_before).and_return(false) }
 
           specify "no main validation stage performed" do
-            validator.should_not_receive(:do_check_all)
+            validator.should_not_receive(:check_all_dummy_tables)
             validator.should_not_receive(:do_check)
             validate
           end
