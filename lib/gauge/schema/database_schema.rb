@@ -1,4 +1,4 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2015.
 # Class Gauge::Schema::DatabaseSchema
 # Database schema.
 # Contains metadata info defining a database structure.
@@ -7,12 +7,13 @@ require 'gauge'
 module Gauge
 	module Schema
 		class DatabaseSchema
-			attr_reader :tables
+			attr_reader :tables, :views
 
 			def initialize(database_name, options={})
 				@database_name = database_name
 				@options = options
 				@tables = {}
+				@views = {}
 			end
 
 

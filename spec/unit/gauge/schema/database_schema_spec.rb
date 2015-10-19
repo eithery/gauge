@@ -10,7 +10,8 @@ module Gauge
 
       it { should respond_to :database_name, :sql_name }
       it { should respond_to :database_schema }
-      it { should respond_to :tables, :to_sym }
+      it { should respond_to :tables, :views }
+      it { should respond_to :to_sym }
       it { should respond_to :object_name }
       it { should respond_to :home }
 
@@ -47,6 +48,11 @@ module Gauge
 
       describe '#tables' do
         specify { db_schema.tables.should be_empty }
+      end
+
+
+      describe '#views' do
+        specify { db_schema.views.should be_empty }
       end
 
 
