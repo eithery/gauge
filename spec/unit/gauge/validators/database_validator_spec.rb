@@ -30,9 +30,18 @@ module Gauge
           DataTableValidator.any_instance.stub(:log)
         end
 
-        it "creates validator to check data tables" do
+        it "creates validator to check all data tables" do
           table_validator = double('table_validator', check: true, errors: [])
           DataTableValidator.should_receive(:new).once.and_return(table_validator)
+          validator.check schema, dba
+        end
+
+        it "creates validator to check all data views" do
+          table_validator = double('table_validator', check: true, errors: [])
+          DataTableValidator.stub(:new).and_return(table_validator)
+
+          view_validator = double('view_validator', check: true, errors: [])
+          DataViewValidator.should_receive(:new).once.and_return(view_validator)
           validator.check schema, dba
         end
 
@@ -41,6 +50,8 @@ module Gauge
             .with(instance_of(Schema::DataTableSchema), dba, anything).exactly(3).times
           validator.check schema, dba
         end
+
+        it "performs validation check for each data view in the database"
 
         it "displays an error if no data tables defined in metadata" do
           empty_schema = Schema::DatabaseSchema.new(:test_db)

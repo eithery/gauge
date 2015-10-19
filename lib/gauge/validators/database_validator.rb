@@ -8,6 +8,7 @@ module Gauge
   module Validators
     class DatabaseValidator < Validators::Base
       check_all :data_tables, with_schema: ->database { database.tables.values }
+      check_all :data_views, with_schema: ->database { database.views.values }
 
       def check(database_schema, database)
         SQL::Builder.new.cleanup database_schema
