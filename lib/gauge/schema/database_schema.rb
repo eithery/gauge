@@ -5,46 +5,46 @@
 require 'gauge'
 
 module Gauge
-	module Schema
-		class DatabaseSchema
-			attr_reader :tables, :views
+  module Schema
+    class DatabaseSchema
+      attr_reader :tables, :views
 
-			def initialize(database_name, options={})
-				@database_name = database_name
-				@options = options
-				@tables = {}
-				@views = {}
-			end
-
-
-			def database_schema
-				self
-			end
+      def initialize(database_name, options={})
+        @database_name = database_name
+        @options = options
+        @tables = {}
+        @views = {}
+      end
 
 
-			def database_name
-				@database_name.to_s
-			end
+      def database_schema
+        self
+      end
 
 
-			def sql_name
-				@options[:sql_name] || database_name
-			end
+      def database_name
+        @database_name.to_s
+      end
 
 
-			def object_name
-				'Database'
-			end
+      def sql_name
+        @options[:sql_name] || database_name
+      end
 
 
-			def to_sym
-				database_name.downcase.to_sym
-			end
+      def object_name
+        'Database'
+      end
 
 
-			def home
-				@options[:home]
-			end
-		end
-	end
+      def to_sym
+        database_name.downcase.to_sym
+      end
+
+
+      def home
+        @options[:home]
+      end
+    end
+  end
 end
