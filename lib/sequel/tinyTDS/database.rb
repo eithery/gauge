@@ -18,6 +18,18 @@ module Sequel
       end
 
 
+      def views
+        @views ||= execute_sql(SQL_ALL_VIEWS).map do |row|
+          schema = row[:view_schema].downcase
+          name = row[:view_name].downcase
+          sql = row[:view_sql]
+          options = {}
+          options[:indexed] = true if row[:is_indexed] == 1
+          Gauge::DB::DataView.new("#{schema}.#{name}", sql, options)
+        end
+      end
+
+
       def table_exists?(table_key)
         tables.any? { |table| table.to_sym == table_key }
       end
@@ -191,6 +203,14 @@ private
         inner join sys.index_columns as ic on ic.object_id = idx.object_id and ic.index_id = idx.index_id
         inner join sys.columns as col on col.object_id = ic.object_id and col.column_id = ic.column_id
         where idx.is_primary_key = 0 and idx.is_unique_constraint = 0 and t.is_ms_shipped = 0;
+      eos
+
+      SQL_ALL_VIEWS = <<-eos
+        select v.name as view_name, s.name as view_schema,
+        objectpropertyex(object_id, 'IsIndexed') as is_indexed, isv.view_definition as view_sql
+        from sys.views as v
+        inner join sys.schemas as s on s.schema_id = v.schema_id
+        inner join information_schema.views as isv on isv.table_name = v.name and isv.table_schema = s.name;
       eos
     end
   end

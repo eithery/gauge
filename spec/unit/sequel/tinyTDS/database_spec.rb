@@ -13,6 +13,7 @@ module Sequel
 
       it { should respond_to :table_exists? }
       it { should respond_to :tables, :table }
+      it { should respond_to :views }
       it { should respond_to :primary_keys }
       it { should respond_to :foreign_keys }
       it { should respond_to :unique_constraints }
@@ -42,6 +43,35 @@ module Sequel
           it { should be_a(Gauge::DB::DataTable) }
           its(:name) { should == 'ref.financial_info' }
           its(:to_sym) { should == :ref_financial_info }
+        end
+      end
+
+
+      describe '#views' do
+        before { stub_data_views }
+        subject { database.views }
+
+        it { should_not be_empty }
+        it { should have(2).views }
+
+        context 'where the first element' do
+          subject { database.views.first }
+
+          it { should be_a(Gauge::DB::DataView) }
+          its(:name) { should == 'dbo.accounts' }
+          its(:to_sym) { should == :dbo_accounts }
+          its(:indexed?) { should be false }
+          its(:sql) { should == 'select * from dbo.master_accounts' }
+        end
+
+        context 'with custom SQL schema' do
+          subject { database.views.last }
+
+          it { should be_a(Gauge::DB::DataView) }
+          its(:name) { should == 'br.direct_trades' }
+          its(:to_sym) { should == :br_direct_trades }
+          its(:indexed?) { should be true }
+          its(:sql) { should == 'select trade_id from dbo.direct_trades' }
         end
       end
 
@@ -335,6 +365,16 @@ module Sequel
           { table_name: 'reps', table_schema: 'bnr' },
           { table_name: 'trades', table_schema: 'dbo' },
           { table_name: 'financial_info', table_schema: 'ref' }
+        ])
+      end
+
+
+      def stub_data_views
+        Sequel::Dataset.any_instance.stub(:all).and_return([
+          { view_name: 'accounts', view_schema: 'dbo', is_indexed: false,
+            view_sql: 'select * from dbo.master_accounts' },
+          { view_name: 'direct_trades', view_schema: 'br', is_indexed: 1,
+            view_sql: 'select trade_id from dbo.direct_trades' }
         ])
       end
     end
