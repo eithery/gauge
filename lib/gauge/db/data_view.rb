@@ -7,12 +7,17 @@ require 'gauge'
 module Gauge
   module DB
     class DataView < DatabaseObject
-      def initialize(name)
-        super
+      attr_reader :sql
+
+      def initialize(name, sql, options={})
+        super name
+        @sql = sql
+        @options = options
       end
 
 
       def indexed?
+        @options[:indexed] == true
       end
 
 
@@ -25,10 +30,6 @@ module Gauge
 
 
       def base_tables
-      end
-
-
-      def sql
       end
 
 

@@ -7,7 +7,10 @@ module Gauge
   module DB
     describe DataView do
       let(:dbo_name) { 'primary_RePS' }
-      let(:dbo) { DataView.new(dbo_name) }
+      let(:view_sql) { 'select number, customer_name, is_active from dbo.master_accounts' }
+      let(:view) { DataView.new(dbo_name, view_sql) }
+      let(:indexed_view) { DataView.new(dbo_name, view_sql, indexed: true) }
+      let(:dbo) { view }
       subject { dbo }
 
       it_behaves_like "any database object"
@@ -22,9 +25,12 @@ module Gauge
 
       describe '#indexed?' do
         context 'for regular views' do
+          it { should_not be_indexed }
         end
 
         context 'for indexed views' do
+          subject { indexed_view }
+          it { should be_indexed }
         end
       end
 
@@ -52,6 +58,10 @@ module Gauge
 
 
       describe '#sql' do
+        subject { view.sql }
+
+        it { should_not be_nil }
+        it { should == view_sql }
       end
 
 
@@ -63,7 +73,7 @@ module Gauge
             'bnr.tradeS' => :bnr_trades,
             :Accounts => :dbo_accounts
           }.each do |name, expected_symbol|
-            DataView.new(name).to_sym.should == expected_symbol
+            DataView.new(name, view_sql).to_sym.should == expected_symbol
           end
         end
       end
