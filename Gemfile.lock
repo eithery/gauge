@@ -2,28 +2,32 @@ GEM
   remote: https://rubygems.org/
   specs:
     diff-lcs (1.2.5)
-    gli (2.12.2)
-    rainbow (2.0.0)
+    gli (2.14.0)
+    rainbow (2.1.0)
     rspec-collection_matchers (1.1.2)
       rspec-expectations (>= 2.99.0.beta1)
-    rspec-core (3.1.7)
-      rspec-support (~> 3.1.0)
-    rspec-expectations (3.1.2)
+    rspec-core (3.5.4)
+      rspec-support (~> 3.5.0)
+    rspec-expectations (3.5.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.1.0)
+      rspec-support (~> 3.5.0)
     rspec-its (1.2.0)
       rspec-core (>= 3.0.0)
       rspec-expectations (>= 3.0.0)
-    rspec-support (3.1.2)
-    sequel (4.16.0)
+    rspec-support (3.5.0)
+    sequel (4.41.0)
 
 PLATFORMS
+  ruby
   x64-mingw32
   x86-mingw32
 
 DEPENDENCIES
-  gli (= 2.12.2)
-  rainbow (= 2.0.0)
+  gli (= 2.14.0)
+  rainbow (= 2.1.0)
   rspec-collection_matchers
   rspec-its
-  sequel (= 4.16.0)
+  sequel (= 4.41.0)
+
+BUNDLED WITH
+   1.13.6
