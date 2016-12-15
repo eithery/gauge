@@ -1,5 +1,6 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2017.
 # Gauge::Logger specs.
+
 require 'spec_helper'
 
 module Gauge
@@ -10,9 +11,9 @@ module Gauge
 
     let(:logger) { LoggerMock.new }
     let(:formatter) do
-        formatter = double('formatter')
-        Logger.stub(:formatters).and_return([formatter, formatter, formatter])
-        formatter
+      formatter = double('formatter')
+      Logger.stub(:formatters).and_return([formatter, formatter, formatter])
+      formatter
     end
 
     subject { logger }
@@ -67,7 +68,8 @@ module Gauge
         before { Logger.configure(colored: true) }
 
         it "setups colored console formatter" do
-          Logger.formatters.should include(Formatters::ColoredConsoleFormatter)
+          expect(Logger.formatters).to include Formatters::ColoredConsoleFormatter
+          expect(Logger.formatters).not_to include Formatters::ConsoleFormatter
         end
       end
 
@@ -75,7 +77,8 @@ module Gauge
         before { Logger.configure }
 
         it "setups simple console formatter" do
-          Logger.formatters.should include(Formatters::ConsoleFormatter)
+          expect(Logger.formatters).to include Formatters::ConsoleFormatter
+          expect(Logger.formatters).not_to include Formatters::ColoredConsoleFormatter
         end
       end
     end
@@ -83,7 +86,7 @@ module Gauge
 
     describe '.formatters' do
       subject { Logger.formatters }
-      it { should have(1).formatter }
+      it { is_expected.to have(1).formatter }
     end
   end
 end

@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2017.
 # Class Gauge::Formatters::ColoredConsoleFormatter
-# Displays colored messages to console terminal.
+# Displays colored messages to console/terminal.
+
 require 'gauge'
 
 module Gauge

@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2017.
 # Class Gauge::Formatters::ConsoleFormatter
-# Displays messages to console terminal.
+# Displays messages to console/terminal.
+
 require 'gauge'
 
 module Gauge

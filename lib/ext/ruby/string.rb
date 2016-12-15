@@ -1,7 +1,9 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2017.
 # Class String
 # Extends functionality of Ruby String class.
 # Supports string colorization for console messages.
+# Depends on rainbow gem.
+
 require 'gauge'
 
 class String

@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2017.
 # String extension specs.
 # Covers some monkey patches for String class.
+
 require 'spec_helper'
 
 describe String do

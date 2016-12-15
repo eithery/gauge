@@ -1,5 +1,6 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2017.
 # Gauge::Formatters::ColoredConsoleFormatter specs.
+
 require 'spec_helper'
 
 module Gauge
