@@ -3,7 +3,6 @@
 
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'rspec/collection_matchers'
-require 'rspec/its'
 require 'gauge'
 
 Dir[File.join(File.dirname(__FILE__) + '/support/**/*.rb')].each { |f| require f }

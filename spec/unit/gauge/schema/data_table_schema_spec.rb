@@ -486,7 +486,7 @@ module Gauge
         end
 
         context "when primary key is composite" do
-          subject { @account_owners.primary_key }
+          subject(:primary_key) { @account_owners.primary_key }
           before do
             @account_owners = DataTableSchema.new(:account_owners) do
               col :master_account_id, :ref => :br_master_account, id: true
@@ -495,7 +495,7 @@ module Gauge
             end
           end
 
-          its(:table) { should == @account_owners.to_sym }
+          it { expect(primary_key.table).to eq @account_owners.to_sym }
           specify { @account_owners.primary_key.columns.should have(2).columns }
           it_behaves_like "a primary key", name: 'pk_dbo_account_owners',
             table: :dbo_account_owners, columns: [:master_account_id, :natural_owner_id]
@@ -527,7 +527,7 @@ module Gauge
         end
 
         context "when composite clustered index defined" do
-          subject { @fund_accounts.primary_key }
+          subject(:primary_key) { @fund_accounts.primary_key }
           before do
             @fund_accounts = DataTableSchema.new(:fund_accounts) do
               col :fund_account_number
@@ -536,7 +536,7 @@ module Gauge
             end
           end
 
-          its(:columns) { should include(:id) }
+          it { expect(primary_key.columns).to include :id }
           it { is_expected.not_to be_clustered }
         end
       end

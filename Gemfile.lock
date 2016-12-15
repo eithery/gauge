@@ -15,14 +15,9 @@ GEM
     rainbow (2.1.0)
     rspec-collection_matchers (1.1.2)
       rspec-expectations (>= 2.99.0.beta1)
-    rspec-core (3.5.4)
-      rspec-support (~> 3.5.0)
     rspec-expectations (3.5.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.5.0)
-    rspec-its (1.2.0)
-      rspec-core (>= 3.0.0)
-      rspec-expectations (>= 3.0.0)
     rspec-mocks (3.5.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.5.0)
@@ -48,7 +43,6 @@ DEPENDENCIES
   gli (= 2.14.0)
   rainbow (= 2.1.0)
   rspec-collection_matchers
-  rspec-its
   rspec-mocks
   sequel (= 4.41.0)
   tiny_tds

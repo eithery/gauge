@@ -510,15 +510,15 @@ module Gauge
 
 
       describe '#index' do
-        subject { @column.index }
+        subject(:index) { @column.index }
 
         context "when the column schema defines index" do
           shared_examples_for "rep code index" do
             it { should be_a Gauge::DB::Index }
-            its(:name) { should == "idx_bnr_reps_rep_code" }
-            its(:table) { should == table_schema.to_sym }
-            its(:columns) { should include(:rep_code) }
-            its(:columns) { should have(1).item }
+            it { expect(index.name).to eq 'idx_bnr_reps_rep_code' }
+            it { expect(index.table).to eq table_schema.to_sym }
+            it { expect(index.columns).to include(:rep_code) }
+            it { expect(index.columns).to have(1).item }
             it { should_not be_composite }
           end
 
@@ -579,15 +579,15 @@ module Gauge
 
 
       describe '#unique_constraint' do
-        subject { @column.unique_constraint }
+        subject(:constraint) { @column.unique_constraint }
 
         context "when the column schema defines unique constraint" do
           shared_examples_for "rep code unique constraint" do
             it { should be_a Gauge::DB::Constraints::UniqueConstraint }
-            its(:name) { should == "uc_bnr_reps_rep_code" }
-            its(:table) { should == table_schema.to_sym }
-            its(:columns) { should include(:rep_code) }
-            its(:columns) { should have(1).item }
+            it { expect(constraint.name).to eq 'uc_bnr_reps_rep_code' }
+            it { expect(constraint.table).to eq table_schema.to_sym }
+            it { expect(constraint.columns).to include :rep_code }
+            it { expect(constraint.columns).to have(1).item }
             it { should_not be_composite }
           end
 
@@ -642,14 +642,14 @@ module Gauge
 
 
       describe '#foreign_key' do
-        subject { @column.foreign_key }
+        subject(:foreign_key) { @column.foreign_key }
 
         context "when the column schema defines a foreign key" do
           shared_examples_for "foreign key constraint" do
             it { should be_a Gauge::DB::Constraints::ForeignKeyConstraint }
-            its(:table) { should == table_schema.to_sym }
-            its(:columns) { should have(1).item }
-            its(:ref_columns) { should have(1).column }
+            it { expect(foreign_key.table).to eq table_schema.to_sym }
+            it { expect(foreign_key.columns).to have(1).item }
+            it { expect(foreign_key.ref_columns).to have(1).column }
             it { should_not be_composite }
           end
 
@@ -657,20 +657,20 @@ module Gauge
             before { @column = DataColumnSchema.new(:ref => :offices).in_table table_schema }
 
             it_behaves_like "foreign key constraint"
-            its(:name) { should == 'fk_bnr_reps_dbo_offices_office_id' }
-            its(:columns) { should include(:office_id) }
-            its(:ref_table) { should == :dbo_offices }
-            its(:ref_columns) { should include(:id) }
+            it { expect(foreign_key.name).to eq 'fk_bnr_reps_dbo_offices_office_id' }
+            it { expect(foreign_key.columns).to include :office_id }
+            it { expect(foreign_key.ref_table).to be :dbo_offices }
+            it { expect(foreign_key.ref_columns).to include :id }
           end
 
           context "with custom SQL schema combined with ref table name" do
             before { @column = DataColumnSchema.new(:ref => 'bnr.offices').in_table table_schema }
 
             it_behaves_like "foreign key constraint"
-            its(:name) { should == 'fk_bnr_reps_bnr_offices_office_id' }
-            its(:columns) { should include(:office_id) }
-            its(:ref_table) { should == :bnr_offices }
-            its(:ref_columns) { should include(:id) }
+            it { expect(foreign_key.name).to eq 'fk_bnr_reps_bnr_offices_office_id' }
+            it { expect(foreign_key.columns).to include :office_id }
+            it { expect(foreign_key.ref_table).to be :bnr_offices }
+            it { expect(foreign_key.ref_columns).to include :id }
           end
 
           context "with custom SQL schema defined using hash based option" do
@@ -679,10 +679,10 @@ module Gauge
             end
 
             it_behaves_like "foreign key constraint"
-            its(:name) { should == 'fk_bnr_reps_bnr_offices_office_id' }
-            its(:columns) { should include(:office_id) }
-            its(:ref_table) { should == :bnr_offices }
-            its(:ref_columns) { should include(:id) }
+            it { expect(foreign_key.name).to eq 'fk_bnr_reps_bnr_offices_office_id' }
+            it { expect(foreign_key.columns).to include :office_id }
+            it { expect(foreign_key.ref_table).to be :bnr_offices }
+            it { expect(foreign_key.ref_columns).to include :id }
           end
 
           context "with ref to custom data column" do
@@ -692,10 +692,10 @@ module Gauge
             end
 
             it_behaves_like "foreign key constraint"
-            its(:name) { should == 'fk_bnr_reps_dbo_offices_office_code' }
-            its(:columns) { should include(:office_code) }
-            its(:ref_table) { should == :dbo_offices }
-            its(:ref_columns) { should include(:office_code) }
+            it { expect(foreign_key.name).to eq 'fk_bnr_reps_dbo_offices_office_code' }
+            it { expect(foreign_key.columns).to include :office_code }
+            it { expect(foreign_key.ref_table).to be :dbo_offices }
+            it { expect(foreign_key.ref_columns).to include :office_code }
           end
         end
 

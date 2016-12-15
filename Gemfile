@@ -7,5 +7,4 @@ gem 'sequel', '4.41.0'
 gem 'tiny_tds'
 
 gem 'rspec-collection_matchers'
-gem 'rspec-its'
 gem 'rspec-mocks'

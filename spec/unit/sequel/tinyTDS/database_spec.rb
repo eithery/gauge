@@ -30,19 +30,19 @@ module Sequel
         it { should have(4).tables }
 
         context "where the first element" do
-          subject { database.tables.first }
+          subject(:first_table) { database.tables.first }
 
           it { should be_a(Gauge::DB::DataTable) }
-          its(:name) { should == 'dbo.accounts' }
-          its(:to_sym) { should == :dbo_accounts }
+          it { expect(first_table.name).to eq 'dbo.accounts' }
+          it { expect(first_table.to_sym).to be :dbo_accounts }
         end
 
         context "with custom SQL schema" do
-          subject { database.tables.last }
+          subject(:last_table) { database.tables.last }
 
           it { should be_a(Gauge::DB::DataTable) }
-          its(:name) { should == 'ref.financial_info' }
-          its(:to_sym) { should == :ref_financial_info }
+          it { expect(last_table.name).to eq 'ref.financial_info' }
+          it { expect(last_table.to_sym).to be :ref_financial_info }
         end
       end
 
@@ -55,23 +55,23 @@ module Sequel
         it { should have(2).views }
 
         context 'where the first element' do
-          subject { database.views.first }
+          subject(:first_view) { database.views.first }
 
           it { should be_a(Gauge::DB::DataView) }
-          its(:name) { should == 'dbo.accounts' }
-          its(:to_sym) { should == :dbo_accounts }
-          its(:indexed?) { should be false }
-          its(:sql) { should == 'select * from dbo.master_accounts' }
+          it { expect(first_view.name).to eq 'dbo.accounts' }
+          it { expect(first_view.to_sym).to be :dbo_accounts }
+          it { expect(first_view).not_to be_indexed }
+          it { expect(first_view.sql).to eq 'select * from dbo.master_accounts' }
         end
 
         context 'with custom SQL schema' do
-          subject { database.views.last }
+          subject(:last_view) { database.views.last }
 
           it { should be_a(Gauge::DB::DataView) }
-          its(:name) { should == 'br.direct_trades' }
-          its(:to_sym) { should == :br_direct_trades }
-          its(:indexed?) { should be true }
-          its(:sql) { should == 'select trade_id from dbo.direct_trades' }
+          it { expect(last_view.name).to eq 'br.direct_trades' }
+          it { expect(last_view.to_sym).to be :br_direct_trades }
+          it { expect(last_view).to be_indexed }
+          it { expect(last_view.sql).to eq 'select trade_id from dbo.direct_trades' }
         end
       end
 
@@ -142,14 +142,14 @@ module Sequel
         it { should have(2).primary_keys }
 
         context "where the first element" do
-          subject { database.primary_keys.first }
+          subject(:primary_key) { database.primary_keys.first }
 
           it { should be_a(Gauge::DB::Constraints::PrimaryKeyConstraint) }
-          its(:name) { should == 'pk_account_owner' }
-          its(:table) { should == :dbo_account_owners }
-          its(:columns) { should include(:master_account_id, :natural_owner_id) }
-          it { should be_composite }
-          it { should be_clustered }
+          it { expect(primary_key.name).to eq 'pk_account_owner' }
+          it { expect(primary_key.table).to be :dbo_account_owners }
+          it { expect(primary_key.columns).to include(:master_account_id, :natural_owner_id) }
+          it { is_expected.to be_composite }
+          it { is_expected.to be_clustered }
         end
 
         context "when the primary key is clustered" do
@@ -186,19 +186,19 @@ module Sequel
         end
         subject { database.foreign_keys }
 
-        it { should_not be_empty }
-        it { should have(2).foreign_keys }
+        it { is_expected.not_to be_empty }
+        it { is_expected.to have(2).foreign_keys }
 
         context "where the first element" do
-          subject { database.foreign_keys.first }
+          subject(:foreign_key) { database.foreign_keys.first }
 
-          it { should be_a(Gauge::DB::Constraints::ForeignKeyConstraint) }
-          its(:name) { should == 'fk_trades_accounts' }
-          its(:table) { should == :dbo_trades }
-          its(:columns) { should include(:account_number, :source_firm_code) }
-          its(:ref_table) { should == :bnr_accounts }
-          its(:ref_columns) { should include(:number, :code) }
-          it { should be_composite }
+          it { is_expected.to be_a(Gauge::DB::Constraints::ForeignKeyConstraint) }
+          it { expect(foreign_key.name).to eq 'fk_trades_accounts' }
+          it { expect(foreign_key.table).to be :dbo_trades }
+          it { expect(foreign_key.columns).to include(:account_number, :source_firm_code) }
+          it { expect(foreign_key.ref_table).to be :bnr_accounts }
+          it { expect(foreign_key.ref_columns).to include(:number, :code) }
+          it { is_expected.to be_composite }
         end
 
         context "when the foreign key is regular" do
@@ -224,17 +224,17 @@ module Sequel
         end
         subject { database.unique_constraints }
 
-        it { should_not be_empty }
-        it { should have(2).unique_constraints }
+        it { is_expected.not_to be_empty }
+        it { is_expected.to have(2).unique_constraints }
 
         context "where the first element" do
-          subject { database.unique_constraints.first }
+          subject(:unique_constraint) { database.unique_constraints.first }
 
           it { should be_a(Gauge::DB::Constraints::UniqueConstraint) }
-          its(:name) { should == 'uq_fund_account_number_cusip' }
-          its(:table) { should == :dbo_fund_accounts }
-          its(:columns) { should include(:fund_account_number, :cusip) }
-          it { should be_composite }
+          it { expect(unique_constraint.name).to eq 'uq_fund_account_number_cusip' }
+          it { expect(unique_constraint.table).to be :dbo_fund_accounts }
+          it { expect(unique_constraint.columns).to include(:fund_account_number, :cusip) }
+          it { is_expected.to be_composite }
         end
 
         context "when the unique constraint is regular (applied to one data column)" do
@@ -258,18 +258,18 @@ module Sequel
         end
         subject { database.check_constraints }
 
-        it { should_not be_empty }
-        it { should have(2).check_constraints }
+        it { is_expected.not_to be_empty }
+        it { is_expected.to have(2).check_constraints }
 
         context "where the first element" do
-          subject { database.check_constraints.first }
+          subject(:check_constraint) { database.check_constraints.first }
 
-          it { should be_a(Gauge::DB::Constraints::CheckConstraint) }
-          its(:name) { should == 'ck_reps_is_active' }
-          its(:table) { should == :dbo_reps }
-          its(:columns) { should include(:is_active) }
-          its(:expression) { should == '([is_active]>= 0) AND [is_active]<=(1))' }
-          it { should_not be_composite }
+          it { is_expected.to be_a(Gauge::DB::Constraints::CheckConstraint) }
+          it { expect(check_constraint.name).to eq 'ck_reps_is_active' }
+          it { expect(check_constraint.table).to be :dbo_reps }
+          it { expect(check_constraint.columns).to include(:is_active) }
+          it { expect(check_constraint.expression).to eq '([is_active]>= 0) AND [is_active]<=(1))' }
+          it { is_expected.not_to be_composite }
         end
       end
 
@@ -287,17 +287,17 @@ module Sequel
         end
         subject { database.default_constraints }
 
-        it { should_not be_empty }
-        it { should have(3).default_constraints }
+        it { is_expected.not_to be_empty }
+        it { is_expected.to have(3).default_constraints }
 
         context "where the first element" do
-          subject { database.default_constraints.first }
+          subject(:default_constraint) { database.default_constraints.first }
 
-          it { should be_a(Gauge::DB::Constraints::DefaultConstraint) }
-          its(:name) { should == 'df_risk_tolerance_is_enabled' }
-          its(:table) { should == :ref_risk_tolerance }
-          its(:column) { should == :is_enabled }
-          its(:default_value) { should == '((1))' }
+          it { is_expected.to be_a(Gauge::DB::Constraints::DefaultConstraint) }
+          it { expect(default_constraint.name).to eq 'df_risk_tolerance_is_enabled' }
+          it { expect(default_constraint.table).to be :ref_risk_tolerance }
+          it { expect(default_constraint.column).to be :is_enabled }
+          it { expect(default_constraint.default_value).to eq '((1))' }
         end
       end
 
@@ -317,19 +317,19 @@ module Sequel
         end
         subject { database.indexes }
 
-        it { should_not be_empty }
-        it { should have(3).indexes }
+        it { is_expected.not_to be_empty }
+        it { is_expected.to have(3).indexes }
 
         context "where the first element" do
-          subject { database.indexes.first }
+          subject(:index) { database.indexes.first }
 
-          it { should be_a(Gauge::DB::Index) }
-          its(:name) { should == 'idx_fund_account_info' }
-          its(:table) { should == :dbo_fund_accounts }
-          its(:columns) { should include(:fund_account_number, :cusip) }
-          it { should be_composite }
-          it { should be_unique }
-          it { should be_clustered }
+          it { is_expected.to be_a(Gauge::DB::Index) }
+          it { expect(index.name).to eq 'idx_fund_account_info' }
+          it { expect(index.table).to be :dbo_fund_accounts }
+          it { expect(index.columns).to include(:fund_account_number, :cusip) }
+          it { is_expected.to be_composite }
+          it { is_expected.to be_unique }
+          it { is_expected.to be_clustered }
         end
 
         context "when the index is clustered" do

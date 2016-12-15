@@ -35,12 +35,12 @@ module Gauge
         it { should have(4).columns }
 
         context "where the last column" do
-          subject { table.columns.last }
+          subject(:last_column) { table.columns.last }
 
           it { should be_a(DataColumn) }
-          its(:name) { should == 'Is_Active' }
-          its(:data_type) { should == :tinyint }
-          its(:to_sym) { should == :is_active }
+          it { expect(last_column.name).to eq 'Is_Active' }
+          it { expect(last_column.data_type).to be :tinyint }
+          it { expect(last_column.to_sym).to be :is_active }
         end
       end
 
