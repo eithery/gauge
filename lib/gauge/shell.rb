@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2017.
 # Class Gauge::Shell
 # Executes application commands.
+
 require 'gauge'
 
 module Gauge

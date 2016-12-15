@@ -1,0 +1,18 @@
+# Eithery Lab., 2017.
+# Gauge application configuration options.
+---
+# Server name.
+:server: localhost
+
+# User ID to connect to the database.
+:user: admin
+
+# User password.
+:password: secret
+
+# When true the console output is colored.
+:colored: true
+
+# The array of paths with Gauge metadata.
+# Can be relative or absolute.
+:data_path: [db]

@@ -1,3 +1,8 @@
+# Eithery Lab., 2017.
+# Main bin executable file
+# Defines available commands, command-line switches, and flags.
+# Bootstraps and runs the application using GLI.
+
 ENV['GLI_DEBUG'] = 'true'
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + '/../lib')
 
@@ -5,37 +10,42 @@ require 'gauge'
 require 'yaml'
 include GLI::App
 
-CONFIG_FILE = File.join(File.dirname(__FILE__), '/../config/options.rc.yml')
+CONFIG_FILE = File.join(File.dirname(__FILE__), '/../config/gauge.rc.yml')
 defaults = YAML.load_file(CONFIG_FILE)
 
 
 # Global command suite options:
-desc 'Displays the version of the application.'
+desc 'Displays the version of the application'
 switch [:v, :version]
 
-desc 'Displays help information.'
+desc 'Displays help information'
 switch [:h, :help]
 
 desc 'Database server name'
 default_value defaults[:server] || 'local'
 flag [:s, :server]
 
-desc 'User name used to connect to db server.'
+desc 'User name used to connect to db server'
 default_value defaults[:user] || 'admin'
 flag [:u, :user]
 
-desc 'Password used to connect to db server.'
+desc 'Password used to connect to db server'
 default_value defaults[:password] || 'secret'
 flag [:p, :password]
 
-desc 'Setups colored console formatter to output messages.'
+desc 'The array of paths with Gauge metadata'
+default_value defaults[:data_path] || ['db']
+flag [:d, :data]
+
+desc 'Setups colored console formatter to output messages'
 default_value defaults[:colored] || false
 switch :colored
 
 
 # Available commands.
 
-# Help.
+# Help
+# Displays help information.
 command [:h, :help] do |c|
   c.action do |global_opts, options, args|
     Gauge::Shell.new.help global_opts
@@ -43,7 +53,7 @@ command [:h, :help] do |c|
 end
 
 
-# Check.
+# Check
 # Compares the structure of the specified database objects against the predefined metadata.
 command [:c, :check] do |c|
   c.action do |global_opts, options, args|
@@ -52,10 +62,19 @@ command [:c, :check] do |c|
 end
 
 
-# Sync.
+# Sync
+# Performs automatic database synchronization based on the predefined metadata.
 command :sync do |c|
   c.action do |global_opts, options, args|
     Gauge::Shell.new.sync global_opts, options, args
+  end
+end
+
+
+# Search
+# Performs search for the specified name in database objects.
+command [:s, :search] do |c|
+  c.action do |global_opts, options, args|
   end
 end
 

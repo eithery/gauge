@@ -1,11 +1,12 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2017.
 # Gauge::Shell specs.
+
 require 'spec_helper'
 
 module Gauge
   describe Shell do
-    let(:global_options) { {v: true, server: 'local\SQL2012'} }
-    let(:options) { {} }
+    let(:global_options) {{ v: true, server: 'local\SQLDEV' }}
+    let(:options) {{}}
     let(:args) { ['database_name', 'data_table_name'] }
     let(:shell) { Shell.new }
 
@@ -13,7 +14,7 @@ module Gauge
 
 
     describe '#initialize' do
-      it "setups colorful console output" do
+      it "colorizes console output" do
         Rainbow.should_receive(:enabled=).with(true)
         Shell.new
       end

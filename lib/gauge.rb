@@ -1,5 +1,6 @@
 # Eithery Lab., 2014.
 # Loaded files for the applicaion.
+
 require 'active_support/core_ext/string'
 require 'active_support/core_ext/string/inflections'
 

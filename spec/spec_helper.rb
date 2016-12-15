@@ -1,4 +1,4 @@
-# Eithery Lab., 2015.
+# Eithery Lab., 2017.
 # RSpec helper file.
 
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + '/../lib')
