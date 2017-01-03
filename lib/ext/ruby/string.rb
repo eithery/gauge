@@ -1,4 +1,4 @@
-# Eithery Lab., 2017.
+# Eithery Lab., 2017
 # Class String
 # Extends functionality of Ruby String class.
 # Supports string colorization for console messages.
@@ -12,6 +12,7 @@ class String
     return self.color displayed_color unless displayed_color.nil?
     self
   end
+
 
 private
 

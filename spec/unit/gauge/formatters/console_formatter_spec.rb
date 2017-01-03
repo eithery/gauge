@@ -28,7 +28,7 @@ module Gauge
 
       describe '#error' do
         it "displays an error message" do
-          formatter.should_receive(:log).with('some message', kind: :error)
+          expect(formatter).to receive(:log).with('some message', kind: :error)
           formatter.error 'some message'
         end
       end
@@ -36,7 +36,7 @@ module Gauge
 
       describe '#warning' do
         it "displays a warning message" do
-          formatter.should_receive(:log).with('some message', kind: :warning)
+          expect(formatter).to receive(:log).with('some message', kind: :warning)
           formatter.warning 'some message'
         end
       end
@@ -44,7 +44,7 @@ module Gauge
 
       describe '#success' do
         it "displays a success message" do
-          formatter.should_receive(:log).with('some message', kind: :success)
+          expect(formatter).to receive(:log).with('some message', kind: :success)
           formatter.success 'some message'
         end
       end
@@ -52,7 +52,7 @@ module Gauge
 
       describe '#info' do
         it "displays an info message" do
-          formatter.should_receive(:log).with('some message', kind: :info)
+          expect(formatter).to receive(:log).with('some message', kind: :info)
           formatter.info 'some message'
         end
       end

@@ -25,7 +25,7 @@ module Gauge
 
     describe '#log' do
       it "delegates #log calls to registered formatters" do
-        formatter.should_receive(:log).with('message', kind: :error).exactly(3).times
+        expect(formatter).to receive(:log).with('message', kind: :error).exactly(3).times
         logger.log 'message', kind: :error
       end
     end
@@ -33,7 +33,7 @@ module Gauge
 
     describe '#error' do
       it "logs an error message" do
-        logger.should_receive(:log).with('message', kind: :error)
+        expect(logger).to receive(:log).with('message', kind: :error)
         logger.error 'message'
       end
     end
@@ -41,7 +41,7 @@ module Gauge
 
     describe '#warning' do
       it "logs a warning message" do
-        logger.should_receive(:log).with('message', kind: :warning)
+        expect(logger).to receive(:log).with('message', kind: :warning)
         logger.warning 'message'
       end
     end
@@ -49,7 +49,7 @@ module Gauge
 
     describe '#info' do
       it "logs an info message" do
-        logger.should_receive(:log).with('message', kind: :info)
+        expect(logger).to receive(:log).with('message', kind: :info)
         logger.info 'message'
       end
     end
@@ -57,7 +57,7 @@ module Gauge
 
     describe '#ok' do
       it "logs a success message" do
-        logger.should_receive(:log).with('message', kind: :success)
+        expect(logger).to receive(:log).with('message', kind: :success)
         logger.ok 'message'
       end
     end
