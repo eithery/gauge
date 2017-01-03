@@ -1,6 +1,6 @@
-# Eithery Lab., 2017.
+# Eithery Lab., 2017
 # Module Gauge::Logger
-# Provides logging functionality using the set of various formatters.
+# Provides logging functionality using the set of registered formatters.
 
 module Gauge
   module Logger
@@ -17,28 +17,28 @@ module Gauge
 
 
     def error(message)
-      log message, severity: :error
+      log message, kind: :error
     end
 
 
     def warning(message)
-      log message, severity: :warning
+      log message, kind: :warning
     end
 
 
     def info(message)
-      log message, severity: :info
+      log message, kind: :info
     end
 
 
     def ok(message)
-      log message, severity: :success
+      log message, kind: :success
     end
 
 
-    def self.configure(options={})
+    def self.configure(colored: false)
       formatters.clear
-      formatters << (options[:colored] ? Formatters::ColoredConsoleFormatter.new : Formatters::ConsoleFormatter.new)
+      formatters << (colored ? Formatters::ColoredConsoleFormatter.new : Formatters::ConsoleFormatter.new)
     end
   end
 end

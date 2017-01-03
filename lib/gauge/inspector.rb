@@ -11,7 +11,7 @@ module Gauge
     include Logger
 
     def initialize(global_opts, options)
-      Logger.configure global_opts
+      Logger.configure(colored: global_opts[:colored])
       DB::Connection.configure global_opts
     end
 

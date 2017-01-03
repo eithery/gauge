@@ -9,14 +9,14 @@ module Gauge
   class Helper
     include Logger
 
-    def initialize(global_opts={})
-      @global_opts = global_opts
-      Logger.configure global_opts
+    def initialize(options={})
+      @options = options
+      Logger.configure(colored: options[:colored])
     end
 
 
     def application_info
-      @global_opts[:v] ? version : full_info(@global_opts[:h])
+      @options[:v] ? version : full_info(@options[:h])
     end
 
 
@@ -29,7 +29,7 @@ module Gauge
 
     def full_info(extended)
       info "Database Gauge. Version #{VERSION}"
-      info "Copyright (C) M&O Systems, Inc., 2014.\n"
+      info "Eithery Labs., 2017.\n"
       info "usage: gauge [-v|--version] [-h|--help] [-s|--server] [-u|--user] [-p|--password]"
       info "             [--[no-]colored] <command> [<args>] [<command options>]"
       if extended

@@ -1,4 +1,4 @@
-# Eithery Lab., 2015.
+# Eithery Lab., 2017.
 # Class Gauge::Helpers::NameParser specs.
 
 require 'spec_helper'
@@ -16,7 +16,7 @@ module Gauge
       describe '.local_name_of' do
         it "extracts the local part of a database object name" do
           (dbo_default_names + dbo_custom_names).each do |dbo_name|
-            NameParser.local_name_of(dbo_name.downcase).should == 'reps'
+            expect(NameParser.local_name_of(dbo_name.downcase)).to eq 'reps'
           end
         end
       end
@@ -25,13 +25,13 @@ module Gauge
       describe '.sql_schema_of' do
         context "for default SQL schema (dbo)" do
           it "returns 'dbo' as SQL schema" do
-            dbo_default_names.each { |dbo_name| NameParser.sql_schema_of(dbo_name).should == 'dbo' }
+            dbo_default_names.each { |dbo_name| expect(NameParser.sql_schema_of(dbo_name)).to eq 'dbo' }
           end
         end
 
         context "for custom SQL schema" do
           it "extracts SQL schema part from a database object name" do
-            dbo_custom_names.each { |dbo_name| NameParser.sql_schema_of(dbo_name.downcase).should == 'bnr' }
+            dbo_custom_names.each { |dbo_name| expect(NameParser.sql_schema_of(dbo_name.downcase)).to eq 'bnr' }
           end
         end
       end
@@ -40,13 +40,13 @@ module Gauge
       describe '.dbo_key_of' do
         context "for default SQL schema (dbo)" do
           it "returns a database object name with 'dbo' SQL schema converted to symbol" do
-            dbo_default_names.each { |dbo_name| NameParser.dbo_key_of(dbo_name).should == :dbo_reps }
+            dbo_default_names.each { |dbo_name| expect(NameParser.dbo_key_of(dbo_name)).to eq :dbo_reps }
           end
         end
 
         context "for custom SQL schema" do
           it "returns a database object name with custom SQL schema converted to symbol" do
-            dbo_custom_names.each { |dbo_name| NameParser.dbo_key_of(dbo_name).should == :bnr_reps }
+            dbo_custom_names.each { |dbo_name| expect(NameParser.dbo_key_of(dbo_name)).to eq :bnr_reps }
           end
         end
       end

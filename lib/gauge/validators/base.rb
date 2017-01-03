@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
-# Class Gauge::Validators::ValidatorBase
-# Represents abstract validator to check a database structure.
+# Eithery Lab., 2017.
+# Class Gauge::Validators::Base
+# Represents an abstract validator to check a database structure.
 
 require 'gauge'
 
@@ -11,6 +11,7 @@ module Gauge
 
       def self.check_all(validator_name, options={})
         check_all_methods << method_name = "check_all_#{validator_name}".to_sym
+
         define_method(method_name) do |dbo_schema, dbo, sql|
           db_schema_provider = options[:with_schema]
           dbo_provider = options[:with_dbo]

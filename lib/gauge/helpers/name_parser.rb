@@ -1,4 +1,4 @@
-# Eithery Lab., 2015.
+# Eithery Lab., 2017.
 # Class Gauge::Helpers::NameParser
 # Provides the set of helper methods to parse database object names.
 

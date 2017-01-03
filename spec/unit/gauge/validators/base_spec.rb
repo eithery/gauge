@@ -1,4 +1,4 @@
-# Eithery Lab., 2015.
+# Eithery Lab., 2017.
 # Gauge::Validators::Base specs.
 
 require 'spec_helper'
