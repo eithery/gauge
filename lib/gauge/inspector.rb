@@ -1,4 +1,4 @@
-# Eithery Lab., 2015.
+# Eithery Lab., 2017
 # Class Gauge::Inspector
 # Performs various validation checks of the specified database or
 # particular database objects structure against the predefined schema.
@@ -10,9 +10,9 @@ module Gauge
   class Inspector
     include Logger
 
-    def initialize(global_opts, options)
-      Logger.configure(colored: global_opts[:colored])
-      DB::Connection.configure global_opts
+    def initialize(options={})
+      Logger.configure(colored: options[:colored])
+      DB::Connection.configure options
     end
 
 
@@ -24,13 +24,13 @@ module Gauge
 
       Schema::Repo.load
       args.each do |dbo|
-        validator = validator_for dbo
         schema = Schema::Repo.schema dbo
         unless schema.nil?
+          validator = validator_for dbo
           begin
             info "== #{schema.object_name} '#{schema.sql_name}' inspecting ".ljust(80, '=')
             DB::Adapter.session schema do |dba|
-              validator.check(schema, dba) unless validator.nil?
+              validator.check(schema, dba)
             end
           rescue Sequel::DatabaseConnectionError => e
             error e.message
@@ -45,11 +45,17 @@ module Gauge
       end
     end
 
+
 private
 
     def validator_for(dbo)
-      return Validators::DatabaseValidator.new if Schema::Repo.database? dbo
-      Validators::DataTableValidator.new if Schema::Repo.table? dbo
+      if Schema::Repo.database? dbo
+        Validators::DatabaseValidator.new
+      elsif Schema::Repo.table? dbo
+        Validators::DataTableValidator.new
+      else
+        raise Errors::InvalidDatabaseObject, "Cannot determine validator for '#{dbo}'"
+      end
     end
 
 

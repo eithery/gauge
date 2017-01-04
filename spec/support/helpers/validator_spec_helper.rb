@@ -1,4 +1,4 @@
-# Eithery Lab., 2015.
+# Eithery Lab., 2017
 # Class Gauge::Validators::ValidatorSpecHelper
 # Provides the set of helper methods for Validator specs.
 
@@ -14,7 +14,7 @@ module Gauge
 
 
       def stub_db_adapter
-        DB::Connection.stub(:server).and_return('local\SQL2012')
+        DB::Connection.stub(:server).and_return('local\SQLDEV')
         DB::Connection.stub(:user).and_return('admin')
         DB::Connection.stub(:password).and_return('secret')
         Sequel::TinyTDS::Database.any_instance.stub(:test_connection)

@@ -1,4 +1,4 @@
-# Eithery Lab., 2017.
+# Eithery Lab., 2017
 # Class Gauge::Shell
 # Executes application commands.
 
@@ -11,13 +11,13 @@ module Gauge
     end
 
 
-    def help(global_opts)
-      Helper.new(global_opts).application_info
+    def help(options)
+      Helper.new(options).application_info
     end
 
 
-    def check(global_opts, opts, args)
-      Inspector.new(global_opts, opts).check args
+    def check(options, args)
+      Inspector.new(options).check args
     end
   end
 end

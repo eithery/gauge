@@ -1,21 +1,19 @@
-# Eithery Lab., 2017.
-# Gauge::Shell specs.
+# Eithery Lab., 2017
+# Gauge::Shell specs
 
 require 'spec_helper'
 
 module Gauge
   describe Shell do
-    let(:global_options) {{ v: true, server: 'local\SQLDEV' }}
-    let(:options) {{}}
-    let(:args) { ['database_name', 'data_table_name'] }
-    let(:shell) { Shell.new }
+    let(:options) {{ v: true, server: 'local\SQLDEV' }}
+    subject(:shell) { Shell.new }
 
     it { should respond_to :help, :check }
 
 
     describe '#initialize' do
       it "colorizes console output" do
-        Rainbow.should_receive(:enabled=).with(true)
+        expect(Rainbow).to receive(:enabled=).with(true)
         Shell.new
       end
     end
@@ -23,22 +21,26 @@ module Gauge
 
     describe '#help' do
       it "delegates call to Helper instance" do
-        helper = Helper.new(global_options)
+        helper = Helper.new(options)
         helper.stub(:info)
-        Helper.should_receive(:new).with(global_options).and_return(helper)
-        shell.help(global_options)
+
+        expect(Helper).to receive(:new).with(options).and_return(helper)
+        expect(helper).to receive(:application_info)
+        shell.help(options)
       end
     end
 
 
     describe '#check' do
-      before do
-        @db_inspector = Inspector.new(global_options, options)
-        @db_inspector.stub(:check)
-      end
-      it "delegates call to DatabaseInspector instance" do
-        Inspector.should_receive(:new).with(global_options, options).and_return(@db_inspector)
-        shell.check(global_options, options, args)
+      let(:args) { ['data_table_name'] }
+
+      it "delegates calls to database inspector instance" do
+        inspector = Inspector.new(options)
+        inspector.stub(:check)
+
+        expect(Inspector).to receive(:new).with(options).and_return(inspector)
+        expect(inspector).to receive(:check).with(args)
+        shell.check(options, args)
       end
     end
   end
