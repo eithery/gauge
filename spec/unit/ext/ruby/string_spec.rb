@@ -1,6 +1,5 @@
 # Eithery Lab., 2017
 # String extension specs
-# Covers monkey patches for String class.
 
 require 'spec_helper'
 

@@ -1,4 +1,4 @@
-# Eithery Lab., 2017.
+# Eithery Lab., 2017
 # Contains the application version info.
 
 require 'gauge'

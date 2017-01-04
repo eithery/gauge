@@ -6,12 +6,8 @@
 require 'gauge'
 
 class Object
+
 private
-
-  def database(*args, &block)
-    Gauge::Schema::Repo.define_database(*args, &block)
-  end
-
 
   def table(*args, &block)
     Gauge::Schema::Repo.define_table(*args, &block)
