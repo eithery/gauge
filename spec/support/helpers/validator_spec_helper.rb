@@ -5,19 +5,18 @@
 module Gauge
   module Validators
     module ValidatorSpecHelper
+      def stub_db_adapter
+        allow(DB::Connection).to receive(:server) { 'local\SQLDEV' }
+        allow(DB::Connection).to receive(:user) { 'admin' }
+        allow(DB::Connection).to receive(:password) { 'secret' }
+        Sequel::TinyTDS::Database.any_instance.stub(:test_connection)
+      end
+
 
       def stub_validator(validator_class)
         validator = validator_class.new
         validator_class.stub(:new).and_return(validator)
         validator
-      end
-
-
-      def stub_db_adapter
-        DB::Connection.stub(:server).and_return('local\SQLDEV')
-        DB::Connection.stub(:user).and_return('admin')
-        DB::Connection.stub(:password).and_return('secret')
-        Sequel::TinyTDS::Database.any_instance.stub(:test_connection)
       end
 
 
