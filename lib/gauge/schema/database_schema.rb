@@ -1,19 +1,26 @@
-# Eithery Lab., 2015.
+# Eithery Lab., 2017
 # Class Gauge::Schema::DatabaseSchema
-# Database schema.
-# Contains metadata info defining a database structure.
+# Defines a database.
+
 require 'gauge'
 
 module Gauge
   module Schema
     class DatabaseSchema
-      attr_reader :tables, :views
+      class << self
+        attr_accessor :current
+      end
 
-      def initialize(database_name, options={})
-        @database_name = database_name
-        @options = options
-        @tables = {}
-        @views = {}
+      attr_reader :path, :name
+
+      def initialize(path)
+        @path = path
+        @name = path.split('/').last
+      end
+
+
+      def database_name
+        name
       end
 
 
@@ -22,28 +29,59 @@ module Gauge
       end
 
 
-      def database_name
-        @database_name.to_s
-      end
-
-
-      def sql_name
-        @options[:sql_name] || database_name
-      end
-
-
-      def object_name
+      def object_type
         'Database'
       end
 
 
       def to_sym
-        database_name.downcase.to_sym
+        name.downcase.to_sym
       end
 
 
-      def home
-        @options[:home]
+      def tables
+        load_tables if @tables.nil?
+        @tables
+      end
+
+
+      def views
+        load_views if @views.nil?
+        @views
+      end
+
+
+      def define_table(table_name, options={}, &block)
+        table_schema = DataTableSchema.new(table_name, options, &block)
+        tables[table_schema.to_sym] = table_schema
+      end
+
+
+      def define_view(view_name, options={}, &block)
+      end
+
+
+  private
+
+      def load_tables
+        @tables = {}
+        load_schemas_for 'tables'
+      end
+
+
+      def load_views
+        @views = {}
+        load_schemas_for 'views'
+      end
+
+
+      def load_schemas_for(kind)
+        begin
+          DatabaseSchema.current = self
+          Dir["#{path}/**/#{kind}/**/*.rb"].each { |f| require f }
+        ensure
+          DatabaseSchema.current = nil
+        end
       end
     end
   end
