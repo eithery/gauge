@@ -4,7 +4,7 @@
 require 'spec_helper'
 
 module Gauge
-  describe ApplicationHelper, f: true do
+  describe ApplicationHelper do
     let(:root_path) { File.expand_path(File.dirname(__FILE__) + '/../../../../') }
 
     it { expect(ApplicationHelper).to respond_to :root_path, :db_path }
