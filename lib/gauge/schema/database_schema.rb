@@ -29,6 +29,11 @@ module Gauge
       end
 
 
+      def table_schema(table_name)
+        tables[table_name.to_s.downcase.to_sym] || tables[Gauge::Helpers::NameParser.dbo_key_of table_name]
+      end
+
+
       def object_type
         'Database'
       end
@@ -48,6 +53,17 @@ module Gauge
       def views
         load_views if @views.nil?
         @views
+      end
+
+
+      def has_table?(table_name)
+        !table_schema(table_name).nil?
+      end
+
+
+      def has_view?(view_name)
+        view_key = Gauge::Helpers::NameParser.dbo_key_of view_name
+        views.include?(view_key)
       end
 
 
@@ -78,7 +94,7 @@ module Gauge
       def load_schemas_for(kind)
         begin
           DatabaseSchema.current = self
-          Dir["#{path}/**/#{kind}/**/*.rb"].each { |f| require f }
+          Dir["#{path}/**/#{kind}/**/*.rb"].each { |f| load f }
         ensure
           DatabaseSchema.current = nil
         end
