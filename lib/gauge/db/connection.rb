@@ -1,20 +1,21 @@
-# Eithery Lab., 2014.
+# Eithery Lab., 2017
 # Class Gauge::DB::Connection
 # Encapsulates a database connection info.
+
 require 'gauge'
 
 module Gauge
   module DB
     class Connection
       class << self
-        attr_accessor :server, :user, :password
+        attr_reader :server, :user, :password
       end
 
 
       def self.configure(options)
-        self.server = options[:server]
-        self.user = options[:user]
-        self.password = options[:password]
+        @server = options[:server]
+        @user = options[:user]
+        @password = options[:password]
       end
     end
   end
