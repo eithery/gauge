@@ -1,182 +1,193 @@
-# Eithery Lab., 2015.
-# Gauge::Schema::Repo specs.
+# Eithery Lab., 2017
+# Gauge::Schema::Repo specs
 
 require 'spec_helper'
 
 module Gauge
   module Schema
-    describe Repo do
-      subject { Repo }
-      let(:database_schema) do
-        db_schema = DatabaseSchema.new(:test_db, sql_name: 'TestDB')
-        db_schema.tables[:dbo_primary_reps] = DataTableSchema.new(:primary_reps, database: db_schema)
-        db_schema.tables[:ref_contract_types] =
-          DataTableSchema.new(:contract_types, sql_schema: :ref, database: db_schema)
-        db_schema
-      end
-      let(:valid_dbo_table_names) { [:primary_reps, 'primary_reps', 'Primary_REPS', '[primary_reps]',
-        'dbo.primary_reps', '[dbo].[primary_reps]']}
-      let(:valid_ref_table_names) { ['ref.contract_types', '[ref].[contract_types]'] }
+    include Constants
 
-      before { Repo.databases[:test_db] = database_schema }
+    describe Repo do
+      let(:repo) { Repo.new('db') }
+      let(:abs_db_path) { File.expand_path(ApplicationHelper.root_path + '/spec/support/data') }
+      let(:db_schema) { double('db_schema', to_sym: :test_db) }
 
       it { should respond_to :databases }
-      it { should respond_to :load, :clear }
+      it { should respond_to :clear }
       it { should respond_to :database?, :table? }
       it { should respond_to :schema }
-      it { should respond_to :define_table, :define_database }
+      it { should respond_to :validator_for }
 
 
-      describe '.databases' do
-        subject { Repo.databases }
+      describe '#initialize' do
+        context "when no metadata paths defined" do
+          it "creates an empty database collection" do
+            expect(Repo.new.databases).to be_empty
+          end
+        end
+
+        context "wnen a metadata path defined" do
+          context "as a relative path" do
+            it "creates database metadata schema for each database" do
+              expect(DatabaseSchema).to receive(:new).twice.and_return(db_schema)
+              Repo.new('db')
+            end
+
+            it "populates a database collection" do
+              expect(repo.databases).to have(2).entries
+              expect(repo.databases).to include(:test_db, :test_db_red)
+              repo.databases.values.each do |db|
+                expect(db).to be_instance_of DatabaseSchema
+              end
+            end
+          end
+
+          context "as an absolute path" do
+            it "creates a database metadata schema for each database" do
+              expect(DatabaseSchema).to receive(:new).exactly(3).times.and_return(db_schema)
+              Repo.new(abs_db_path)
+            end
+
+            it "populates a database collection" do
+              repo = Repo.new(abs_db_path)
+              expect(repo.databases).to have(3).entries
+              expect(repo.databases).to include(:database1, :database2, :database3)
+              repo.databases.values.each do |db|
+                expect(db).to be_instance_of DatabaseSchema
+              end
+            end
+          end
+        end
+
+        context "when multiple metadata paths defined" do
+          it "creates a database metadata schema for each database" do
+            expect(DatabaseSchema).to receive(:new).exactly(5).times.and_return(db_schema)
+            Repo.new('db', abs_db_path)
+          end
+
+          it "populates a database collection" do
+            repo = Repo.new('db', abs_db_path)
+            expect(repo.databases).to have(5).entries
+            expect(repo.databases).to include(:test_db, :database3)
+            repo.databases.values.each do |db|
+              expect(db).to be_instance_of DatabaseSchema
+            end
+          end
+        end
+      end
+
+
+      describe '#databases' do
+        context "for newly created repo" do
+          it { expect(Repo.new.databases).to_not be nil }
+          it { expect(Repo.new.databases).to be_empty }
+        end
 
         context "when no database metadata defined" do
-          before { Repo.clear }
-          it { should be_empty }
+          before { repo.clear }
+          it { expect(repo.databases).to be_empty }
         end
 
         context "when any database metadata defined" do
-          it { should_not be_empty }
-          specify { Repo.databases.should include(:test_db) }
+          it { expect(repo.databases).to_not be_empty }
+          it { expect(repo.databases).to have(2).entries }
         end
       end
 
 
-      describe '.load' do
-        it "loads databases metadata file" do
-          Repo.as_null_object.should_receive(:require).with(/config\/databases\.rb/)
-          Repo.load
-        end
-
-        it "loads all data table metadata for the database" do
-          Repo.as_null_object.should_receive(:require).with(/test_db\/tables\/(.*)\.rb/i).at_least(4).times
-          Repo.load
-        end
-      end
-
-
-      describe '.define_database' do
-        before { Repo.clear }
-
-        it "registers database metadata in the repository" do
-          expect { Repo.define_database(:blue_troll, sql_name: 'BlueTroll') }
-            .to change { Repo.databases.count }.from(0).to(1)
-          Repo.databases.should include(:blue_troll)
-        end
-      end
-
-
-      describe '.define_table' do
-        before do
-          @db_schema = DatabaseSchema.new(:blue_troll)
-          Repo.stub(:current_db_schema).and_return(@db_schema)
-        end
-
-        it "creates data table metadata definition" do
-          table_schema = double('participants', to_sym: :participants, :database= => @db_schema)
-          DataTableSchema.should_receive(:new).with(:participants, hash_including(database: @db_schema))
-            .and_return(table_schema)
-          Repo.define_table(:participants)
-        end
-
-        it "registers data table metadata definition in the database metadata" do
-          expect { Repo.define_table(:participants) }
-            .to change { @db_schema.tables.count }.from(0).to(1)
-          @db_schema.tables.should include(:dbo_participants)
-        end
-      end
-
-
-      describe '.clear' do
+      describe '#clear' do
         it "clears metadata repository" do
-          Repo.databases.should_not be_empty
-          expect { Repo.clear }.to change { Repo.databases.empty? }.from(false).to(true)
-          Repo.databases.should be_empty
+          expect(repo.databases).to_not be_empty
+          expect { repo.clear }.to change { repo.databases.empty? }.from(false).to(true)
+          expect(repo.databases).to be_empty
         end
       end
 
 
-      describe '.database?' do
-        context "when database with specifid name is defined in the metadata" do
-          specify { Repo.database?(:test_db).should be true }
-          specify { Repo.database?('test_db').should be true }
-          specify { Repo.database?('TestDB').should be true }
-          specify { Repo.database?('testdb').should be true }
-          specify { Repo.database?('TEST_DB').should be true }
-        end
+      describe '#database?' do
+        context "when a database with specified name exists" do
+          let(:valid_db_names) { [:test_db, :test_db_red, :TEST_DB, 'test_db', 'TEST_DB', 'Test_Db_Red'] }
 
-        context "when database with specified name is not found" do
-          specify { Repo.database?(:account_profile).should be false }
-          specify { Repo.database?('account_profile').should be false }
-          specify { Repo.database?('PackageMe_DB').should be false }
-        end
-      end
-
-
-      describe '.table?' do
-        context "when data table is defined in metadata and table name specified" do
-          context "as symbol" do
-            specify { Repo.table?(:primary_reps).should be true }
-          end
-
-          context "as string without SQL schema" do
-            specify { Repo.table?('primary_reps').should be true }
-          end
-
-          context "in different case" do
-            specify { Repo.table?('Primary_REPS').should be true }
-          end
-
-          context "with square brackets" do
-            specify { Repo.table?('[primary_reps]').should be true }
-          end
-
-          context "with default SQL schema" do
-            specify { Repo.table?('dbo.primary_reps').should be true }
-          end
-
-          context "with default SQL schema and square brackets" do
-            specify { Repo.table?('[dbo].[primary_reps]').should be true }
-          end
-
-          context "with custom SQL schema" do
-            specify { Repo.table?('ref.contract_types').should be true }
-          end
-
-          context "with custom SQL schema and square brackets" do
-            specify { Repo.table?('[ref].[contract_types]').should be true }
+          it "returns true for existing DB names" do
+            valid_db_names.each do |db_name|
+              expect(repo.database?(db_name)).to be true
+            end
           end
         end
 
-        context "when data table with specified name is not found" do
-          specify { Repo.table?(:master_accounts).should be false }
-          specify { Repo.table?('master_accounts').should be false }
+        context "when a database with specified name is not found" do
+          let(:invalid_db_names) { ['testDB', 'testdb', :account_profile, :database1] }
+
+          it "returns false for invalid db names" do
+            invalid_db_names.each do |db_name|
+              expect(repo.database?(db_name)).to be false
+            end
+          end
         end
       end
 
 
-      describe '.schema' do
-        context "when passed db object name is a database name" do
+      describe '#table?' do
+        it "returns true when a data table exist" do
+          EXISTING_TABLE_NAMES.each do |table_name|
+            expect(repo.table?(table_name)).to be true
+          end
+        end
+
+        it "returns false when a data table not found" do
+          MISSING_TABLE_NAMES.each do |table_name|
+            expect(repo.table?(table_name)).to be false
+          end
+        end
+      end
+
+
+      describe '#schema' do
+        context "when the passed name is a database name" do
           it "returns a valid database schema" do
-            Repo.schema(:test_db).should == database_schema
-            Repo.schema('test_db').should == database_schema
-            Repo.schema('TestDB').should == database_schema
+            db_schema = repo.databases[:test_db]
+            expect(repo.schema(:test_db)).to be db_schema
+            expect(repo.schema(:test_db)).to be_instance_of DatabaseSchema
+            expect(repo.schema('test_db')).to be db_schema
+            expect(repo.schema('Test_DB')).to be db_schema
           end
         end
 
-        context "when passed db object name is an existing data table name" do
+        context "when the passed name is an existing data table name" do
           it "returns a valid table schema" do
-            valid_dbo_table_names.each do |table_name|
-              Repo.schema(table_name).should == database_schema.tables[:dbo_primary_reps]
+            reps_table = repo.databases[:test_db].tables[:dbo_primary_reps]
+            ref_table = repo.databases[:test_db].tables[:ref_contract_types]
+
+            REPS_TABLE_NAMES.each do |table_name|
+              expect(repo.schema(table_name)).to be reps_table
+              expect(repo.schema(table_name)).to be_instance_of DataTableSchema
             end
-            valid_ref_table_names.each do |table_name|
-              Repo.schema(table_name).should == database_schema.tables[:ref_contract_types]
+            REF_TABLE_NAMES.each do |table_name|
+              expect(repo.schema(table_name)).to be ref_table
+              expect(repo.schema(table_name)).to be_instance_of DataTableSchema
             end
           end
         end
 
-        context "when metadata for passed db object name is not found" do
-          specify { Repo.schema('unknown_db_object').should be_nil }
+        context "when metadata not found" do
+          it { expect(repo.schema('unknown_db_object')).to be nil }
+        end
+      end
+
+
+      describe '#validator_for' do
+        it "returns a database validator for database metadata" do
+          expect(repo.validator_for(:test_db)).to be_instance_of(Validators::DatabaseValidator)
+        end
+
+        it "returns a data table validator for data table metadata" do
+          expect(repo.validator_for(:primary_reps)).to be_instance_of(Validators::DataTableValidator)
+          expect(repo.validator_for(:ref_contract_types)).to be_instance_of(Validators::DataTableValidator)
+        end
+
+        it "raise an error if the metadata type cannot be determined" do
+          expect { repo.validator_for('invalid_db_object') }.to raise_error(Errors::InvalidDatabaseObject,
+            /cannot determine a metadata type for 'invalid_db_object'/i)
         end
       end
     end

@@ -1,106 +1,68 @@
-# Eithery Lab., 2015.
+# Eithery Lab., 2017
 # Class Gauge::Schema::Repo
-# Represent a repository containing metadata describing database structure.
+# Represents a repository containing metadata describing the database structure.
 
 require 'gauge'
 
 module Gauge
   module Schema
     class Repo
-      class << self
-        attr_accessor :databases, :current_db_schema
-        private :current_db_schema
-      end
-
-      @databases = {}
-
-
-      def self.load
-        require expand_path('/config/databases.rb')
-        databases.values.each do |db_schema|
-          with_database db_schema do
-            Dir["#{home_for(db_schema)}/**/#{db_schema.database_name}/**/tables/**/*.rb"].each { |f| require f }
+      def initialize(*paths)
+        paths.each do |path|
+          home = File.absolute_path(path, ApplicationHelper.root_path)
+          Dir["#{home}/*/"].each do |db_path|
+            db = DatabaseSchema.new(db_path)
+            databases[db.to_sym] = db
           end
         end
       end
 
 
-      def self.define_database(*args, &block)
-        db_schema = DatabaseSchema.new(*args, &block)
-        databases[db_schema.to_sym] = db_schema
+      def databases
+        @databases ||= {}
       end
 
 
-      def self.define_table(table_name, options={}, &block)
-        options[:database] = current_db_schema
-        table_schema = DataTableSchema.new(table_name, options, &block)
-        current_db_schema.tables[table_schema.to_sym] = table_schema
-      end
-
-
-      def self.clear
+      def clear
         databases.clear
       end
 
 
-      def self.database?(dbo_name)
-        databases.include?(dbo_name.downcase.to_sym) ||
-          databases.values.any? { |db_schema| dbo_name.downcase == db_schema.sql_name.downcase }
+      def database?(database_name)
+        db_key = database_name.to_s.downcase.to_sym
+        databases.include?(db_key)
       end
 
 
-      def self.table?(dbo_name)
-        databases.values.each do |db_schema|
-          return true if db_schema.tables.include?(table_key dbo_name)
+      def table?(dbo_name)
+        databases.values.any? { |db| db.has_table? dbo_name }
+      end
+
+
+      def schema(dbo_name)
+        databases[dbo_name.to_s.downcase.to_sym] || table_schema(dbo_name)
+      end
+
+
+      def validator_for(dbo)
+        if database?(dbo)
+          Validators::DatabaseValidator.new
+        elsif table?(dbo)
+          Validators::DataTableValidator.new
+        else
+          raise Errors::InvalidDatabaseObject, "Cannot determine a metadata type for '#{dbo}'"
         end
-        false
       end
 
-
-      def self.schema(dbo_name)
-        return database_schema dbo_name if database? dbo_name
-        table_schema dbo_name if table? dbo_name
-      end
 
 private
 
-      def self.expand_path(path)
-        File.expand_path(File.dirname(__FILE__) + '/../../../' + path)
-      end
-
-
-      def self.table_key(dbo_name)
-        Gauge::Helpers::NameParser.dbo_key_of dbo_name
-      end
-
-
-      def self.database_schema(dbo_name)
-        databases[dbo_name.downcase.to_sym] ||
-          databases.values.select { |db_schema| dbo_name.downcase == db_schema.sql_name.downcase }.first
-      end
-
-
-      def self.table_schema(dbo_name)
+      def table_schema(dbo_name)
         databases.values.each do |db_schema|
-          table_schema = db_schema.tables[table_key dbo_name]
+          table_schema = db_schema.table_schema(dbo_name)
           return table_schema unless table_schema.nil?
         end
         nil
-      end
-
-
-      def self.with_database(db_schema)
-        begin
-          @current_db_schema = db_schema
-          yield
-        ensure
-          @current_db_schema = nil;
-        end
-      end
-
-
-      def self.home_for(db_schema)
-        db_schema.home.nil? ? expand_path('db') : db_schema.home
       end
     end
   end
