@@ -11,6 +11,7 @@ module Gauge
     include Logger
 
     def initialize(options={})
+      @data_path = options[:data] || ['db']
       Logger.configure(colored: options[:colored])
       DB::Connection.configure options
     end
@@ -22,11 +23,11 @@ module Gauge
         return
       end
 
-      Schema::Repo.load
+      repo = Schema::Repo.new(@data_path)
       args.each do |dbo|
-        schema = Schema::Repo.schema dbo
+        schema = repo.schema(dbo)
         unless schema.nil?
-          validator = validator_for dbo
+          validator = repo.validator_for(dbo)
           begin
             info "== #{schema.object_name} '#{schema.sql_name}' inspecting ".ljust(80, '=')
             DB::Adapter.session schema do |dba|
@@ -47,17 +48,6 @@ module Gauge
 
 
 private
-
-    def validator_for(dbo)
-      if Schema::Repo.database? dbo
-        Validators::DatabaseValidator.new
-      elsif Schema::Repo.table? dbo
-        Validators::DataTableValidator.new
-      else
-        raise Errors::InvalidDatabaseObject, "Cannot determine validator for '#{dbo}'"
-      end
-    end
-
 
     def print_total(validator)
       validator.errors.empty? ? ok('<b>ok</b>') : error("Total errors found: #{validator.errors.count}")

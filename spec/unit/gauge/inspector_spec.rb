@@ -5,6 +5,36 @@ require 'spec_helper'
 
 module Gauge
   describe Inspector do
+    let(:inspector) do
+      inspector = Inspector.new
+      inspector.stub(:log)
+      Schema::Repo.stub(:new).and_return(repo)
+      inspector
+    end
+
+    let(:repo) do
+      repo = double('repo', validator_for: validator, load: nil)
+      allow(repo).to receive(:schema) do |dbo|
+        if dbo == 'test_db'
+          database_schema
+        elsif ['accounts', 'trades'].include? dbo
+          table_schema
+        end
+      end
+      repo
+    end
+
+    let(:database_schema) do
+      db_schema = double('database_schema', object_name: 'Database', sql_name: 'test_db')
+      allow(db_schema).to receive(:database_schema).and_return(db_schema)
+      db_schema
+    end
+    let(:table_schema) do
+      double('table_schema', object_name: 'Data table', sql_name: 'accounts', database_schema: database_schema)
+    end
+    let(:validator) { double('validator', check: nil, errors: []) }
+
+
     it { should respond_to :check }
 
 
@@ -23,22 +53,7 @@ module Gauge
 
 
     describe '#check' do
-      let(:inspector) do
-        inspector = Inspector.new
-        inspector.stub(:log)
-        inspector
-      end
-      let(:db_schema) { Schema::Repo.databases[:test_db] = Schema::DatabaseSchema.new(:test_db) }
-      let(:table_schema) do
-        table_schema = Schema::DataTableSchema.new(:primary_reps, database: db_schema)
-        db_schema.tables[:dbo_primary_reps] = table_schema
-      end
-
-      before do
-        stub_db_adapter
-        Schema::Repo.stub(:load)
-        Validators::DatabaseValidator.any_instance.stub(:log)
-      end
+      before { stub_db_adapter }
 
       it "displays an error when no arguments specified" do
         expect(inspector).to receive(:error).with(/no database objects specified/i)
@@ -46,16 +61,12 @@ module Gauge
       end
 
       it "performs validation for each data object passed as an argument" do
-        stub_db_schema
-        validator = stub_validator Validators::DataTableValidator
-        inspector.stub(:validator_for).and_return(validator)
-
-        expect(inspector).to receive(:validator_for).with(/accounts|primary_reps/).twice
-        inspector.check ['accounts', 'primary_reps']
+        expect(repo).to receive(:validator_for).with(/accounts|trades/).twice
+        inspector.check ['accounts', 'trades']
       end
 
       it "runs within data adapter session" do
-        expect(DB::Adapter).to receive(:session).with(db_schema)
+        expect(DB::Adapter).to receive(:session).with(database_schema)
         inspector.check ['test_db']
       end
 
@@ -69,40 +80,32 @@ module Gauge
         inspector.check ['test_db']
       end
 
-      it "raise an error if the validator cannot be determined" do
-        stub_db_schema
-        expect { inspector.check ['invalid_db_object'] }.to raise_error(Errors::InvalidDatabaseObject,
-          /cannot determine validator for 'invalid_db_object'/i)
-      end
 
-
-      context "in metadata repository context" do
+      context "for metadata repository context" do
         it "loads metadata for all database objects" do
-          expect(Schema::Repo).to receive :load
+          expect(Schema::Repo).to receive(:new).with(['db'])
           inspector.check ['test_db']
         end
 
         it "retrieves a schema containing metadata for the data object passed as an argument" do
-          expect(Schema::Repo).to receive(:schema).with('test_db')
+          expect(repo).to receive(:schema).with('test_db')
           inspector.check ['test_db']
         end
       end
 
 
       context "when at least one argument is a database name" do
-        it "performs database structure check using DatabaseValidator class" do
-          validator = stub_validator Validators::DatabaseValidator
-          expect(validator).to receive(:check).with(db_schema, instance_of(Sequel::TinyTDS::Database))
+        it "performs database structure check using database schema" do
+          expect(validator).to receive(:check).with(database_schema, instance_of(Sequel::TinyTDS::Database))
           inspector.check ['test_db']
         end
       end
 
 
       context "when at least one argument is a data table name" do
-        it "performs data table structure check using DataTableValidator class" do
-          validator = stub_validator Validators::DataTableValidator
+        it "performs data table structure check using data table schema" do
           expect(validator).to receive(:check).with(table_schema, instance_of(Sequel::TinyTDS::Database))
-          inspector.check ['primary_reps']
+          inspector.check ['accounts']
         end
       end
 
@@ -117,8 +120,7 @@ module Gauge
 
       context "wnen no validation errors found" do
         before do
-          validator = double('validator', check: [], errors: [])
-          Validators::DatabaseValidator.stub(:new).and_return(validator)
+          allow(validator).to receive(:errors) { [] }
         end
 
         it "displays OK total" do
@@ -130,8 +132,7 @@ module Gauge
 
       context "when any validation errors found" do
         before do
-          validator = double('validator', check: [], errors: ['error 1', 'error 2'])
-          Validators::DatabaseValidator.stub(:new).and_return(validator)
+          allow(validator).to receive(:errors) { ['error 1', 'error 2'] }
         end
 
         it "displays the total count of errors" do
@@ -139,13 +140,6 @@ module Gauge
           inspector.check ['test_db']
         end
       end
-    end
-
-
-private
-
-    def stub_db_schema
-      Schema::Repo.stub(:schema).and_return(table_schema)
     end
   end
 end
