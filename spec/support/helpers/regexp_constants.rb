@@ -1,6 +1,6 @@
 # Eithery Lab., 2017
 # Module Gauge::Constants
-# Defines the set of constants used in spec regular expressions.
+# Defines the set of constants used in specs with regular expressions.
 
 module Gauge
   module Constants
