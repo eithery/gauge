@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::Constraints::PrimaryKeyConstraint
-# Represents the primary key constraint.
+# A primary key constraint.
 
 require 'gauge'
 
@@ -8,10 +8,9 @@ module Gauge
   module DB
     module Constraints
       class PrimaryKeyConstraint < CompositeConstraint
-
-        def initialize(name, table, columns, options={})
-          super(name, table, columns)
-          @clustered = options[:clustered] != false
+        def initialize(name, table:, columns:, clustered: true)
+          super(name, table: table, columns: columns)
+          @clustered = clustered
         end
 
 

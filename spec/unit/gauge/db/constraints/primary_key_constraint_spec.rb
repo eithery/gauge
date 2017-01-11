@@ -1,5 +1,5 @@
-# Eithery Lab., 2015.
-# Class Gauge::DB::Constraints::PrimaryKeyConstraint specs.
+# Eithery Lab, 2017
+# Gauge::DB::Constraints::PrimaryKeyConstraint specs
 
 require 'spec_helper'
 
@@ -7,96 +7,81 @@ module Gauge
   module DB
     module Constraints
       describe PrimaryKeyConstraint do
-        let(:dbo_name) { 'PK_REPS' }
-        let(:dbo) { PrimaryKeyConstraint.new(dbo_name, :reps, :rep_code) }
-        subject { dbo }
+        let(:primary_key) { PrimaryKeyConstraint.new('PK_REPS', table: :reps, columns: :rep_code) }
+        let(:composite_key) do
+          PrimaryKeyConstraint.new('pk_fund_accounts', table: :fund_accounts,
+            columns: [:fund_account_number, :cusip], clustered: false)
+        end
+        subject { primary_key }
 
-        it_behaves_like "any composite database constraint"
+        it { expect(described_class).to be < CompositeConstraint }
+
         it { should respond_to :clustered? }
 
-
         describe '#clustered?' do
-          context "by default" do
-            it { should be_clustered }
+          it "clusterd by default" do
+            expect(primary_key).to be_clustered
           end
 
-          context "when specified as nonclustered" do
-            before { @nonclustered_key = PrimaryKeyConstraint.new('pk_reps', :reps, :id, clustered: false) }
-            specify { @nonclustered_key.should_not be_clustered }
+          it "returns false for a non clustered primary key" do
+            key = PrimaryKeyConstraint.new('pk_reps', table: :reps, columns: :id, clustered: false)
+            expect(key).to_not be_clustered
           end
 
-          context "when specified as clustered" do
-            before { @clustered_key = PrimaryKeyConstraint.new('pk_reps', :reps, :id, clustered: true) }
-            specify { @clustered_key.should be_clustered }
+          it "returns true for a clustered primary key" do
+            key = PrimaryKeyConstraint.new('pk_reps', table: :reps, columns: :id, clustered: true)
+            expect(key).to be_clustered
           end
 
-          context "when specified with incorrect value" do
-            before { @clustered_key = PrimaryKeyConstraint.new('pk_reps', :reps, :id, clustered: 'no') }
-            specify { @clustered_key.should be_clustered }
+          it "return true if 'clustered' option has incorrect value" do
+            key = PrimaryKeyConstraint.new('pk_reps', table: :reps, columns: :id, clustered: 'no')
+            expect(key).to be_clustered
           end
         end
 
 
         describe '#==' do
-          before { @primary_key = PrimaryKeyConstraint.new('pk_reps', :reps, :rep_code) }
-
-          context "when two primary keys are the same instance" do
-            specify "they are equal" do
-              @primary_key.should == @primary_key
-            end
+          it "returns true for same primary key instance" do
+            expect(primary_key.==(primary_key)).to be true
           end
 
-          context "when two primary keys have the same state" do
-            specify "they are equal" do
-              key = PrimaryKeyConstraint.new('pk_reps', :reps, :rep_code)
-              key.should_not equal(@primary_key)
-              key.should == @primary_key
-              @primary_key.should == key
-            end
+          it "returns true for primary keys on the same table and column" do
+            key = PrimaryKeyConstraint.new('pk_reps', table: :reps, columns: :rep_code)
+            expect(key).to_not equal(primary_key)
+            expect(key.==(primary_key)).to be true
+            expect(primary_key.==(key)).to be true
           end
 
-          context "when two primary keys have the same state but different names" do
-            specify "they are equal" do
-              key = PrimaryKeyConstraint.new('pk_primary_reps_123456', :reps, :rep_code)
-              key.should == @primary_key
-              @primary_key.should == key
-            end
+          it "returns true for primary keys on the same table and column but having different names" do
+            key = PrimaryKeyConstraint.new('pk_primary_reps_123456', table: :reps, columns: :rep_code)
+            expect(key.==(primary_key)).to be true
+            expect(primary_key.==(key)).to be true
           end
 
-          context "when two primary keys are different" do
-            specify "they are not equal" do
-              key = PrimaryKeyConstraint.new('pk_reps', :reps, :rep_code, clustered: false)
-              key.should_not == @primary_key
-              @primary_key.should_not == key
-            end
+          it "returns false when other primary key is not clustered" do
+            key = PrimaryKeyConstraint.new('PK_REPS', table: :reps, columns: :rep_code, clustered: false)
+            expect(key.==(primary_key)).to be false
+            expect(primary_key.==(key)).to be false
           end
 
           context "for composite primary keys" do
-            before do
-              @composite_key = PrimaryKeyConstraint.new('pk_fund_accounts', :fund_accounts,
-                [:fund_account_number, :cusip], clustered: false)
+            it "returns true for primary keys on same columns in various order" do
+              key = PrimaryKeyConstraint.new('pk_fund_accounts', table: :fund_accounts,
+                columns: [:fund_account_number, :cusip], clustered: false)
+              inverse_order_key = PrimaryKeyConstraint.new('pk_fund_accounts', table: :fund_accounts,
+                columns: [:cusip, :fund_account_number], clustered: false)
+
+              expect(key.==(composite_key)).to be true
+              expect(composite_key.==(key)).to be true
+              expect(inverse_order_key.==(composite_key)).to be true
+              expect(composite_key.==(inverse_order_key)).to be true
             end
 
-            context "with same columns in various order" do
-              specify "they are equal" do
-                key = PrimaryKeyConstraint.new('pk_fund_accounts', :fund_accounts,
-                  [:fund_account_number, :cusip], clustered: false)
-                inverse_order_key = PrimaryKeyConstraint.new('pk_fund_accounts', :fund_accounts,
-                  [:cusip, :fund_account_number], clustered: false)
-                key.should == @composite_key
-                @composite_key.should == key
-                inverse_order_key.should == @composite_key
-                @composite_key.should == inverse_order_key
-              end
-            end
-
-            context "when the number of columns are different" do
-              specify "they are not equal" do
-                key = PrimaryKeyConstraint.new('pk_fund_accounts', :fund_accounts,
-                  [:fund_account_number, :cusip, :ordinal], clustered: false)
-                key.should_not == @composite_key
-                @composite_key.should_not == key
-              end
+            it "returns false for different number of columns" do
+              key = PrimaryKeyConstraint.new('pk_fund_accounts', table: :fund_accounts,
+                columns: [:fund_account_number, :cusip, :ordinal], clustered: false)
+              expect(key.==(composite_key)).to be false
+              expect(composite_key.==(key)).to be false
             end
           end
         end
