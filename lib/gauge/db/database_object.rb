@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::DatabaseObject
-# Represents the base class for all database objects.
+# A base class for all database objects.
 
 module Gauge
   module DB

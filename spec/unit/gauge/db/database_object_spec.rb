@@ -1,25 +1,27 @@
-# Eithery Lab., 2015.
-# Class Gauge::DB::DatabaseObject specs.
+# Eithery Lab, 2017
+# Gauge::DB::DatabaseObject specs
 
 require 'spec_helper'
 
 module Gauge
   module DB
+    include SharedExamples
+
     describe DatabaseObject do
       let(:dbo_name) { 'PK_REP_CODE' }
       let(:dbo) { DatabaseObject.new(dbo_name) }
 
-      it_should_behave_like "any database object"
+      it_behaves_like "any database object"
 
-      subject { dbo }
-      it { should respond_to :to_sym }
+      it { expect(dbo).to respond_to :to_sym }
 
 
       describe '#to_sym' do
-        it "converts the database object name to symbol in downcase" do
-          DatabaseObject.new(dbo_name).to_sym.should == :pk_rep_code
-          DatabaseObject.new(:Reps).to_sym.should == :reps
-          DatabaseObject.new('dBo.master_Accounts').to_sym.should == :dbo_master_accounts
+        it "converts a database object name to downcase symbol" do
+          expect(DatabaseObject.new(dbo_name).to_sym).to be :pk_rep_code
+          expect(DatabaseObject.new(:Reps).to_sym).to be :reps
+          expect(DatabaseObject.new('dBo.master_Accounts').to_sym).to be :dbo_master_accounts
+          expect(DatabaseObject.new('ref.contract_Types').to_sym).to be :ref_contract_types
         end
       end
     end
