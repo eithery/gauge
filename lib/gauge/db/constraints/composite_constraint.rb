@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::Constraints::CompositeConstraint
-# Represents the base class for all composite (multicolumn) database constraints.
+# A base class for all composite (multicolumn) database constraints.
 
 require 'gauge'
 require_relative 'database_constraint'
@@ -11,8 +11,8 @@ module Gauge
       class CompositeConstraint < DatabaseConstraint
         attr_reader :columns
 
-        def initialize(name, table, columns)
-          super(name, table)
+        def initialize(name, table:, columns:)
+          super(name, table: table)
           @columns = flatten_array_of columns
         end
 
@@ -20,6 +20,7 @@ module Gauge
         def composite?
           columns.length > 1
         end
+
 
   protected
 

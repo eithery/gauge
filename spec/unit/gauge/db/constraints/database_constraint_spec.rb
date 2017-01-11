@@ -6,7 +6,7 @@ require 'spec_helper'
 module Gauge
   module DB
     module Constraints
-      describe DatabaseConstraint, f: true do
+      describe DatabaseConstraint do
         let(:dbo_name) { 'DC_DB_CONSTRAINT_NAME' }
         let(:dbo) { DatabaseConstraint.new(dbo_name, table: :fund_accounts) }
         subject { dbo }

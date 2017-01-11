@@ -15,9 +15,4 @@ RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
     mocks.syntax = [:should, :expect]
   end
-
-  config.include Gauge::SchemaMatchers
-  config.include Gauge::Validators::ValidatorSpecHelper
-  config.include Gauge::DB::Constraints
-  config.include Gauge::DB::Constraints::ConstraintSpecHelper
 end
