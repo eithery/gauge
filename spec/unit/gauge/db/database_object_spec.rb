@@ -5,20 +5,24 @@ require 'spec_helper'
 
 module Gauge
   module DB
-    include SharedExamples
-
     describe DatabaseObject do
-      let(:dbo_name) { 'PK_REP_CODE' }
-      let(:dbo) { DatabaseObject.new(dbo_name) }
+      let(:dbo) { DatabaseObject.new('PK_REP_CODE') }
+      subject { dbo }
 
-      it_behaves_like "any database object"
+      it { should respond_to :name }
+      it { should respond_to :to_sym }
 
-      it { expect(dbo).to respond_to :to_sym }
+
+      describe '#name' do
+        it "equals to the object name passed in the initializer" do
+          expect(dbo.name).to eq 'PK_REP_CODE'
+        end
+      end
 
 
       describe '#to_sym' do
         it "converts a database object name to downcase symbol" do
-          expect(DatabaseObject.new(dbo_name).to_sym).to be :pk_rep_code
+          expect(DatabaseObject.new('PK_REP_CODE').to_sym).to be :pk_rep_code
           expect(DatabaseObject.new(:Reps).to_sym).to be :reps
           expect(DatabaseObject.new('dBo.master_Accounts').to_sym).to be :dbo_master_accounts
           expect(DatabaseObject.new('ref.contract_Types').to_sym).to be :ref_contract_types
