@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::Constraints::DefaultConstraint
-# Represents the data column default constraint.
+# A data column default constraint.
 
 require 'gauge'
 
@@ -10,8 +10,8 @@ module Gauge
       class DefaultConstraint < DatabaseConstraint
         attr_reader :column, :default_value
 
-        def initialize(name, table, column, default_value)
-          super(name, table)
+        def initialize(name, table:, column:, default_value:)
+          super(name, table: table)
           @column = column.to_sym.downcase
           @default_value = default_value
         end
