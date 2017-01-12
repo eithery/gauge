@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::Index
-# Represents the database index on the data table or data view.
+# A database index on the data table or data view.
 
 require 'gauge'
 
@@ -8,20 +8,20 @@ module Gauge
   module DB
     class Index < Constraints::CompositeConstraint
 
-      def initialize(name, table, columns, options={})
-        super(name, table, columns)
-        @clustered = options[:clustered] == true
-        @unique = options[:unique] == true
+      def initialize(name, table:, columns:, unique: false, clustered: false)
+        super(name, table: table, columns: columns)
+        @clustered = clustered
+        @unique = unique
       end
 
 
       def clustered?
-        @clustered
+        @clustered == true
       end
 
 
       def unique?
-        @unique || clustered?
+        @unique == true || clustered?
       end
 
 

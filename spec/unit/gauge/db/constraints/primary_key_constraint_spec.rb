@@ -18,6 +18,7 @@ module Gauge
 
         it { should respond_to :clustered? }
 
+
         describe '#clustered?' do
           it "clusterd by default" do
             expect(primary_key).to be_clustered

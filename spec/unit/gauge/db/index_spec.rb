@@ -1,143 +1,132 @@
-# Eithery Lab., 2015.
-# Class Gauge::DB::Index specs.
+# Eithery Lab, 2017
+# Gauge::DB::Index specs
 
 require 'spec_helper'
 
 module Gauge
   module DB
     describe Index do
-      let(:dbo_name) { "IDX_REP_CODE" }
-      let(:dbo) { Index.new(dbo_name, :reps, :rep_code) }
-      subject { dbo }
+      let(:index) { Index.new('IDX_REP_CODE', table: :reps, columns: :rep_code) }
+      let(:composite_index) do
+        Index.new('idx_fund_accounts', table: :fund_accounts, columns: [:fund_account_number, :cusip])
+      end
 
-      it_behaves_like "any composite database constraint"
+      subject { index }
+
+
+      it { expect(described_class).to be < Constraints::CompositeConstraint }
 
       it { should respond_to :clustered? }
       it { should respond_to :unique? }
 
 
       describe '#clustered?' do
-        context "by default" do
-          it { should_not be_clustered }
+        it "non-clustered by default" do
+          expect(index).to_not be_clustered
         end
 
-        context "when specified as clustered" do
-          before { @clustered_index = Index.new('idx_rep_code', :reps, :rep_code, clustered: true) }
-          specify { @clustered_index.should be_clustered }
+        it "returns false for a non-clustered index" do
+          index = Index.new('idx_rep_code', table: :reps, columns: :rep_code, clustered: false)
+          expect(index).to_not be_clustered
         end
 
-        context "when specified as non clustered" do
-          before { @nonclustered_index = Index.new('idx_rep_code', :reps, :rep_code, clustered: false) }
-          specify { @nonclustered_index.should_not be_clustered }
+        it "returns true for a clustered index" do
+          index = Index.new('idx_rep_code', table: :reps, columns: :rep_code, clustered: true)
+          expect(index).to be_clustered
         end
 
-        context "when specified with incorrect value" do
-          before { @nonclustered_index = Index.new('idx_rep_code', :reps, :rep_code, clustered: 'yes') }
-          specify { @nonclustered_index.should_not be_clustered }
+        it "returns false if 'clustered' option has incorrect value" do
+          index = Index.new('idx_rep_code', table: :reps, columns: :rep_code, clustered: 'yes')
+          expect(index).to_not be_clustered
         end
       end
 
 
-      describe '#unique' do
-        context "by default" do
-          it { should_not be_unique }
+      describe '#unique?' do
+        it "not-unique by default" do
+          expect(index).to_not be_unique
         end
 
-        context "when specified as unique" do
-          before { @unique_index = Index.new('idx_rep_code', :reps, :rep_code, unique: true) }
-          specify { @unique_index.should be_unique }
+        it "returns true for a unique index" do
+          index = Index.new('idx_rep_code', table: :reps, columns: :rep_code, unique: true)
+          expect(index).to be_unique
         end
 
-        context "when specified as clustered" do
-          before { @clustered_index = Index.new('idx_rep_code', :reps, :rep_code, clustered: true) }
-          specify { @clustered_index.should be_unique }
+        it "returns true for a clustered index" do
+          index = Index.new('idx_rep_code', table: :reps, columns: :rep_code, clustered: true)
+          expect(index).to be_unique
         end
 
-        context "when specified as clustered but not unique" do
-          before { @clustered_index = Index.new('idx_rep_code', :reps, :rep_code, clustered: true, unique: false) }
-          specify { @clustered_index.should be_unique }
+        it "returns true for a clustered but not unique index" do
+          index = Index.new('idx_rep_code', table: :reps, columns: :rep_code, clustered: true, unique: false)
+          expect(index).to be_unique
         end
 
-        context "when specified as not unique" do
-          before { @nonunique_index = Index.new('idx_rep_code', :reps, :rep_code, unique: false) }
-          specify { @nonunique_index.should_not be_unique }
+        it "returns false for a non-unique index" do
+          index = Index.new('idx_rep_code', table: :reps, columns: :rep_code, unique: false)
+          expect(index).to_not be_unique
         end
 
-        context "when specified with incorrect value" do
-          before { @nonunique_index = Index.new('idx_rep_code', :reps, :rep_code, unique: 'yes') }
-          specify { @nonunique_index.should_not be_unique }
+        it "returns false if 'unique' option has incorrect value" do
+          index = Index.new('idx_rep_code', table: :reps, columns: :rep_code, unique: 'yes')
+          expect(index).to_not be_unique
         end
       end
 
 
       describe '#==' do
-        before { @index = Index.new('idx_reps_rep_code', :reps, :rep_code) }
-
-        context "when two indexes represent the same instance" do
-          specify "they are equal" do
-            @index.should == @index
-          end
+        it "returns true for same index instances" do
+          expect(index.==(index)).to be true
         end
 
-        context "when two indexes have the same state" do
-          specify "they are equal" do
-            index = Index.new('idx_reps_rep_code', :reps, :rep_code)
-            index.should_not equal(@index)
-            index.should == @index
-            @index.should == index
-          end
+        it "returns true for indexes on the same table and column" do
+          idx = Index.new('idx_reps_rep_code', table: :reps, columns: :rep_code)
+          expect(index).to_not equal(idx)
+          expect(index.==(idx)).to be true
+          expect(idx.==(index)).to be true
         end
 
-        context "when two indexes have the same state but different names" do
-          specify "they are equal" do
-            index = Index.new('idx_primary_reps_123456', :reps, :rep_code)
-            index.should == @index
-            @index.should == index
-          end
+        it "returns true for indexes on the same table and column but having different names" do
+          idx = Index.new('idx_primary_reps_123456', table: :reps, columns: :rep_code)
+          expect(index.==(idx)).to be true
+          expect(idx.==(index)).to be true
         end
 
-        context "when two indexes are different" do
-          specify "they are not equal" do
-            index = Index.new('idx_reps_rep_code', :reps, :rep_code, unique: true)
-            index.should_not == @index
-            @index.should_not == index
-          end
+        it "returns false when other index is unique" do
+          unique_index = Index.new('idx_reps_rep_code', table: :reps, columns: :rep_code, unique: true)
+          expect(index.==(unique_index)).to be false
+          expect(unique_index.==(index)).to be false
         end
 
-        context "when other index is nil" do
-          subject { Index.new('idx_reps_rep_code', :reps, :rep_code) }
-          it { should_not == nil }
+        it "return false when other index is nil" do
+          expect(index.==(nil)).to be false
         end
 
         context "for composite indexes" do
-          before { @composite_index = Index.new('idx_fund_accounts', :fund_accounts, [:fund_account_number, :cusip]) }
+          it "returns true for indexes on same columns in various order" do
+            idx = Index.new('idx_fund_accounts', table: :fund_accounts, columns: [:fund_account_number, :cusip])
+            inverse_order_index = Index.new('idx_fund_accounts', table: :fund_accounts,
+              columns: [:cusip, :fund_account_number])
 
-          context "with same columns in various order" do
-            specify "they are equal" do
-              index = Index.new('idx_fund_accounts', :fund_accounts, [:fund_account_number, :cusip])
-              inverse_order_index = Index.new('idx_fund_accounts', :fund_accounts, [:cusip, :fund_account_number])
-              index.should == @composite_index
-              @composite_index.should == index
-              inverse_order_index.should == @composite_index
-              @composite_index.should == inverse_order_index
-            end
+            expect(idx.==(composite_index)).to be true
+            expect(composite_index.==(idx)).to be true
+            expect(inverse_order_index.==(composite_index)).to be true
+            expect(composite_index.==(inverse_order_index)).to be true
           end
 
-          context "when the number of columns are different" do
-            specify "they are not equal" do
-              index = Index.new('idx_fund_accounts', :fund_accounts, [:fund_account_number, :cusip, :ordinal])
-              index.should_not == @composite_index
-              @composite_index.should_not == index
-            end
+          it "returns false for different number of columns" do
+            idx = Index.new('idx_fund_accounts', table: :fund_accounts, columns: [:fund_account_number, :cusip, :ordinal])
+            expect(idx.==(composite_index)).to be false
+            expect(composite_index.==(idx)).to be false
           end
         end
 
         context "for clustered indexes" do
-          before { @clustered_index = Index.new('idx_reps_rep_code', :reps, :rep_code, clustered: true) }
-          it "does not equal to the unique index on the same column but not clustered" do
-            index = Index.new('idx_reps_rep_code', :reps, :rep_code, unique: true)
-            @clustered_index.should_not == index
-            index.should_not == @clustered_index
+          it "is not equal to a non-clustered unique index on the same column" do
+            clustered_index = Index.new('idx_reps_rep_code', table: :reps, columns: :rep_code, clustered: true)
+            idx = Index.new('idx_reps_rep_code', table: :reps, columns: :rep_code, unique: true)
+            expect(clustered_index.==(idx)).to be false
+            expect(idx.==(clustered_index)).to be false
           end
         end
       end
