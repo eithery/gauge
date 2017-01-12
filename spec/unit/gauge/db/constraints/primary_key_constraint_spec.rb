@@ -41,7 +41,7 @@ module Gauge
 
 
         describe '#==' do
-          it "returns true for same primary key instance" do
+          it "returns true for same primary key instances" do
             expect(primary_key.==(primary_key)).to be true
           end
 

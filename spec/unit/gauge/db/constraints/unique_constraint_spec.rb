@@ -1,5 +1,5 @@
-# Eithery Lab., 2015.
-# Class Gauge::DB::Constraints::UniqueConstraint specs.
+# Eithery Lab, 2017
+# Gauge::DB::Constraints::UniqueConstraint specs
 
 require 'spec_helper'
 
@@ -7,70 +7,62 @@ module Gauge
   module DB
     module Constraints
       describe UniqueConstraint do
-        let(:dbo_name) { 'UC_REPS_REP_CODE' }
-        let(:dbo) { UniqueConstraint.new(dbo_name, :reps, :rep_code) }
+        let(:unique_constraint) { UniqueConstraint.new('UC_REPS_REP_CODE', table: :reps, columns: :rep_code) }
+        let(:composite_unique_constraint) do
+          UniqueConstraint.new('UC_FUND_ACCOUNTS', table: :fund_accounts, columns: [:fund_account_number, :cusip])
+        end
 
-        it_behaves_like "any composite database constraint"
+        subject { unique_constraint }
+
+
+        it { expect(described_class).to be < CompositeConstraint }
 
 
         describe '#==' do
-          before { @unique_constraint = UniqueConstraint.new('uc_reps_rep_code', :reps, :rep_code) }
-
-          context "when two constraints have the same state" do
-            specify "they are equal" do
-              constraint = UniqueConstraint.new('uc_reps_rep_code', :reps, :rep_code)
-              @unique_constraint.should_not equal(constraint)
-              @unique_constraint.should == constraint
-              constraint.should == @unique_constraint
-            end
+          it "returns true for same unique constraint instances" do
+            expect(unique_constraint.==(unique_constraint)).to be true
           end
 
-          context "when two constraints have the same state but different names" do
-            specify "they are equal" do
-              constraint = UniqueConstraint.new('uc_reps_12345', :reps, :rep_code)
-              @unique_constraint.should == constraint
-              constraint.should == @unique_constraint
-            end
+          it "returns true for unique constraints on the same table and column" do
+            constraint = UniqueConstraint.new('uc_reps_rep_code', table: :reps, columns: :rep_code)
+            expect(unique_constraint).to_not equal(constraint)
+            expect(unique_constraint.==(constraint)).to be true
+            expect(constraint.==(unique_constraint)).to be true
           end
 
-          context "when two constraints are different" do
-            specify "they are not equal" do
-              constraint = UniqueConstraint.new('uc_reps_rep_code', :reps, :rep_id)
-              @unique_constraint.should_not == constraint
-              constraint.should_not == @unique_constraint
-            end
+          it "returns true for unique constrains on the same table and column but having different names" do
+            constraint = UniqueConstraint.new('uc_reps_12345', table: :reps, columns: :rep_code)
+            expect(unique_constraint.==(constraint)).to be true
+            expect(constraint.==(unique_constraint)).to be true
           end
 
-          context "when other unique constraint is nil" do
-            subject { UniqueConstraint.new('uc_reps_rep_code', :reps, :rep_code) }
-            it { should_not == nil }
+          it "returns false for different unique constraints" do
+            constraint = UniqueConstraint.new('UC_REPS_REP_CODE', table: :reps, columns: :rep_id)
+            expect(unique_constraint.==(constraint)).to be false
+            expect(constraint.==(unique_constraint)).to be false
+          end
+
+          it "return false when other unique constraint is nil" do
+            expect(unique_constraint.==(nil)).to be false
           end
 
           context "for composite unique constraints" do
-            before do
-              @composite_unique_constraint = UniqueConstraint.new('uc_fund_accounts', :fund_accounts,
-                [:fund_account_number, :cusip])
+            it "returns true for unique constraints on same columns in various order" do
+              constraint = UniqueConstraint.new('uc_fund_accounts', table: :fund_accounts,
+                columns: [:fund_account_number, :cusip])
+              inverse_order_constraint = UniqueConstraint.new('uc_fund_accounts', table: :fund_accounts,
+                columns: [:cusip, :fund_account_number])
+              expect(composite_unique_constraint.==(constraint)).to be true
+              expect(constraint.==(composite_unique_constraint)).to be true
+              expect(composite_unique_constraint.==(inverse_order_constraint)).to be true
+              expect(inverse_order_constraint.==(composite_unique_constraint)).to be true
             end
 
-            context "with same columns in various order" do
-              specify "they are equal" do
-                constraint = UniqueConstraint.new('uc_fund_accounts12', :fund_accounts, [:fund_account_number, :cusip])
-                inverse_order_constraint = UniqueConstraint.new('uc_fund_accounts', :fund_accounts,
-                  [:cusip, :fund_account_number])
-                constraint.should == @composite_unique_constraint
-                @composite_unique_constraint.should == constraint
-                inverse_order_constraint.should == @composite_unique_constraint
-                @composite_unique_constraint.should == inverse_order_constraint
-              end
-            end
-
-            context "when the number of columns are different" do
-              specify "they are not equal" do
-                constraint = UniqueConstraint.new('uc_fund_accounts', :fund_accounts,
-                  [:fund_account_number, :cusip, :ordinal])
-                constraint.should_not == @composite_unique_constraint
-                @composite_unique_constraint.should_not == constraint
-              end
+            it "returns false for different number of columns" do
+              constraint = UniqueConstraint.new('uc_fund_accounts', table: :fund_accounts,
+                columns: [:fund_account_number, :cusip, :ordinal])
+              expect(composite_unique_constraint.==(constraint)).to be false
+              expect(constraint.==(composite_unique_constraint)).to be false
             end
           end
         end
