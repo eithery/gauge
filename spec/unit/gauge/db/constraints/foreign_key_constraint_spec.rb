@@ -1,17 +1,26 @@
-# Eithery Lab., 2015.
-# Class Gauge::DB::Constraints::ForeignKeyConstraint specs.
+# Eithery Lab, 2017
+# Gauge::DB::Constraints::ForeignKeyConstraint specs
 
 require 'spec_helper'
 
 module Gauge
   module DB
     module Constraints
-      describe ForeignKeyConstraint do
-        let(:dbo_name) { 'FK_TRADES_PRIMARY_REPS' }
-        let(:dbo) { ForeignKeyConstraint.new(dbo_name, :trades, :rep_code, :primary_reps, :code) }
-        subject { dbo }
+      include Constants
 
-        it_behaves_like "any composite database constraint"
+      describe ForeignKeyConstraint, f: true do
+        let(:foreign_key) do
+          ForeignKeyConstraint.new('FK_TRADES_PRIMARY_REPS', table: :trades,
+            columns: :rep_code, ref_table: :primary_reps, ref_columns: :code)
+        end
+        let(:composite_foreign_key) do
+          ForeignKeyConstraint.new('fk_trade_accounts', table: :trades, columns: [:account_number, :source_firm_code],
+            ref_table: :accounts, ref_columns: [:number, 'Source'])
+        end
+
+        subject { foreign_key }
+
+        it { expect(described_class).to be < CompositeConstraint }
 
         it { should respond_to :ref_table }
         it { should respond_to :ref_table_sql }
@@ -19,32 +28,30 @@ module Gauge
 
 
         describe '#ref_table' do
-          it "equals to the table name passed in the initializer in various forms" do
-            ConstraintSpecHelper.tables.each do |table_name, actual_table|
-              foreign_key = ForeignKeyConstraint.new('fk_trades_primary_reps', :direct_trades, :rep_code,
-                table_name, :code)
-              foreign_key.ref_table.should == actual_table
+          it "equals to a table name passed in the initializer" do
+            TABLES.each do |table_name, actual_table|
+              foreign_key = ForeignKeyConstraint.new('fk_trades_primary_reps', table: :direct_trades,
+                columns: :rep_code, ref_table: table_name, ref_columns: :code)
+              expect(foreign_key.ref_table).to be actual_table
             end
           end
         end
 
 
         describe '#ref_table_sql' do
-          before do
-            @ref_tables = {
+          REF_TABLES = {
               :direct_trades => 'dbo.direct_trades',
               'ref.source_firms' => 'ref.source_firms',
               :REPS => 'dbo.reps',
               'bnr.Master_Accounts' => 'bnr.master_accounts',
               'dbo.master_account_registration_types' => 'dbo.master_account_registration_types'
-            }
-          end
+          }
 
           it "returns a full table name for SQL statements" do
-            @ref_tables.each do |ref_table, sql|
-              foreign_key = ForeignKeyConstraint.new('fk_some_name', :some_table, :some_column,
-                ref_table, :some_ref_column)
-              foreign_key.ref_table_sql.should == sql
+            REF_TABLES.each do |table, sql|
+              foreign_key = ForeignKeyConstraint.new('fk_some_name', table: :some_table, columns: :some_column,
+                ref_table: table, ref_columns: :some_ref_column)
+              expect(foreign_key.ref_table_sql).to eq sql
             end
           end
         end
@@ -52,76 +59,87 @@ module Gauge
 
         describe '#ref_columns' do
           context "for regular foreign keys" do
-            specify { subject.ref_columns.should include(:code) }
+            it { expect(foreign_key.ref_columns).to include(:code) }
           end
 
           context "for composite foreign keys" do
-            before do
-              @composite_constraint = ForeignKeyConstraint.new('fk_trade_accounts', :trades,
-                [:account_number, :source_firm_code], :accounts, [:number, 'Source'])
-            end
             it "includes all data columns specified as a composite key in various forms" do
-              @composite_constraint.ref_columns.count.should == 2
-              @composite_constraint.ref_columns.should include(:number)
-              @composite_constraint.ref_columns.should include(:source)
+              expect(composite_foreign_key).to have(2).ref_columns
+              expect(composite_foreign_key.ref_columns).to include(:number, :source)
             end
           end
         end
 
 
         describe '#==' do
-          before do
-            @foreign_key = ForeignKeyConstraint.new('fk_bnr_reps_office_code',
-              :bnr_reps, :office_id, :bnr_offices, :id)
+          it "returns true for the same foreign key instances" do
+            expect(foreign_key.==(foreign_key)).to be true
           end
 
-          context "when two foreign keys have the same state" do
-            specify "they are equal" do
-              foreign_key = ForeignKeyConstraint.new('fk_bnr_reps_office_code',
-                :bnr_reps, :office_id, :bnr_offices, :id)
-              @foreign_key.should_not equal(foreign_key)
-              @foreign_key.should == foreign_key
-              foreign_key.should == @foreign_key
+          it "returns true for foreign keys defined on the same tables and columns" do
+            [
+              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :trades, columns: :rep_code,
+                ref_table: :primary_reps, ref_columns: :code),
+              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :dbo_trades, columns: :rep_code,
+                ref_table: :dbo_primary_reps, ref_columns: :code),
+              ForeignKeyConstraint.new('fk_trades_primary_reps', table: 'trades', columns: 'rep_code',
+                ref_table: 'primary_reps', ref_columns: 'code'),
+              ForeignKeyConstraint.new('fk_trades_primary_reps', table: 'dbo.trades', columns: 'rep_code',
+                  ref_table: 'dbo.primary_reps', ref_columns: 'code'),
+              ForeignKeyConstraint.new('fk_trades_primary_reps', table: 'TRADES', columns: 'REP_CODE',
+                ref_table: 'DBO.PRIMARY_REPS', ref_columns: 'CODE')
+            ]
+            .each do |key|
+              expect(foreign_key).to_not equal(key)
+              expect(foreign_key.==(key)).to be true
+              expect(key.==(foreign_key)).to be true
             end
           end
 
-          context "when two foreign keys have the same state but different names" do
-            specify "they are equal" do
-              foreign_key = ForeignKeyConstraint.new('fk_bnr_reps_1234',
-                :bnr_reps, :office_id, :bnr_offices, :id)
-              @foreign_key.should == foreign_key
-              foreign_key.should == @foreign_key
+          it "returns true for foreign keys on the same table and columns but having different names" do
+            key = ForeignKeyConstraint.new('fk_trades_12345', table: :trades, columns: :rep_code,
+              ref_table: :primary_reps, ref_columns: :code)
+            expect(foreign_key.==(key)).to be true
+            expect(key.==(foreign_key)).to be true
+          end
+
+          it "returns false for different foreign keys" do
+            [
+              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :bnr_trades, columns: :rep_code,
+                ref_table: :primary_reps, ref_columns: :code),
+              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :trades, columns: :rep_id,
+                ref_table: :primary_reps, ref_columns: :code),
+              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :trades, columns: :rep_code,
+                ref_table: :reps, ref_columns: :code),
+              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :trades, columns: :rep_code,
+                ref_table: :primary_reps, ref_columns: :id)
+            ]
+            .each do |key|
+              expect(foreign_key.==(key)).to be false
+              expect(key.==(foreign_key)).to be false
             end
           end
 
-          context "when two foreign keys are different" do
-            before do
-              key_name = 'fk_bnr_reps_office_code'
-              @keys = [
-                ForeignKeyConstraint.new(key_name, :dbo_reps, :office_id, :bnr_offices, :id),
-                ForeignKeyConstraint.new(key_name, :bnr_reps, :office_code, :bnr_offices, :id),
-                ForeignKeyConstraint.new(key_name, :bnr_reps, :office_id, :dbo_offices, :id),
-                ForeignKeyConstraint.new(key_name, :bnr_reps, :office_id, :bnr_offices, :office_id),
-              ]
-            end
-
-            specify "they are not equal" do
-              @keys.each do |foreign_key|
-                @foreign_key.should_not == foreign_key
-                foreign_key.should_not == @foreign_key
-              end
-            end
+          it "return false when other foreign key is nil" do
+            expect(foreign_key.==(nil)).to be false
           end
 
-          context "when other foreign key is nil" do
-            subject { ForeignKeyConstraint.new('fk_bnr_reps_office_code', :bnr_reps, :office_id, :bnr_offices, :id) }
-            it { should_not == nil }
+          context "for composite foreign keys" do
+            it "returns true for foreign keys on same columns in various order" do
+              key = ForeignKeyConstraint.new('fk_trade_accounts', table: :trades,
+                columns: [:source_firm_code, :account_number], ref_table: :accounts, ref_columns: ['Source', :number])
+              expect(composite_foreign_key.==(key)).to be true
+              expect(key.==(composite_foreign_key)).to be true
+            end
+
+            it "returns false for different number of columns" do
+              key = ForeignKeyConstraint.new('fk_trade_accounts', table: :trades,
+                columns: [:account_number, :source_firm_code, :ordinal], ref_table: :accounts,
+                ref_columns: [:number, 'Source', :ordinal])
+              expect(composite_foreign_key.==(key)).to be false
+              expect(key.==(composite_foreign_key)).to be false
+            end
           end
-        end
-
-
-        def constraint_for(*args)
-          ForeignKeyConstraint.new(*args, :primary_reps, :code)
         end
       end
     end

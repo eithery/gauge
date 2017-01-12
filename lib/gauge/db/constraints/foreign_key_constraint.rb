@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::Constraints::ForeignKeyConstraint
-# Represents the foreign key constraint.
+# A foreign key constraint.
 
 require 'gauge'
 
@@ -10,8 +10,8 @@ module Gauge
       class ForeignKeyConstraint < CompositeConstraint
         attr_reader :ref_table, :ref_columns
 
-        def initialize(name, table, columns, ref_table, ref_columns)
-          super(name, table, columns)
+        def initialize(name, table:, columns:, ref_table:, ref_columns:)
+          super(name, table: table, columns: columns)
           @ref_table = Gauge::Helpers::NameParser.dbo_key_of ref_table
           @ref_columns = flatten_array_of ref_columns
         end
@@ -27,6 +27,7 @@ module Gauge
         def ref_table_sql
           "#{ref_table_sql_schema}.#{ref_table_local_name}"
         end
+
 
   private
 
