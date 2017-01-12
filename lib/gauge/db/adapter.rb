@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
+# Eithery Lab, 2017
 # Class Gauge::DB::Adapter
-# Database adapter class encapsulating interations with Sequel.
+# Database adapter providing interation with Sequel.
+
 require 'gauge'
 
 module Gauge
@@ -13,13 +14,15 @@ module Gauge
       @database = nil
 
       def self.session(schema)
-        Sequel.tinytds(dataserver: Connection.server, database: schema.database_schema.sql_name,
+        Sequel.tinytds(dataserver: Connection.server, database: schema.database_name,
           user: Connection.user, password: Connection.password) do |dba|
           dba.test_connection
-
-          self.database = dba
-          yield dba
-          self.database = nil
+          begin
+            self.database = dba
+            yield dba
+          ensure
+            self.database = nil
+          end
         end
       end
     end
