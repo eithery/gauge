@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::Constraints::CheckConstraint
-# Represents the check constraint defined on the data table.
+# A check constraint defined on data table.
 
 require 'gauge'
 require_relative 'composite_constraint'
@@ -11,9 +11,9 @@ module Gauge
       class CheckConstraint < CompositeConstraint
         attr_reader :expression
 
-        def initialize(name, table, columns, expression)
-          super(name, table, columns)
-          @expression = expression
+        def initialize(name, table:, columns:, check:)
+          super(name, table: table, columns: columns)
+          @expression = check
         end
       end
     end
