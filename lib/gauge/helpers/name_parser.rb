@@ -1,6 +1,6 @@
-# Eithery Lab., 2017.
+# Eithery Lab, 2017
 # Class Gauge::Helpers::NameParser
-# Provides the set of helper methods to parse database object names.
+# Provides helper methods to parse database object names.
 
 require 'gauge'
 
@@ -26,7 +26,7 @@ module Gauge
   private
 
       def self.parsed_name(dbo_name)
-        dbo_name.to_s.gsub(/\[|\]|\"/, '').split('.')
+        dbo_name.to_s.gsub(/\[|\]|\"|^dbo_/, '').split('.')
       end
     end
   end

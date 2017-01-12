@@ -1,5 +1,5 @@
-# Eithery Lab., 2017.
-# Class Gauge::Helpers::NameParser specs.
+# Eithery Lab, 2017
+# Gauge::Helpers::NameParser specs
 
 require 'spec_helper'
 
@@ -25,7 +25,7 @@ module Gauge
       describe '.sql_schema_of' do
         context "for default SQL schema (dbo)" do
           it "returns 'dbo' as SQL schema" do
-            dbo_default_names.each { |dbo_name| expect(NameParser.sql_schema_of(dbo_name)).to eq 'dbo' }
+            dbo_default_names.each { |dbo_name| expect(NameParser.sql_schema_of(dbo_name.downcase)).to eq 'dbo' }
           end
         end
 
@@ -40,27 +40,28 @@ module Gauge
       describe '.dbo_key_of' do
         context "for default SQL schema (dbo)" do
           it "returns a database object name with 'dbo' SQL schema converted to symbol" do
-            dbo_default_names.each { |dbo_name| expect(NameParser.dbo_key_of(dbo_name)).to eq :dbo_reps }
+            dbo_default_names.each { |dbo_name| expect(NameParser.dbo_key_of(dbo_name)).to be :dbo_reps }
           end
         end
 
         context "for custom SQL schema" do
           it "returns a database object name with custom SQL schema converted to symbol" do
-            dbo_custom_names.each { |dbo_name| expect(NameParser.dbo_key_of(dbo_name)).to eq :bnr_reps }
+            dbo_custom_names.each { |dbo_name| expect(NameParser.dbo_key_of(dbo_name)).to be :bnr_reps }
           end
         end
       end
+
 
   private
 
       def dbo_default_names
         ['REPS', 'dbo.reps', '"dbo"."reps"', '[dbo].[reps]', '[reps]', '[rep_profile].[dbo].[reps]', :reps,
-          'rep_profile..reps']
+          'rep_profile..reps', 'DBO.REPS', :dbo_reps, 'dbo_reps']
       end
 
 
       def dbo_custom_names
-        ['Bnr.RepS', '"bnr"."reps"', '[bnr].[reps]', '[rep_profile].[bnr].[reps]', 'rep_profile.bnr.reps']
+        ['BNR.RepS', '"bnr"."reps"', '[bnr].[reps]', '[rep_profile].[bnr].[reps]', 'rep_profile.bnr.reps']
       end
     end
   end
