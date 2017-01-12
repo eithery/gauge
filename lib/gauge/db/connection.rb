@@ -1,6 +1,6 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Class Gauge::DB::Connection
-# Encapsulates a database connection info.
+# A database connection info.
 
 require 'gauge'
 
@@ -12,10 +12,10 @@ module Gauge
       end
 
 
-      def self.configure(options)
-        @server = options[:server]
-        @user = options[:user]
-        @password = options[:password]
+      def self.configure(server:, user:, password: nil)
+        @server = server
+        @user = user
+        @password = password
       end
     end
   end

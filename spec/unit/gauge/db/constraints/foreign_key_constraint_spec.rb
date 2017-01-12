@@ -8,7 +8,7 @@ module Gauge
     module Constraints
       include Constants
 
-      describe ForeignKeyConstraint, f: true do
+      describe ForeignKeyConstraint do
         let(:foreign_key) do
           ForeignKeyConstraint.new('FK_TRADES_PRIMARY_REPS', table: :trades,
             columns: :rep_code, ref_table: :primary_reps, ref_columns: :code)

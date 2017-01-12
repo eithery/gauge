@@ -1,4 +1,4 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Gauge::DB::Connection specs
 
 require 'spec_helper'
