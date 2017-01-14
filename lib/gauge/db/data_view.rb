@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::DataView
-# Represents the actual data view in DB.
+# An actual database view.
 
 require 'gauge'
 
@@ -9,15 +9,15 @@ module Gauge
     class DataView < DatabaseObject
       attr_reader :sql
 
-      def initialize(name, sql, options={})
+      def initialize(name, sql:, indexed: false)
         super name
         @sql = sql
-        @options = options
+        @indexed = indexed
       end
 
 
       def indexed?
-        @options[:indexed] == true
+        @indexed == true
       end
 
 

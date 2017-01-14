@@ -1,20 +1,18 @@
-# Eithery Lab., 2015.
-# Class Gauge::DB::DataView specs.
+# Eithery Lab, 2017
+# Gauge::DB::DataView specs
 
 require 'spec_helper'
 
 module Gauge
   module DB
     describe DataView do
-      let(:dbo_name) { 'primary_RePS' }
       let(:view_sql) { 'select number, customer_name, is_active from dbo.master_accounts' }
-      let(:view) { DataView.new(dbo_name, view_sql) }
-      let(:indexed_view) { DataView.new(dbo_name, view_sql, indexed: true) }
-      let(:dbo) { view }
-      subject { dbo }
+      let(:view) { DataView.new('PRIMARY_REPS', sql: view_sql) }
+      let(:indexed_view) { DataView.new('PRIMARY_REPS', sql: view_sql, indexed: true) }
 
-      it_behaves_like "any database object"
+      subject { view }
 
+      it { expect(DataView).to be < DatabaseObject }
 
       it { should respond_to :indexed?, :with_schemabinding? }
       it { should respond_to :indexes }
@@ -24,31 +22,30 @@ module Gauge
 
 
       describe '#indexed?' do
-        context 'for regular views' do
-          it { should_not be_indexed }
+        it "returns false for regular views" do
+          expect(view).to_not be_indexed
         end
 
-        context 'for indexed views' do
-          subject { indexed_view }
-          it { should be_indexed }
+        it "returns true for indexed views" do
+          expect(indexed_view).to be_indexed
         end
       end
 
 
       describe '#with_schemabinding' do
-        context 'for views without schemabinding' do
+        context "for views without schemabinding" do
         end
 
-        context 'for views with schemabinding' do
+        context "for views with schemabinding" do
         end
       end
 
 
       describe '#indexes' do
-        context 'for regular views' do
+        context "for regular views" do
         end
 
-        context 'for indexed views' do
+        context "for indexed views" do
         end
       end
 
@@ -58,22 +55,20 @@ module Gauge
 
 
       describe '#sql' do
-        subject { view.sql }
-
-        it { should_not be_nil }
-        it { should == view_sql }
       end
 
 
       describe '#to_sym' do
-        it "returns the data view name and schema combination converted to a symbol" do
+        it "returns a data view name and schema combination converted to a symbol" do
           {
-            dbo_name => :dbo_primary_reps,
+            'PRIMARY_REPS' => :dbo_primary_reps,
+            :dbo_primary_reps => :dbo_primary_reps,
             'master_Accounts' => :dbo_master_accounts,
             'bnr.tradeS' => :bnr_trades,
             :Accounts => :dbo_accounts
-          }.each do |name, expected_symbol|
-            DataView.new(name, view_sql).to_sym.should == expected_symbol
+          }
+          .each do |name, expected_symbol|
+            expect(DataView.new(name, sql: view_sql).to_sym).to be expected_symbol
           end
         end
       end
