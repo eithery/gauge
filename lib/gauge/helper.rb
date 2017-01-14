@@ -1,4 +1,4 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Class Gauge::Helper
 # Displays brief help and version information for the application.
 

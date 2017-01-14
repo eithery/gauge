@@ -1,4 +1,4 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Class Gauge::Inspector
 # Performs various validation checks of the specified database or
 # particular database objects structure against the predefined schema.

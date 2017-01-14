@@ -1,4 +1,4 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Gauge::Shell specs
 
 require 'spec_helper'

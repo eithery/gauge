@@ -1,4 +1,4 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Module Gauge::Logger
 # Provides logging functionality using the set of registered formatters.
 
