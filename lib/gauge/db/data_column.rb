@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::DataColumn
-# Encapsulates the actual data column attributes.
+# Defines an actual data table column.
 
 require 'gauge'
 
@@ -40,6 +40,7 @@ module Gauge
       def to_sym
         name.downcase.to_sym
       end
+
 
   private
 

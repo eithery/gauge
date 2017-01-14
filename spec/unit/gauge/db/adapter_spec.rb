@@ -5,7 +5,7 @@ require 'spec_helper'
 
 module Gauge
   module DB
-    describe Adapter, f: true do
+    describe Adapter do
       let(:db_schema) { double('db_schema', database_name: 'test_db') }
       let(:database) { double('database', test_connection: nil) }
       subject { Adapter }
