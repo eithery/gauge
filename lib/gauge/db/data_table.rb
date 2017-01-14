@@ -1,15 +1,15 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::DB::DataTable
-# Represents the actual data table.
+# An actual database table.
 
 require 'gauge'
 
 module Gauge
   module DB
     class DataTable < DatabaseObject
-      def initialize(name, database)
+      def initialize(name, db:)
         super(name)
-        @database = database
+        @database = db
       end
 
 
@@ -22,14 +22,12 @@ module Gauge
 
 
       def column_exists?(column_name)
-        column_key = column_name.downcase.to_sym
-        columns.any? { |col| col.to_sym == column_key }
+        columns.any? { |col| col.to_sym == key_of(column_name) }
       end
 
 
       def column(column_name)
-        column_key = column_name.downcase.to_sym
-        columns.select { |col| col.to_sym == column_key }.first
+        columns.select { |col| col.to_sym == key_of(column_name) }.first
       end
 
 
@@ -65,6 +63,13 @@ module Gauge
 
       def to_sym
         Gauge::Helpers::NameParser.dbo_key_of name
+      end
+
+
+  private
+
+      def key_of(column_name)
+        column_name.downcase.to_sym
       end
     end
   end
