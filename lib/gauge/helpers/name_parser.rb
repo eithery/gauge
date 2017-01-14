@@ -23,6 +23,7 @@ module Gauge
         "#{sql_schema_of(dbo_name)}_#{local_name_of(dbo_name)}".downcase.to_sym
       end
 
+
   private
 
       def self.parsed_name(dbo_name)

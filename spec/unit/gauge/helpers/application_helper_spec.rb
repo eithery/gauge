@@ -1,5 +1,5 @@
-# Eithery Lab., 2017
-# Class Gauge::ApplicationHelper specs
+# Eithery Lab, 2017
+# Gauge::ApplicationHelper specs
 
 require 'spec_helper'
 
