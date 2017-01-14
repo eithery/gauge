@@ -1,5 +1,5 @@
-# Eithery Lab., 2017
-# Object extension specs
+# Eithery Lab, 2017
+# Object extensions specs
 
 require 'spec_helper'
 

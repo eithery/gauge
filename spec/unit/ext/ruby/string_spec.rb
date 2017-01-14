@@ -1,5 +1,5 @@
-# Eithery Lab., 2017
-# String extension specs
+# Eithery Lab, 2017
+# String extensions specs
 
 require 'spec_helper'
 
