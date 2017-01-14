@@ -1,4 +1,4 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Class Gauge::Formatters::ConsoleFormatter
 # Displays messages to console/terminal.
 

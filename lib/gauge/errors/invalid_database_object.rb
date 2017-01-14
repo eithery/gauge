@@ -1,4 +1,4 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Class Gauge::Errors::InvalidDatabaseObject
 # Invalid database object error.
 
