@@ -1,5 +1,5 @@
-# Eithery Lab., 2015.
-# Sequel::TynyTDS::Database specs.
+# Eithery Lab, 2017
+# Sequel::TynyTDS::Database specs
 
 require 'spec_helper'
 
@@ -10,6 +10,9 @@ module Sequel
       let(:table_schema) { Gauge::Schema::DataTableSchema.new(:accounts, sql_schema: :bnr) }
       let(:column_schema) { Gauge::Schema::DataColumnSchema.new(:account_number).in_table table_schema }
       let(:missing_column_schema) { Gauge::Schema::DataColumnSchema.new(:missing_column).in_table table_schema }
+
+
+      it { expect(Database).to be < Sequel::Database }
 
       it { should respond_to :table_exists? }
       it { should respond_to :tables, :table }
@@ -24,54 +27,52 @@ module Sequel
 
       describe '#tables' do
         before { stub_data_tables }
-        subject { database.tables }
 
-        it { should_not be_empty }
-        it { should have(4).tables }
+        it { expect(database.tables).to_not be_empty }
+        it { expect(database).to have(4).tables }
 
         context "where the first element" do
-          subject(:first_table) { database.tables.first }
+          let(:table) { database.tables.first }
 
-          it { should be_a(Gauge::DB::DataTable) }
-          it { expect(first_table.name).to eq 'dbo.accounts' }
-          it { expect(first_table.to_sym).to be :dbo_accounts }
+          it { expect(table).to be_instance_of Gauge::DB::DataTable }
+          it { expect(table.name).to eq 'dbo.accounts' }
+          it { expect(table.to_sym).to be :dbo_accounts }
         end
 
         context "with custom SQL schema" do
-          subject(:last_table) { database.tables.last }
+          let(:table) { database.tables.last }
 
-          it { should be_a(Gauge::DB::DataTable) }
-          it { expect(last_table.name).to eq 'ref.financial_info' }
-          it { expect(last_table.to_sym).to be :ref_financial_info }
+          it { expect(table).to be_instance_of Gauge::DB::DataTable }
+          it { expect(table.name).to eq 'ref.financial_info' }
+          it { expect(table.to_sym).to be :ref_financial_info }
         end
       end
 
 
       describe '#views' do
         before { stub_data_views }
-        subject { database.views }
 
-        it { should_not be_empty }
-        it { should have(2).views }
+        it { expect(database.views).to_not be_empty }
+        it { expect(database).to have(2).views }
 
         context 'where the first element' do
-          subject(:first_view) { database.views.first }
+          let(:view) { database.views.first }
 
-          it { should be_a(Gauge::DB::DataView) }
-          it { expect(first_view.name).to eq 'dbo.accounts' }
-          it { expect(first_view.to_sym).to be :dbo_accounts }
-          it { expect(first_view).not_to be_indexed }
-          it { expect(first_view.sql).to eq 'select * from dbo.master_accounts' }
+          it { expect(view).to be_instance_of Gauge::DB::DataView }
+          it { expect(view.name).to eq 'dbo.accounts' }
+          it { expect(view.to_sym).to be :dbo_accounts }
+          it { expect(view).to_not be_indexed }
+          it { expect(view.sql).to eq 'select * from dbo.master_accounts' }
         end
 
         context 'with custom SQL schema' do
-          subject(:last_view) { database.views.last }
+          let(:view) { database.views.last }
 
-          it { should be_a(Gauge::DB::DataView) }
-          it { expect(last_view.name).to eq 'br.direct_trades' }
-          it { expect(last_view.to_sym).to be :br_direct_trades }
-          it { expect(last_view).to be_indexed }
-          it { expect(last_view.sql).to eq 'select trade_id from dbo.direct_trades' }
+          it { expect(view).to be_instance_of Gauge::DB::DataView }
+          it { expect(view.name).to eq 'br.direct_trades' }
+          it { expect(view.to_sym).to be :br_direct_trades }
+          it { expect(view).to be_indexed }
+          it { expect(view.sql).to eq 'select trade_id from dbo.direct_trades' }
         end
       end
 
@@ -79,19 +80,15 @@ module Sequel
       describe '#table_exists?' do
         before { stub_data_tables }
 
-        context "when data table exists in the database" do
-          it "returns true" do
-            [:dbo_accounts, :ref_financial_info, :dbo_trades, :bnr_reps].each do |table_name|
-              database.table_exists?(table_name).should be true
-            end
+        it "returns true when a data table exists" do
+          [:dbo_accounts, :ref_financial_info, :dbo_trades, :bnr_reps].each do |table_name|
+            expect(database.table_exists?(table_name)).to be true
           end
         end
 
-        context "when data table does not exist in the database" do
-          it "returns false" do
-            [:accounts, :reps, :ref_accounts, :dbo_reps].each do |table_name|
-              database.table_exists?(table_name).should be false
-            end
+        it "returns false when a data table does not exist" do
+          [:accounts, :reps, :ref_accounts, :dbo_reps].each do |table_name|
+            expect(database.table_exists?(table_name)).to be false
           end
         end
       end
@@ -100,27 +97,26 @@ module Sequel
       describe '#table' do
         before { stub_data_tables }
 
-        context "when data table exists in the database" do
+        context "when a data table exists" do
           it "returns a data table with the specified name" do
             {
               'dbo.accounts' => :dbo_accounts,
+              :DBO_accounts => :dbo_accounts,
               'ref.financial_info' => :ref_financial_info,
               'DBO.Accounts' => :dbo_accounts,
               'trades' => :dbo_trades,
               :trades => :dbo_trades
-            }.each do |name, table|
-              database.table(name).should be_a(Gauge::DB::DataTable)
-              database.table(name).to_sym.should == table
+            }
+            .each do |name, table|
+              expect(database.table(name)).to be_instance_of Gauge::DB::DataTable
+              expect(database.table(name).to_sym).to be table
             end
           end
         end
 
-
-        context "when data table does not exist in the database" do
-          it "returns nil" do
-            database.table('reps').should be_nil
-            database.table('ref.accounts').should be_nil
-          end
+        it "returns nil when data table does not exist" do
+          expect(database.table('reps')).to be nil
+          expect(database.table('ref.accounts')).to be nil
         end
       end
 
@@ -136,41 +132,40 @@ module Sequel
               column_name: 'id', key_type: 2 },
           ])
         end
-        subject { database.primary_keys }
 
-        it { should_not be_empty }
-        it { should have(2).primary_keys }
+        it { expect(database.primary_keys).to_not be_empty }
+        it { expect(database).to have(2).primary_keys }
 
         context "where the first element" do
-          subject(:primary_key) { database.primary_keys.first }
+          let(:primary_key) { database.primary_keys.first }
 
-          it { should be_a(Gauge::DB::Constraints::PrimaryKeyConstraint) }
+          it { expect(primary_key).to be_instance_of Gauge::DB::Constraints::PrimaryKeyConstraint }
           it { expect(primary_key.name).to eq 'pk_account_owner' }
           it { expect(primary_key.table).to be :dbo_account_owners }
           it { expect(primary_key.columns).to include(:master_account_id, :natural_owner_id) }
-          it { is_expected.to be_composite }
-          it { is_expected.to be_clustered }
+          it { expect(primary_key).to be_composite }
+          it { expect(primary_key).to be_clustered }
         end
 
-        context "when the primary key is clustered" do
-          specify { database.primary_keys.first.should be_clustered }
+        context "when a primary key is clustered" do
+          it { expect(database.primary_keys.first).to be_clustered }
         end
 
-        context "when the primary key is not clustered" do
-          specify { database.primary_keys.last.should_not be_clustered }
+        context "when a primary key is not clustered" do
+          it { expect(database.primary_keys.last).to_not be_clustered }
         end
 
-        context "when the primary key is regular (one column)" do
-          specify { database.primary_keys.last.should_not be_composite }
+        context "when a primary key is regular (one column)" do
+          it { expect(database.primary_keys.last).to_not be_composite }
         end
 
-        context "when the primary key is composite (multiple columns)" do
-          specify { database.primary_keys.first.should be_composite }
+        context "when a primary key is composite (multiple columns)" do
+          it { expect(database.primary_keys.first).to be_composite }
         end
       end
 
 
-      describe '#foreign_keys' do
+      describe '#foreign_keys', f: true do
         before do
           Sequel::Dataset.any_instance.stub(:all).and_return([
             { constraint_name: 'fk_trades_accounts', table_schema: 'dbo', table_name: 'trades',
@@ -184,29 +179,28 @@ module Sequel
               ref_column_name: 'id' }
           ])
         end
-        subject { database.foreign_keys }
 
-        it { is_expected.not_to be_empty }
-        it { is_expected.to have(2).foreign_keys }
+        it { expect(database.foreign_keys).not_to be_empty }
+        it { expect(database).to have(2).foreign_keys }
 
         context "where the first element" do
-          subject(:foreign_key) { database.foreign_keys.first }
+          let(:foreign_key) { database.foreign_keys.first }
 
-          it { is_expected.to be_a(Gauge::DB::Constraints::ForeignKeyConstraint) }
+          it { expect(foreign_key).to be_instance_of Gauge::DB::Constraints::ForeignKeyConstraint }
           it { expect(foreign_key.name).to eq 'fk_trades_accounts' }
           it { expect(foreign_key.table).to be :dbo_trades }
           it { expect(foreign_key.columns).to include(:account_number, :source_firm_code) }
           it { expect(foreign_key.ref_table).to be :bnr_accounts }
           it { expect(foreign_key.ref_columns).to include(:number, :code) }
-          it { is_expected.to be_composite }
+          it { expect(foreign_key).to be_composite }
         end
 
-        context "when the foreign key is regular" do
-          specify { database.foreign_keys.first.should be_composite }
+        context "when a foreign key is regular" do
+          it { expect(database.foreign_keys.last).to_not be_composite }
         end
 
-        context "when the foreign key is composite" do
-          specify { database.foreign_keys.last.should_not be_composite }
+        context "when a foreign key is composite" do
+          it { expect(database.foreign_keys.first).to be_composite }
         end
       end
 
@@ -356,6 +350,7 @@ module Sequel
           specify { database.indexes.first.should be_composite }
         end
       end
+
 
   private
 

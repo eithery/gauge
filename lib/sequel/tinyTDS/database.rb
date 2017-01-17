@@ -1,4 +1,4 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Sequel::TynyTDS::Database
 # Extends Sequel Database functionality.
 
@@ -13,7 +13,7 @@ module Sequel
         @tables ||= execute_sql(SQL_ALL_TABLES).map do |row|
           schema = row[:table_schema].downcase
           name = row[:table_name].downcase
-          Gauge::DB::DataTable.new("#{schema}.#{name}", self)
+          Gauge::DB::DataTable.new("#{schema}.#{name}", db: self)
         end
       end
 
@@ -22,10 +22,7 @@ module Sequel
         @views ||= execute_sql(SQL_ALL_VIEWS).map do |row|
           schema = row[:view_schema].downcase
           name = row[:view_name].downcase
-          sql = row[:view_sql]
-          options = {}
-          options[:indexed] = true if row[:is_indexed] == 1
-          Gauge::DB::DataView.new("#{schema}.#{name}", sql, options)
+          Gauge::DB::DataView.new("#{schema}.#{name}", sql: row[:view_sql], indexed: row[:is_indexed] == 1)
         end
       end
 
@@ -43,17 +40,16 @@ module Sequel
 
       def primary_keys
         @primary_keys ||= all_constraints(SQL_ALL_PRIMARY_KEYS) do |name, row|
-          options = {}
-          options[:clustered] = false if row[:key_type] == 2
-          Gauge::DB::Constraints::PrimaryKeyConstraint.new(name, table_from(row), column_from(row), options)
+          Gauge::DB::Constraints::PrimaryKeyConstraint.new(name, table: table_from(row),
+            columns: column_from(row), clustered: row[:key_type] != 2)
         end
       end
 
 
       def foreign_keys
         @foreign_keys ||= all_constraints(SQL_ALL_FOREIGN_KEYS, contains_refs: true) do |name, row|
-          Gauge::DB::Constraints::ForeignKeyConstraint.new(name, table_from(row), column_from(row),
-            ref_table_from(row), ref_column_from(row))
+          Gauge::DB::Constraints::ForeignKeyConstraint.new(name, table: table_from(row),
+            columns: column_from(row), ref_table: ref_table_from(row), ref_columns: ref_column_from(row))
         end
       end
 
