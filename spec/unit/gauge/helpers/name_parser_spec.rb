@@ -56,7 +56,7 @@ module Gauge
 
       def dbo_default_names
         ['REPS', 'dbo.reps', '"dbo"."reps"', '[dbo].[reps]', '[reps]', '[rep_profile].[dbo].[reps]', :reps,
-          'rep_profile..reps', 'DBO.REPS', :dbo_reps, 'dbo_reps']
+          'rep_profile..reps', 'DBO.REPS', :DBO_reps, 'dbo_reps']
       end
 
 

@@ -27,7 +27,7 @@ module Gauge
   private
 
       def self.parsed_name(dbo_name)
-        dbo_name.to_s.gsub(/\[|\]|\"|^dbo_/, '').split('.')
+        dbo_name.to_s.gsub(/\[|\]|\"|^dbo_/i, '').split('.')
       end
     end
   end
