@@ -1,5 +1,5 @@
-# Eithery Lab., 2015.
-# Gauge::Schema::DataTableSchema specs.
+# Eithery Lab., 2017
+# Gauge::Schema::DataTableSchema specs
 
 require 'spec_helper'
 
@@ -36,7 +36,7 @@ module Gauge
 
 
       describe '#table_name' do
-        context "when data table is defined in default SQL schema" do
+        context "when a data table defined in the default SQL schema" do
           specify { dbo_table_schema.table_name.should == 'dbo.master_accounts' }
         end
 

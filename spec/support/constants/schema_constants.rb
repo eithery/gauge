@@ -1,6 +1,6 @@
-# Eithery Lab., 2017
-# Module Gauge::Constants
-# Defines the set of constants used in db schema specs.
+# Eithery Lab, 2017
+# Module Gauge::Schema::Constants
+# Defines constants used in db schema specs.
 
 module Gauge
   module Schema

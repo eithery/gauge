@@ -1,6 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab., 2017
 # Class Gauge::Schema::DataTableSchema
-# Data table schema.
+# Data table schema
 # Contains metadata info defining a data table structure.
 
 require 'gauge'
@@ -8,11 +8,10 @@ require 'gauge'
 module Gauge
   module Schema
     class DataTableSchema
-      attr_reader :columns
+      attr_reader :sql_schema, :columns
 
-      def initialize(table_name, options={}, &block)
+      def initialize(table_name, sql_schema: :dbo, &block)
         @local_name = table_name
-        @options = options
         @columns = []
 
         instance_eval(&block) if block
@@ -35,28 +34,13 @@ module Gauge
       end
 
 
-      def sql_schema
-        @options[:sql_schema] || :dbo
-      end
-
-
       def sql_name
         table_name
       end
 
 
-      def database_schema
-        @options[:database]
-      end
-
-
-      def table_schema
-        self
-      end
-
-
       def reference_table?
-        @options[:type] == :reference || sql_schema == :ref
+        sql_schema == :ref
       end
 
 
@@ -121,6 +105,7 @@ module Gauge
       def foreign_keys
         @foreign_keys ||= define_foreign_keys
       end
+
 
 private
 

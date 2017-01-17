@@ -1,5 +1,5 @@
-# Eithery Lab., 2015.
-# Gauge::Schema::DataColumnSchema specs.
+# Eithery Lab, 2017
+# Gauge::Schema::DataColumnSchema specs
 
 require 'spec_helper'
 
@@ -9,6 +9,7 @@ module Gauge
       let(:column) { DataColumnSchema.new(:account_number, type: :string, required: true) }
       let(:ref_column) { DataColumnSchema.new(:ref => 'br.primary_reps') }
       let(:table_schema) { DataTableSchema.new(:reps, sql_schema: :bnr) }
+
       subject { column }
 
       it { should respond_to :column_name }
@@ -36,32 +37,29 @@ module Gauge
 
 
       describe '#column_name' do
-        context "when name is explicitly passed in constructor arguments" do
-          specify { column.column_name.should == 'account_number' }
+        context "when a name is explicitly passed in constructor arguments" do
+          it { expect(column.column_name).to eq 'account_number' }
         end
 
         context "when no name passed in constructors arguments" do
-          context "and column attributes contain the ref to another table" do
-            before { @ref_column = DataColumnSchema.new(:ref => :risk_tolerance, schema: :ref) }
-
-            it "concludes the column name based on the ref" do
-              ref_column.column_name.should == 'primary_rep_id'
-              @ref_column.column_name.should == 'risk_tolerance_id'
+          context "and column attributes contain a ref to another table" do
+            it "concludes a column name based on the ref" do
+              expect(ref_column.column_name).to eq 'primary_rep_id'
+              ref_column2 = DataColumnSchema.new(:ref => :risk_tolerance, schema: :ref)
+              expect(ref_column2.column_name).to eq 'risk_tolerance_id'
             end
           end
 
           context "and column is defined as id" do
-            before { @id_column = DataColumnSchema.new(id: true) }
-
             it "interprets the column name as id" do
-              @id_column.column_name.should == 'id'
+              id_column = DataColumnSchema.new(id: true)
+              expect(id_column.column_name).to eq 'id'
             end
           end
 
           context "and no refs to another table defined" do
-            before { @no_name_column = DataColumnSchema.new }
-            specify do
-              expect { @no_name_column.column_name }.to raise_error(/column name is not specified/)
+            it "raises an error" do
+              expect { DataColumnSchema.new.column_name }.to raise_error(ArgumentError, /column name is not specified/)
             end
           end
         end
@@ -69,7 +67,7 @@ module Gauge
 
 
       describe '#table' do
-        context "when column schema is created by data table schema" do
+        context "when a column schema is created by data table schema" do
           before do
             @table_schema = DataTableSchema.new(:customers, sql_schema: :ref)
             @table_schema.col :account_number

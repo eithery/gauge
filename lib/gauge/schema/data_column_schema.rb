@@ -1,7 +1,6 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::Schema::DataColumnSchema
-# Data column schema.
-# Contains metadata info defining a data table column.
+# A data column schema.
 
 require 'gauge'
 
@@ -29,7 +28,7 @@ module Gauge
         col_name = column_name_from_ref || column_name_from_id
         return col_name.to_s unless col_name.blank?
 
-        raise "Data column name is not specified."
+        raise ArgumentError, "Data column name is not specified"
       end
 
 
@@ -132,14 +131,16 @@ module Gauge
         if has_index?
           options = @options[:index]
           options = {} unless options.respond_to? :[]
-          Gauge::DB::Index.new("idx_#{table.to_sym}_#{column_name}", table.table_name, to_sym, options)
+          Gauge::DB::Index.new("idx_#{table.to_sym}_#{column_name}", table: table.table_name,
+            columns: to_sym, unique: options[:unique], clustered: options[:clustered])
         end
       end
 
 
       def unique_constraint
         if has_unique_constraint?
-          Gauge::DB::Constraints::UniqueConstraint.new("uc_#{table.to_sym}_#{column_name}", table.table_name, to_sym)
+          Gauge::DB::Constraints::UniqueConstraint.new("uc_#{table.to_sym}_#{column_name}",
+            table: table.table_name, columns: to_sym)
         end
       end
 
@@ -149,7 +150,7 @@ module Gauge
           ref_table_name = "#{ref_table_options[:schema]}.#{ref_table_options[:table]}"
           ref_table = Gauge::Helpers::NameParser.dbo_key_of ref_table_name
           Gauge::DB::Constraints::ForeignKeyConstraint.new("fk_#{table.to_sym}_#{ref_table}_#{to_sym}",
-            table.table_name, to_sym, ref_table_name, ref_column)
+            table: table.table_name, columns: to_sym, ref_table: ref_table_name, ref_columns: ref_column)
         end
       end
 
@@ -281,7 +282,7 @@ module Gauge
 
 
       def validate_column_type
-        raise ArgumentError.new('Invalid column type.') unless defined_column_type.nil? ||
+        raise ArgumentError, 'Invalid column type.' unless defined_column_type.nil? ||
           type_map.include?(defined_column_type.to_sym)
       end
 
