@@ -27,14 +27,13 @@ module Sequel
       end
 
 
-      def table_exists?(table_key)
-        tables.any? { |table| table.to_sym == table_key }
+      def table_exists?(table_name)
+        tables.any? { |table| table_keys_for(table_name).include?(table.to_sym) }
       end
 
 
       def table(table_name)
-        table_key = Gauge::Helpers::NameParser.dbo_key_of table_name
-        tables.select { |table| table.to_sym == table_key }.first
+        tables.select { |table| table_keys_for(table_name).include?(table.to_sym) }.first
       end
 
 
@@ -56,35 +55,41 @@ module Sequel
 
       def unique_constraints
         @unique_constraints ||= all_constraints(SQL_ALL_UNIQUE_CONSTRAINTS) do |name, row|
-          Gauge::DB::Constraints::UniqueConstraint.new(name, table_from(row), column_from(row))
+          Gauge::DB::Constraints::UniqueConstraint.new(name, table: table_from(row), columns: column_from(row))
         end
       end
 
 
       def check_constraints
         @check_constraints ||= all_constraints(SQL_ALL_CHECK_CONSTRAINTS) do |name, row|
-          Gauge::DB::Constraints::CheckConstraint.new(name, table_from(row), column_from(row), row[:check_clause])
+          Gauge::DB::Constraints::CheckConstraint.new(name, table: table_from(row), columns: column_from(row),
+            check: row[:check_clause])
         end
       end
 
 
       def default_constraints
         @default_constraints ||= all_constraints(SQL_ALL_DEFAULT_CONSTRAINTS) do |name, row|
-          Gauge::DB::Constraints::DefaultConstraint.new(name, table_from(row), column_from(row), row[:definition])
+          Gauge::DB::Constraints::DefaultConstraint.new(name, table: table_from(row), column: column_from(row),
+            default_value: row[:definition])
         end
       end
 
 
       def indexes
         @indexes ||= all_constraints(SQL_ALL_INDEXES) do |name, row|
-          options = {}
-          options[:clustered] = true if row[:index_type] == 1
-          options[:unique] = true if row[:is_unique] == true
-          Gauge::DB::Index.new(name, table_from(row), column_from(row), options)
+          Gauge::DB::Index.new(name, table: table_from(row), columns: column_from(row),
+            unique: row[:is_unique] == true, clustered: row[:index_type] == 1)
         end
       end
 
-private
+
+  private
+
+      def table_keys_for(table_name)
+        [Gauge::Helpers::NameParser.dbo_key_of(table_name), table_name.downcase.to_sym]
+      end
+
 
       def table_from(dataset_row)
         compose_table dataset_row, :table_schema, :table_name
@@ -137,13 +142,13 @@ private
       end
 
 
-      SQL_ALL_TABLES = <<-eos
+      SQL_ALL_TABLES = <<~eos
         select t.name as table_name, s.name as table_schema
         from sys.tables as t
         inner join sys.schemas as s on s.schema_id = t.schema_id
       eos
 
-      SQL_ALL_PRIMARY_KEYS = <<-eos
+      SQL_ALL_PRIMARY_KEYS = <<~eos
         select idx.name as constraint_name, s.name as table_schema, t.name as table_name,
           col.name as column_name, idx.type as key_type
         from sys.indexes as idx
@@ -154,7 +159,7 @@ private
         where idx.is_primary_key = 1 and t.is_ms_shipped = 0;
       eos
 
-      SQL_ALL_FOREIGN_KEYS = <<-eos
+      SQL_ALL_FOREIGN_KEYS = <<~eos
         select obj.name as constraint_name, sch.name as table_schema, t.name as table_name, col.name as column_name,
           refsch.name as ref_table_schema, reft.name as ref_table_name, refcol.name as ref_column_name
         from sys.foreign_key_columns as fkc
@@ -167,7 +172,7 @@ private
         inner join sys.columns as refcol on refcol.column_id = fkc.referenced_column_id and refcol.object_id = reft.object_id;
       eos
 
-      SQL_ALL_UNIQUE_CONSTRAINTS = <<-eos
+      SQL_ALL_UNIQUE_CONSTRAINTS = <<~eos
         select tc.constraint_name, tc.table_schema, tc.table_name, col.column_name
         from information_schema.table_constraints as tc
         inner join information_schema.constraint_column_usage as col on col.constraint_name = tc.constraint_name
@@ -175,13 +180,13 @@ private
         where tc.constraint_type = 'UNIQUE';
       eos
 
-      SQL_ALL_CHECK_CONSTRAINTS = <<-eos
+      SQL_ALL_CHECK_CONSTRAINTS = <<~eos
         select cc.constraint_name, col.table_schema, col.table_name, col.column_name, cc.check_clause
         from information_schema.check_constraints as cc
         inner join information_schema.constraint_column_usage col on cc.constraint_name = col.constraint_name;
       eos
 
-      SQL_ALL_DEFAULT_CONSTRAINTS = <<-eos
+      SQL_ALL_DEFAULT_CONSTRAINTS = <<~eos
         select dc.name as constraint_name, s.name as table_schema, t.name as table_name,
           col.name as column_name, dc.definition
         from sys.default_constraints as dc
@@ -190,7 +195,7 @@ private
         inner join sys.schemas as s on s.schema_id = t.schema_id;
       eos
 
-      SQL_ALL_INDEXES = <<-eos
+      SQL_ALL_INDEXES = <<~eos
         select idx.name as constraint_name, s.name as table_schema, t.name as table_name, col.name as column_name,
           idx.is_unique, idx.[type] as index_type
         from sys.indexes as idx
@@ -201,7 +206,7 @@ private
         where idx.is_primary_key = 0 and idx.is_unique_constraint = 0 and t.is_ms_shipped = 0;
       eos
 
-      SQL_ALL_VIEWS = <<-eos
+      SQL_ALL_VIEWS = <<~eos
         select v.name as view_name, s.name as view_schema,
         objectpropertyex(object_id, 'IsIndexed') as is_indexed, isv.view_definition as view_sql
         from sys.views as v
