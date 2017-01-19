@@ -25,7 +25,7 @@ module Gauge
     end
 
     let(:database_schema) do
-      db_schema = double('database_schema', object_name: 'Database', sql_name: 'test_db')
+      db_schema = double('database_schema', object_name: 'Database', database_name: 'test_db')
       allow(db_schema).to receive(:database_schema).and_return(db_schema)
       db_schema
     end
@@ -41,7 +41,7 @@ module Gauge
     describe '#initialize' do
       it "configures connection settings" do
         options = { server: 'local\SQLDEV', user: 'admin' }
-        expect(DB::Connection).to receive(:configure).with(options).once
+        expect(DB::Connection).to receive(:configure).with(server: 'local\SQLDEV', user: 'admin', password: nil).once
         Inspector.new(options)
       end
 
@@ -53,7 +53,7 @@ module Gauge
 
 
     describe '#check' do
-      before { stub_db_adapter }
+      before { Sequel::TinyTDS::Database.any_instance.stub(:test_connection) }
 
       it "displays an error when no arguments specified" do
         expect(inspector).to receive(:error).with(/no database objects specified/i)

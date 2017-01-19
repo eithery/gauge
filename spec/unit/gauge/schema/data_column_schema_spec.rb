@@ -72,88 +72,87 @@ module Gauge
             @table_schema = DataTableSchema.new(:customers, sql_schema: :ref)
             @table_schema.col :account_number
           end
-          specify { @table_schema.columns.last.table.should == @table_schema }
+          it { expect(@table_schema.columns.last.table).to be @table_schema }
         end
 
         context "when column schema is created explicitly" do
-          before { @column = DataColumnSchema.new(:account_number) }
-          specify { @column.table.should be_nil }
+          it { expect(DataColumnSchema.new(:account_number).table).to be nil }
         end
       end
 
 
       describe '#table_schema' do
-        before { @column_schema = DataColumnSchema.new(:rep_code, :reps, required: true).in_table table_schema }
-        it "alias for #table method" do
-          @column_schema.table_schema.should be_equal(@column_schema.table)
+        let(:column_schema) { DataColumnSchema.new(:rep_code, :reps, required: true).in_table table_schema }
+        it "is alias for #table method" do
+          expect(column_schema.table_schema).to be column_schema.table
         end
       end
 
 
-      describe '#column_type' do
+      describe '#column_type', f: true do
         context "when type is explicitly passed in constructor arguments" do
-          before { @country_column = DataColumnSchema.new(:customers, type: :country) }
+          let(:country_column) { DataColumnSchema.new(:customers, type: :country) }
 
           it "returns initialized column type converted to symbol" do
-            column.column_type.should == :string
-            @country_column.column_type.should == :country
+            expect(column.column_type).to be :string
+            expect(country_column.column_type).to be :country
           end
         end
 
         context "when no type attribute is defined" do
           context "and column attributes contain the ref to another table" do
             context "and no column length defined" do
-              specify { ref_column.column_type.should == :id }
+              it { expect(ref_column.column_type).to be :id }
             end
 
-            context "and column length is defined" do
-              before { @ref_column = DataColumnSchema.new(:trade_type_code, len: 10, :ref => :trade_types) }
-              specify { @ref_column.column_type.should == :string }
+            context "and a column length is defined" do
+              let(:ref_column) { DataColumnSchema.new(:trade_type_code, len: 10, :ref => :trade_types) }
+              it { expect(ref_column.column_type).to be :string }
             end
           end
 
-          context "and column is defined as surrogate id" do
+          context "and a column is defined as surrogate id" do
             context "and no column length defined" do
-              before { @id_column = DataColumnSchema.new(:master_account_id, id: true) }
-              specify { @id_column.column_type.should == :id }
+              let(:id_column) { DataColumnSchema.new(:master_account_id, id: true) }
+              it { expect(id_column.column_type).to be :id }
             end
 
-            context "and column length is defined" do
-              before { @id_column = DataColumnSchema.new(:batch_code, len: 10, id: true) }
-              specify { @id_column.column_type.should == :string }
+            context "and a column length is defined" do
+              let(:id_column) { DataColumnSchema.new(:batch_code, len: 10, id: true) }
+              it { expect(id_column.column_type).to be :string }
             end
           end
 
-          context "and column name contains 'is', 'has', or 'allow' prefix" do
-            before do
-              @bool_columns = ['is_visible', 'has_accounts', 'allow_delete'].map do |col_name|
+          context "and a column name contains 'is', 'has', or 'allow' prefix" do
+            let(:bool_columns) do
+              ['is_visible', 'has_accounts', 'allow_delete'].map do |col_name|
                 DataColumnSchema.new(col_name)
               end
             end
             it "should be boolean" do
-              @bool_columns.each { |col| col.column_type.should == :bool }
+              bool_columns.each { |col| expect(col.column_type).to be :bool }
             end  
           end
 
-          context "and column name contains 'date' or '_at' suffix" do
-            before do
-              @date_time_columns = ['startDate', 'created_at'].map do |col_name|
+          context "and a column name contains 'date' or '_at' suffix" do
+            let(:date_time_columns) do
+              ['startDate', 'created_at'].map do |col_name|
                 DataColumnSchema.new(col_name)
               end
             end
             it "should be datetime" do
-              @date_time_columns.each { |col| col.column_type.should == :datetime }
+              date_time_columns.each { |col| expect(col.column_type).to be :datetime }
             end
           end
 
-          context "and column name contains '_on' suffix" do
-            before { @column = DataColumnSchema.new(:created_on) }
-            specify { @column.column_type.should == :date }
+          context "and a column name contains '_on' suffix" do
+            let(:column) { DataColumnSchema.new(:created_on) }
+            it { expect(column.column_type).to be :date }
           end
 
-          context "and column name does not contain specific prefixes or suffixes" do
-            before { @column = DataColumnSchema.new(:account_number) }
-            specify { @column.column_type.should == :string }
+          context "and a column name does not contain specific prefixes or suffixes" do
+            let(:column) { DataColumnSchema.new(:account_number) }
+            it { expect(column.column_type).to be :string }
           end
         end
       end

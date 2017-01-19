@@ -13,7 +13,7 @@ module Gauge
     def initialize(options={})
       @data_path = options[:data] || ['db']
       Logger.configure(colored: options[:colored])
-      DB::Connection.configure options
+      DB::Connection.configure server: options[:server], user: options[:user], password: options[:password]
     end
 
 
