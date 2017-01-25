@@ -13,3 +13,6 @@
 # Ignore all RubyMine and Sublime Text related files.
 /.idea
 /*.sublime*
+
+# Ignore Mac directory files.
+.DS_Store
