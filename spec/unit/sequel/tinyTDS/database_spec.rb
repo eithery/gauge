@@ -389,7 +389,6 @@ module Sequel
           'Trades'              => :dbo_trades,
           :trades               => :dbo_trades,
           '[dbo].[trades]'      => :dbo_trades,
-          '[dbo].[trades]'      => :dbo_trades,
           :bnr_reps             => :bnr_reps,
           :ref_financial_info   => :ref_financial_info,
           'ref.financial_info'  => :ref_financial_info,

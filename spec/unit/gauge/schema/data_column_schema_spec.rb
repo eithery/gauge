@@ -5,9 +5,10 @@ require 'spec_helper'
 
 module Gauge
   module Schema
-    describe DataColumnSchema do
+    describe DataColumnSchema, f: true do
       let(:column) { DataColumnSchema.new(:account_number, type: :string, required: true) }
       let(:ref_column) { DataColumnSchema.new(:ref => 'br.primary_reps') }
+      let(:id_column) { DataColumnSchema.new(id: true) }
       let(:table_schema) { DataTableSchema.new(:reps, sql_schema: :bnr) }
 
       subject { column }
@@ -36,12 +37,32 @@ module Gauge
       end
 
 
+      describe '#table' do
+        context "when a column schema is created by a data table schema" do
+          before { table_schema.col :rep_code, len: 10 }
+          it { expect(table_schema.columns.last.table).to be table_schema }
+        end
+
+        context "when a column schema is created explicitly" do
+          it { expect(DataColumnSchema.new(:account_number).table).to be nil }
+        end
+      end
+
+
+      describe '#table_schema' do
+        let(:column_schema) { DataColumnSchema.new(:rep_code, :reps, required: true).in_table table_schema }
+        it "is alias for #table method" do
+          expect(column_schema.table_schema).to be column_schema.table
+        end
+      end
+
+
       describe '#column_name' do
         context "when a name is explicitly passed in constructor arguments" do
           it { expect(column.column_name).to eq 'account_number' }
         end
 
-        context "when no name passed in constructors arguments" do
+        context "when no name passed in constructor args" do
           context "and column attributes contain a ref to another table" do
             it "concludes a column name based on the ref" do
               expect(ref_column.column_name).to eq 'primary_rep_id'
@@ -66,34 +87,11 @@ module Gauge
       end
 
 
-      describe '#table' do
-        context "when a column schema is created by data table schema" do
-          before do
-            @table_schema = DataTableSchema.new(:customers, sql_schema: :ref)
-            @table_schema.col :account_number
-          end
-          it { expect(@table_schema.columns.last.table).to be @table_schema }
-        end
-
-        context "when column schema is created explicitly" do
-          it { expect(DataColumnSchema.new(:account_number).table).to be nil }
-        end
-      end
-
-
-      describe '#table_schema' do
-        let(:column_schema) { DataColumnSchema.new(:rep_code, :reps, required: true).in_table table_schema }
-        it "is alias for #table method" do
-          expect(column_schema.table_schema).to be column_schema.table
-        end
-      end
-
-
-      describe '#column_type', f: true do
-        context "when type is explicitly passed in constructor arguments" do
+      describe '#column_type' do
+        context "when a type is explicitly passed in constructor args" do
           let(:country_column) { DataColumnSchema.new(:customers, type: :country) }
 
-          it "returns initialized column type converted to symbol" do
+          it "returns initialized column type converted to a symbol" do
             expect(column.column_type).to be :string
             expect(country_column.column_type).to be :country
           end
@@ -111,7 +109,7 @@ module Gauge
             end
           end
 
-          context "and a column is defined as surrogate id" do
+          context "and a column is defined as a surrogate id" do
             context "and no column length defined" do
               let(:id_column) { DataColumnSchema.new(:master_account_id, id: true) }
               it { expect(id_column.column_type).to be :id }
@@ -158,196 +156,180 @@ module Gauge
       end
 
 
-      describe '#data_type' do
-        it "supports convertion from the specified column type" do
-          [:id, :long].should be_converted_to(:bigint)
-          [:int].should be_converted_to(:int)
-          [:string].should be_converted_to(:nvarchar)
-          [:char, :us_state, :country].should be_converted_to(:nchar)
-          [:bool, :byte, :enum].should be_converted_to(:tinyint)
-          [:datetime].should be_converted_to(:datetime)
-          [:date].should be_converted_to(:date)
-          [:money, :percent].should be_converted_to(:decimal)
-          [:xml].should be_converted_to(:xml)
-          [:blob].should be_converted_to(:varbinary)
-          [:binary].should be_converted_to(:binary)
-          [:guid].should be_converted_to(:uniqueidentifier)
+      describe '#sql_type' do
+        context "for character types" do
+          it { expect(DataColumnSchema.new(:account_number).sql_type).to eq 'nvarchar(255)' }
+          it { expect(DataColumnSchema.new(:rep_code, len: 10).sql_type).to eq 'nvarchar(10)' }
+          it { expect(DataColumnSchema.new(:service_flag, type: :char).sql_type).to eq 'nchar(1)' }
         end
 
-        context "when data column represents a surrogate primary key" do
-          before { @id_column = DataColumnSchema.new(id: true) }
-
-          context "for regular data table" do
-            before { @id_column.in_table DataTableSchema.new(:customers) }
-            specify { @id_column.data_type.should == :bigint }
-          end
-
-          context "for reference data table containing metadata" do
-            context "defined explicitly" do
-              before { @id_column.in_table DataTableSchema.new(:activation_reasons, type: :reference) }
-              specify { @id_column.data_type.should == :tinyint }
-            end
-
-            context "defined based on the table name" do
-              before { @id_column.in_table DataTableSchema.new(:risk_tolerance, sql_schema: :ref) }
-              specify { @id_column.data_type.should == :tinyint }
-            end
-          end
+        context "for money type" do
+          it { expect(DataColumnSchema.new(:total_amount, type: :money).sql_type).to eq 'decimal(18,2)' }
         end
 
+        context "for percent type" do
+          it { expect(DataColumnSchema.new(:bank_rate, type: :percent).sql_type).to eq 'decimal(18,4)' }
+        end
 
-        context "when data column represents a foreign key reference" do
-          context "to ref data table" do
-            context "defined explicitly" do
-              before { @ref_column = DataColumnSchema.new(:ref => { table: :risk_tolerance, schema: :ref }) }
-              specify { @ref_column.data_type.should == :tinyint }
-            end
+        context "for blob type" do
+          it { expect(DataColumnSchema.new(:image, type: :blob).sql_type).to eq 'varbinary(max)' }
+        end
 
-            context "defined by ref table name" do
-              before { @ref_column = DataColumnSchema.new(:ref => 'ref.risk_tolerance') }
-              specify { @ref_column.data_type.should == :tinyint }
-            end
-          end
+        context "for binary type" do
+          it { expect(DataColumnSchema.new(:hash_code, type: :binary, len: 10).sql_type).to eq 'binary(10)' }
+        end
 
-          context "to regular data table" do
-            context "when table name is defined as symbol" do
-              before { @ref_column = DataColumnSchema.new(:ref => :reps) }
-              specify { @ref_column.data_type.should == :bigint }
-            end
+        context "for id types" do
+          it { expect(DataColumnSchema.new(id: true).sql_type).to eq 'bigint' }
+          it { expect(DataColumnSchema.new(:ref => 'ref.financial_info').sql_type).to eq 'tinyint' }
+        end
 
-            context "when table name is defined as string" do
-              before { @ref_column = DataColumnSchema.new(:ref => 'exp.reps') }
-              specify { @ref_column.data_type.should == :bigint }
-            end
-          end
+        context "for other types" do
+          it { expect(DataColumnSchema.new(:status, type: :enum).sql_type).to eq 'tinyint' }
+          it { expect(DataColumnSchema.new(:created_at).sql_type).to eq 'datetime' }
+          it { expect(DataColumnSchema.new(:country, type: :country).sql_type).to eq 'nchar(2)' }
+          it { expect(DataColumnSchema.new(:state_code, type: :us_state).sql_type).to eq 'nchar(2)' }
+          it { expect(DataColumnSchema.new(:is_active).sql_type).to eq 'tinyint' }
+          it { expect(DataColumnSchema.new(:snapshot, type: :xml).sql_type).to eq 'xml' }
+          it { expect(DataColumnSchema.new(:trageGuid, type: :guid).sql_type).to eq 'uniqueidentifier' }
         end
       end
 
 
-      describe '#sql_type' do
-        context "for character types" do
-          specify do
-            DataColumnSchema.new(:account_number).sql_type.should == 'nvarchar(256)'
-            DataColumnSchema.new(:rep_code, len: 10).sql_type.should == 'nvarchar(10)'
-            DataColumnSchema.new(:service_flag, type: :char).sql_type.should == 'nchar(1)'
+      describe '#data_type' do
+        it "supports convertion from the specified column type" do
+          expect([:id, :long]).to be_converted_to :bigint
+          expect(:int).to be_converted_to :int
+          expect(:string).to be_converted_to :nvarchar
+          expect([:char, :us_state, :country]).to be_converted_to :nchar
+          expect([:bool, :byte, :enum]).to be_converted_to :tinyint
+          expect(:datetime).to be_converted_to :datetime
+          expect(:date).to be_converted_to :date
+          expect([:money, :percent]).to be_converted_to :decimal
+          expect(:xml).to be_converted_to :xml
+          expect(:blob).to be_converted_to :varbinary
+          expect(:binary).to be_converted_to :binary
+          expect(:guid).to be_converted_to :uniqueidentifier
+        end
+
+        context "when a data column represents a surrogate primary key" do
+          context "for a regular data table" do
+            before { id_column.in_table DataTableSchema.new(:customers) }
+            it { expect(id_column.data_type).to be :bigint }
+          end
+
+          context "for a reference data table containing metadata" do
+            context "defined explicitly" do
+              before { id_column.in_table DataTableSchema.new(:activation_reasons, table_type: :reference) }
+              it { expect(id_column.data_type).to be :tinyint }
+            end
+
+            context "defined based on the table name" do
+              before { id_column.in_table DataTableSchema.new(:risk_tolerance, sql_schema: :ref) }
+              it { expect(id_column.data_type).to be :tinyint }
+            end
           end
         end
 
-        context "for money type" do
-          specify { DataColumnSchema.new(:total_amount, type: :money).sql_type.should == 'decimal(18,2)'}
-        end
+        context "when a data column represents a foreign key reference" do
+          context "to ref data table" do
+            context "defined explicitly" do
+              let(:ref_column) { DataColumnSchema.new(:ref => { table: :risk_tolerance, schema: :ref }) }
+              it { expect(ref_column.data_type).to be :tinyint }
+            end
 
-        context "for percent type" do
-          specify { DataColumnSchema.new(:bank_rate, type: :percent).sql_type.should == 'decimal(18,4)' }
-        end
+            context "defined by ref table name" do
+              let(:ref_column) { DataColumnSchema.new(:ref => 'ref.risk_tolerance') }
+              it { expect(ref_column.data_type).to be :tinyint }
+            end
+          end
 
-        context "for blob type" do
-          specify { DataColumnSchema.new(:image, type: :blob).sql_type.should == 'varbinary(max)' }
-        end
+          context "to a regular data table" do
+            context "when a table name is defined as a symbol" do
+              let(:ref_column) { DataColumnSchema.new(:ref => :reps) }
+              it { expect(ref_column.data_type).to be :bigint }
+            end
 
-        context "for binary type" do
-          specify { DataColumnSchema.new(:hash_code, type: :binary, len: 10).sql_type.should == 'binary(10)' }
-        end
-
-        context "for other types" do
-          specify { DataColumnSchema.new(:status, type: :enum).sql_type.should == 'tinyint' }
-          specify { DataColumnSchema.new(id: true).sql_type.should == 'bigint' }
-          specify { DataColumnSchema.new(:created_at).sql_type.should == 'datetime' }
-          specify { DataColumnSchema.new(:country, type: :country).sql_type.should == 'nchar(2)' }
-          specify { DataColumnSchema.new(:state_code, type: :us_state).sql_type.should == 'nchar(2)' }
-          specify { DataColumnSchema.new(:is_active).sql_type.should == 'tinyint' }
-          specify { DataColumnSchema.new(:snapshot, type: :xml).sql_type.should == 'xml' }
-          specify { DataColumnSchema.new(:trageGuid, type: :guid).sql_type.should == 'uniqueidentifier' }
+            context "when a table name is defined as a string" do
+              let(:ref_column) { DataColumnSchema.new(:ref => 'exp.reps') }
+              it { expect(ref_column.data_type).to be :bigint }
+            end
+          end
         end
       end
 
 
       describe '#char_column?' do
-        context "when the column type is one of character types" do
-          before do
-            @char_columns = [:string, :char, :us_state, :country]
-              .map { |t| DataColumnSchema.new(:col_name, type: t) }
-          end
-          specify { @char_columns.each { |col| col.should be_char_column }}
+        it "returns true when a column type is one of character types" do
+          [:string, :char, :us_state, :country].map { |t| DataColumnSchema.new(:col_name, type: t) }
+            .each { |col| expect(col.char_column?).to be true }
         end
 
-        context "when the column type is not character" do
-          before do
-            @non_char_columns = [:id, :long, :datetime, :money, :enum]
-              .map { |t| DataColumnSchema.new(:col_name, type: t)}
-          end
-          specify { @non_char_columns.each { |col| col.should_not be_char_column }}
+        it "returns false when a column type is not character" do
+          [:id, :long, :datetime, :money, :enum].map { |t| DataColumnSchema.new(:col_name, type: t) }
+            .each { |col| expect(col.char_column?).to be false }
         end
       end
 
 
       describe '#allow_null?' do
-        subject { @column.allow_null? }
-
-        context "when no identity or required attributes defined" do
-          before { @column = DataColumnSchema.new(:account_number) }
-          it { should be true }
+        it "returns true when no identity or required attributes defined" do
+          expect(DataColumnSchema.new(:account_number).allow_null?).to be true
         end
 
-        context "when the column is defined as identity column" do
-          before { @column = DataColumnSchema.new(id: true) }
-          it { should be false }
+        it "returns false when a column is defined as an identity column" do
+          expect(DataColumnSchema.new(id: true).allow_null?).to be false
         end
 
-        context "when the column defined as business identity column" do
-          before { @column = DataColumnSchema.new(business_id: true) }
-          it { should be false }
+        it "returns false when a column defined as a business identity column" do
+          expect(DataColumnSchema.new(business_id: true).allow_null?).to be false
         end
 
-        context "when the column is defined as required" do
-          before { @column = DataColumnSchema.new(required: true) }
-          it { should be false }
+        it "returns false when a column is defined as required" do
+          expect(DataColumnSchema.new(required: true).allow_null?).to be false
         end
       end
 
 
       describe '#length' do
-        subject { @column.length }
-
-        context "when column length is defined in metadata" do
-          context "as integer value" do
-            before { @column = DataColumnSchema.new(:rep_code, len: 10) }
-            it "equals to predefined length value" do
-              @column.length.should == 10
+        context "when a column length is defined in metadata" do
+          context "as an integer value" do
+            let(:column) { DataColumnSchema.new(:rep_code, len: 10) }
+            it "equals to the passed length value" do
+              expect(column.length).to eq 10
             end
           end
 
-          context "as maximum available value" do
-            before { @column = DataColumnSchema.new(:description, len: :max) }
-            it { should == :max }
+          context "as a maximum available value" do
+            let(:column) { DataColumnSchema.new(:description, len: :max) }
+            it { expect(column.length).to be :max }
           end
         end
 
-
         context "when no column length defined" do
           context "for string columns" do
-            before { @column = DataColumnSchema.new(:last_name, type: :string) }
-            it { should == DataColumnSchema::DEFAULT_VARCHAR_LENGTH }
+            let(:column) { DataColumnSchema.new(:last_name, type: :string) }
+            it { expect(column.length).to eq DataColumnSchema::DEFAULT_VARCHAR_LENGTH }
           end
 
           context "for char columns" do
-            before { @column = DataColumnSchema.new(:trade_type, type: :char) }
-            it { should  == DataColumnSchema::DEFAULT_CHAR_LENGTH }
+            let(:column) { DataColumnSchema.new(:trade_type, type: :char) }
+            it { expect(column.length).to eq DataColumnSchema::DEFAULT_CHAR_LENGTH }
           end
 
           context "for country code columns" do
-            before { @column = DataColumnSchema.new(:country_code, type: :country) }
-            it { should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH }
+            let(:column) { DataColumnSchema.new(:country_code, type: :country) }
+            it { expect(column.length).to eq DataColumnSchema::DEFAULT_ISO_CODE_LENGTH }
           end
 
           context "for US state code columns" do
-            before { @column = DataColumnSchema.new(:state_code, type: :us_state) }
-            it { should == DataColumnSchema::DEFAULT_ISO_CODE_LENGTH }
+            let(:column) { DataColumnSchema.new(:state_code, type: :us_state) }
+            it { expect(column.length).to eq DataColumnSchema::DEFAULT_ISO_CODE_LENGTH }
           end
 
           context "for other column types" do
-            before { @column = DataColumnSchema.new(:created, type: :datetime) }
-            it { should be_nil }
+            let(:column) { DataColumnSchema.new(:created, type: :datetime) }
+            it { expect(column.length).to be nil }
           end
         end
       end
@@ -759,7 +741,7 @@ module Gauge
 
       def columns
         [
-          [[:last_name, {}],                                        'nvarchar(256) null'],
+          [[:last_name, {}],                                        'nvarchar(255) null'],
           [[:rep_code, {len: 10}],                                  'nvarchar(10) null'],
           [[:description, {len: :max}],                             'nvarchar(max) null'],
           [[:total_amount, {type: :money}],                         'decimal(18,2) null'],

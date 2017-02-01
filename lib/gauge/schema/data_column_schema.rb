@@ -9,7 +9,7 @@ module Gauge
     class DataColumnSchema
       attr_reader :table
 
-      DEFAULT_VARCHAR_LENGTH = 256
+      DEFAULT_VARCHAR_LENGTH = 255
       DEFAULT_CHAR_LENGTH = 1
       DEFAULT_ISO_CODE_LENGTH = 2
       UID = 'abs(convert(bigint,convert(varbinary,newid())))'
@@ -17,7 +17,7 @@ module Gauge
 
       def initialize(*args, &block)
         @column_name = unsplat_name *args
-        @options = unsplat_options *args
+        @options = unsplat_options(*args) || {}
         instance_eval(&block) if block
         validate_column_type
       end
@@ -71,7 +71,7 @@ module Gauge
 
 
       def allow_null?
-        !(identity? || @options[:required] == true)
+        not (identity? || @options[:required] == true)
       end
 
 
@@ -174,6 +174,7 @@ module Gauge
       def bool?
         column_type == :bool
       end
+
 
   private
 
@@ -288,13 +289,12 @@ module Gauge
 
 
       def unsplat_name(*args)
-        return args.first.to_s unless args.first.is_a? Hash
+        args.first.to_s unless args.first.is_a? Hash
       end
 
 
       def unsplat_options(*args)
-        args.each { |arg| return arg if arg.is_a? Hash }
-        {}
+        args.find { |arg| arg.is_a? Hash }
       end
 
 

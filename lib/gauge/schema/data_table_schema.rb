@@ -10,9 +10,11 @@ module Gauge
     class DataTableSchema
       attr_reader :sql_schema, :columns
 
-      def initialize(table_name, sql_schema: :dbo, &block)
+      def initialize(table_name, sql_schema: :dbo, table_type: nil, &block)
         @local_name = table_name
         @columns = []
+        @sql_schema = sql_schema
+        @table_type = table_type
 
         instance_eval(&block) if block
         define_surrogate_id unless has_id?
@@ -40,7 +42,7 @@ module Gauge
 
 
       def reference_table?
-        sql_schema == :ref
+        sql_schema == :ref || @table_type == :reference
       end
 
 

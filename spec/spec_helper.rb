@@ -1,5 +1,5 @@
-# Eithery Lab., 2017.
-# RSpec helper file.
+# Eithery Lab, 2017
+# RSpec helper file
 
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'rspec/collection_matchers'
@@ -15,4 +15,6 @@ RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
     mocks.syntax = [:should, :expect]
   end
+
+  config.include Gauge::SchemaMatchers
 end

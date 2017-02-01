@@ -1,6 +1,7 @@
-# Eithery Lab., 2014.
-# Gauge::SchemaMatchers::BeConvertedToMatcher.
-# Custom RSpec matcher verifying conversion Gauge data column types to SQL data types. 
+# Eithery Lab, 2017
+# Gauge::SchemaMatchers::BeConvertedToMatcher
+# Verifies conversion data column types to SQL data types. 
+
 require 'gauge'
 
 module Gauge
@@ -12,8 +13,8 @@ module Gauge
 
 
       def matches?(column_types)
-        @column_types = column_types
-        columns = column_types.map { |t| Schema::DataColumnSchema.new('sample_table_name', type: t) }
+        @column_types = [column_types].flatten
+        columns = @column_types.map { |t| Schema::DataColumnSchema.new('sample_column_name', type: t) }
         columns.all? { |col| col.data_type == @sql_type }
       end
 
