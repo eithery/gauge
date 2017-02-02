@@ -336,49 +336,47 @@ module Gauge
 
 
       describe '#default_value' do
-        subject { @column_schema.default_value }
-
         context "when defined explicitly in column attributes" do
           context "for enumeration (integer) data columns" do
-            before { @column_schema = DataColumnSchema.new(:account_status, required: true, default: 1) }
-            it { should be 1 }
+            let(:column) { DataColumnSchema.new(:account_status, required: true, default: 1) }
+            it { expect(column.default_value).to be 1 }
           end
 
           context "for boolean data columns" do
-            before { @column_schema = DataColumnSchema.new(:is_active, required: true, default: true) }
-            it { should be true }
+            let(:column) { DataColumnSchema.new(:is_active, required: true, default: true) }
+            it { expect(column.default_value).to be true }
           end
 
           context "as UID" do
-            before { @column_schema = DataColumnSchema.new(:account_id, id: true, default: :uid) }
-            it { should == DataColumnSchema::UID }
+            let(:column) { DataColumnSchema.new(:account_id, id: true, default: :uid) }
+            it { expect(column.default_value).to eq DataColumnSchema::UID }
           end
 
           context "as SQL function without arguments" do
-            before { @column_schema = DataColumnSchema.new(:modified_by, default: { function: :host_name }) }
-            it { should == 'host_name()' }
+            let(:column) { DataColumnSchema.new(:modified_by, default: { function: :host_name }) }
+            it { expect(column.default_value).to eq 'host_name()' }
           end
 
           context "as CURRENT_TIMESTAMP SQL function" do
-            before { @column_schema = DataColumnSchema.new(:modified_at, default: { function: :current_timestamp }) }
-            it { should == :current_timestamp }
+            let(:column) { DataColumnSchema.new(:modified_at, default: { function: :current_timestamp }) }
+            it { expect(column.default_value).to be :current_timestamp }
           end
 
           context "as getdate() SQL function" do
-            before { @column_schema = DataColumnSchema.new(:modified_at, default: { function: :getdate }) }
-            it { should == :current_timestamp }
+            let(:column) { DataColumnSchema.new(:modified_at, default: { function: :getdate }) }
+            it { expect(column.default_value).to be :current_timestamp }
           end
         end
 
         context "when it is not defined in column attributes" do
           context "for boolean required columns" do
-            before { @column_schema = DataColumnSchema.new(:is_restricted, required: true) }
-            it { should be false }
+            let(:column) { DataColumnSchema.new(:is_restricted, required: true) }
+            it { expect(column.default_value).to be false }
           end
 
           context "for other columns" do
-            before { @column_schema = DataColumnSchema.new(:rep_code) }
-            it { should be nil }
+            let(:column) { DataColumnSchema.new(:rep_code) }
+            it { expect(column.default_value).to be nil }
           end
         end
       end
@@ -386,22 +384,23 @@ module Gauge
 
       describe '#sql_default_value' do
         it "returns nil if no default value defined" do
-          DataColumnSchema.new(:trade_id, :ref => :trades).sql_default_value.should be nil
+          column = DataColumnSchema.new(:trade_id, :ref => :trades)
+          expect(column.sql_default_value).to be nil
         end
 
-        it "returns quoted default value for character types" do
-          DataColumnSchema.new(:rep_code, default: 'R001').sql_default_value.should == "'R001'"
-          DataColumnSchema.new(:country, type: :country, default: 'US').sql_default_value.should == "'US'"
+        it "returns a quoted default value for character types" do
+          expect(DataColumnSchema.new(:rep_code, default: 'R001').sql_default_value).to eq "'R001'"
+          expect(DataColumnSchema.new(:country, type: :country, default: 'US').sql_default_value).to eq "'US'"
         end
 
         it "returns 0 and 1 respectively for boolean types" do
-          DataColumnSchema.new(:is_active, default: true).sql_default_value.should == 1
-          DataColumnSchema.new(:is_active, required: true).sql_default_value.should == 0
+          expect(DataColumnSchema.new(:is_active, default: true).sql_default_value).to be 1
+          expect(DataColumnSchema.new(:is_active, required: true).sql_default_value).to be 0
         end
 
-        it "returns unchanged default value for other column types" do
-          DataColumnSchema.new(:created_at, default: { function: :getdate })
-            .sql_default_value.should == :current_timestamp
+        it "returns an unchanged default value for other column types" do
+          column = DataColumnSchema.new(:created_at, default: { function: :getdate })
+          expect(column.sql_default_value).to be :current_timestamp
           DataColumnSchema.new(:status, type: :enum, default: 2).sql_default_value.should == 2
           DataColumnSchema.new(:total_amount, type: :money, default: 120.32).sql_default_value.should == 120.32
         end
