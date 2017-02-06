@@ -77,9 +77,9 @@ module Gauge
 
       def default_value
         default = @options[:default]
-        return false if default.nil? && column_type == :bool && !allow_null?
+        return false if default.nil? && bool? && !allow_null?
         return UID if default == :uid
-        return sql_function(default) if function? default
+        return sql_function(default) if function?(default)
         default
       end
 
@@ -117,16 +117,6 @@ module Gauge
       end
 
 
-      def has_unique_constraint?
-        @options.include?(:unique) && @options[:unique] != false
-      end
-
-
-      def has_foreign_key?
-        contains_ref_id?
-      end
-
-
       def index
         if has_index?
           options = @options[:index]
@@ -137,11 +127,21 @@ module Gauge
       end
 
 
+      def has_unique_constraint?
+        @options.include?(:unique) && @options[:unique] != false
+      end
+
+
       def unique_constraint
         if has_unique_constraint?
           Gauge::DB::Constraints::UniqueConstraint.new("uc_#{table.to_sym}_#{column_name}",
             table: table.table_name, columns: to_sym)
         end
+      end
+
+
+      def has_foreign_key?
+        contains_ref_id?
       end
 
 

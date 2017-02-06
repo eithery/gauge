@@ -401,285 +401,243 @@ module Gauge
         it "returns an unchanged default value for other column types" do
           column = DataColumnSchema.new(:created_at, default: { function: :getdate })
           expect(column.sql_default_value).to be :current_timestamp
-          DataColumnSchema.new(:status, type: :enum, default: 2).sql_default_value.should == 2
-          DataColumnSchema.new(:total_amount, type: :money, default: 120.32).sql_default_value.should == 120.32
+          expect(DataColumnSchema.new(:status, type: :enum, default: 2).sql_default_value).to eq 2
+          expect(DataColumnSchema.new(:total_amount, type: :money, default: 120.32).sql_default_value).to eq 120.32
         end
       end
 
 
       describe '#sql_attributes' do
-        it "returns column type, length, and nullability as part of SQL clause" do
+        it "returns a column type, length, and nullability as a part of SQL clause" do
           columns.each do |col|
-            column = Schema::DataColumnSchema.new(col[0][0], col[0][1])
-            column.sql_attributes.should == "#{col[1]}"
+            column = Schema::DataColumnSchema.new(col.first[0], col.first[1])
+            expect(column.sql_attributes).to eq col.last
           end
         end
       end
 
 
       describe '#to_sym' do
-        it "returns column name converted to a symbol" do
-          column.to_sym.should == :account_number
+        it "returns a column name converted to a symbol" do
+          expect(column.to_sym).to be :account_number
+          expect(ref_column.to_sym).to be :primary_rep_id
         end
       end
 
 
       describe '#id?' do
-        context "when column schema defines surrogate id" do
-          before { @id_column = DataColumnSchema.new(:product_id, id: true) }
-          specify { @id_column.should be_id }
+        it "returns true when a column schema defines a surrogate id" do
+          expect(DataColumnSchema.new(:product_id, id: true).id?).to be true
         end
 
-        context "when column schema does not define surrogate id" do
-          before { @not_id_column = DataColumnSchema.new(:product_id) }
-          specify { @not_id_column.should_not be_id }
+        it "returns false when no surrogate id defined" do
+          expect(DataColumnSchema.new(:product_id).id?).to be false
         end
 
-        context "when id option value is not true" do
-          before { @not_id_column = DataColumnSchema.new(:product_id, product_id: false) }
-          specify { @not_id_column.should_not be_id }
+        it "returns false when id option value is not true" do
+          expect(DataColumnSchema.new(:product_id, id: false).id?).to be false
+          expect(DataColumnSchema.new(:product_id, id: 'true').id?).to be false
         end
       end
 
 
       describe '#business_id?' do
-        context "when column schema defines business id" do
-          before { @business_id_column = DataColumnSchema.new(:rep_code, business_id: true) }
-          specify { @business_id_column.should be_business_id }
+        it "returns true when a column schema defines a business id" do
+          expect(DataColumnSchema.new(:rep_code, business_id: true).business_id?).to be true
         end
 
-        context "when column schema does not define business id" do
-          before { @not_business_id_column = DataColumnSchema.new(:rep_code) }
-          specify { @not_business_id_column.should_not be_business_id }
+        it "returns false when no business id defined" do
+          expect(DataColumnSchema.new(:rep_code).business_id?).to be false
         end
 
-        context "when business_id value is not true" do
-          before { @not_business_id_column = DataColumnSchema.new(:rep_code, business_id: false) }
-          specify { @not_business_id_column.should_not be_business_id }
+        it "returns false when a business_id value is not true" do
+          expect(DataColumnSchema.new(:rep_code, business_id: false).business_id?).to be false
+          expect(DataColumnSchema.new(:rep_code, business_id: 'true').business_id?).to be false
         end
       end
 
 
       describe '#has_index?' do
-        subject { @column.has_index? }
-
-        context "when the column schema defines index" do
-          context "with 'true' value" do
-            before { @column = DataColumnSchema.new(:rep_code, index: true) }
-            it { should be true }
-          end
-
-          context "with 'false' value" do
-            before { @column = DataColumnSchema.new(:rep_code, index: false) }
-            it { should be false }
-          end
-
-          context "with additional attributes" do
-            before { @column = DataColumnSchema.new(:rep_code, index: { unique: true }) }
-            it { should be true }
-          end
+        it "returns true when a column schema defines an index" do
+          expect(DataColumnSchema.new(:rep_code, index: true).has_index?).to be true
+          expect(DataColumnSchema.new(:rep_code, index: { unique: true }).has_index?).to be true
         end
 
-        context "when the column schema does not define index" do
-          before { @column = DataColumnSchema.new(:rep_code) }
-          it { should be false }
+        it "returns false when an index is not defined" do
+          expect(DataColumnSchema.new(:rep_code, index: false).has_index?).to be false
+          expect(DataColumnSchema.new(:rep_code).has_index?).to be false
         end
       end
 
 
       describe '#index' do
-        subject(:index) { @column.index }
-
-        context "when the column schema defines index" do
+        context "when a column schema defines index" do
           shared_examples_for "rep code index" do
-            it { should be_a Gauge::DB::Index }
-            it { expect(index.name).to eq 'idx_bnr_reps_rep_code' }
-            it { expect(index.table).to eq table_schema.to_sym }
-            it { expect(index.columns).to include(:rep_code) }
-            it { expect(index.columns).to have(1).item }
-            it { should_not be_composite }
+            it { expect(column.index).to be_a Gauge::DB::Index }
+            it { expect(column.index.name).to eq 'idx_bnr_reps_rep_code' }
+            it { expect(column.index.table).to eq table_schema.to_sym }
+            it { expect(column.index.columns).to include(:rep_code) }
+            it { expect(column.index.columns).to have(1).item }
+            it { expect(column.index).to_not be_composite }
           end
 
           context "with 'true' value" do
-            before { @column = DataColumnSchema.new(:rep_code, index: true).in_table table_schema }
+            let(:column) { DataColumnSchema.new(:rep_code, index: true).in_table table_schema }
             it_behaves_like "rep code index"
-            it { should_not be_clustered }
-            it { should_not be_unique }
+            it { expect(column.index).to_not be_clustered }
+            it { expect(column.index).to_not be_unique }
           end
 
           context "with 'false' value" do
-            before { @column = DataColumnSchema.new(:rep_code, index: false).in_table table_schema }
-            it { should be_nil }
+            let(:column) { DataColumnSchema.new(:rep_code, index: false).in_table table_schema }
+            it { expect(column.index).to be nil }
           end
 
           context "with 'unique' attribute" do
-            before { @column = DataColumnSchema.new(:rep_code, index: { unique: true }).in_table table_schema }
+            let(:column) { DataColumnSchema.new(:rep_code, index: { unique: true }).in_table table_schema }
             it_behaves_like "rep code index"
-            it { should_not be_clustered }
-            it { should be_unique }
+            it { expect(column.index).to_not be_clustered }
+            it { expect(column.index).to be_unique }
           end
 
           context "with 'clustered' attribute" do
-            before { @column = DataColumnSchema.new(:rep_code, index: { clustered: true }).in_table table_schema }
+            let(:column) { DataColumnSchema.new(:rep_code, index: { clustered: true }).in_table table_schema }
             it_behaves_like "rep code index"
-            it { should be_clustered }
-            it { should be_unique }
+            it { expect(column.index).to be_clustered }
+            it { expect(column.index).to be_unique }
           end
         end
 
-        context "when the column schema does not define index" do
-          before { @column = DataColumnSchema.new(:rep_code).in_table table_schema }
-            it { should be_nil }
+        context "when an index is not defined" do
+          let(:column) { DataColumnSchema.new(:rep_code).in_table table_schema }
+          it { expect(column.index).to be nil }
         end
       end
 
 
       describe '#has_unique_constraint?' do
-        subject { @column.has_unique_constraint? }
-
-        context "when the column schema defines unique constraint" do
-          context "with 'true' value" do
-            before { @column = DataColumnSchema.new(:rep_code, unique: true) }
-            it { should be true }
-          end
-
-          context "with 'false' value" do
-            before { @column = DataColumnSchema.new(:rep_code, unique: false) }
-            it { should be false }
-          end
+        it "returns true when a column schema defines a unique constraint" do
+          expect(DataColumnSchema.new(:rep_code, unique: true).has_unique_constraint?).to be true
         end
 
-        context "when the column schema does not define unique constraint" do
-          before { @column = DataColumnSchema.new(:rep_code) }
-          it { should be false }
+        it "returns false when a unique constraint is not defined" do
+          expect(DataColumnSchema.new(:rep_code).has_unique_constraint?).to be false
+          expect(DataColumnSchema.new(:rep_code, unique: false).has_unique_constraint?).to be false
         end
       end
 
 
       describe '#unique_constraint' do
-        subject(:constraint) { @column.unique_constraint }
-
-        context "when the column schema defines unique constraint" do
+        context "when a column schema defines a unique constraint" do
           shared_examples_for "rep code unique constraint" do
-            it { should be_a Gauge::DB::Constraints::UniqueConstraint }
-            it { expect(constraint.name).to eq 'uc_bnr_reps_rep_code' }
-            it { expect(constraint.table).to eq table_schema.to_sym }
-            it { expect(constraint.columns).to include :rep_code }
-            it { expect(constraint.columns).to have(1).item }
-            it { should_not be_composite }
+            it { expect(column.unique_constraint).to be_a Gauge::DB::Constraints::UniqueConstraint }
+            it { expect(column.unique_constraint.name).to eq 'uc_bnr_reps_rep_code' }
+            it { expect(column.unique_constraint.table).to eq table_schema.to_sym }
+            it { expect(column.unique_constraint.columns).to include :rep_code }
+            it { expect(column.unique_constraint.columns).to have(1).item }
+            it { expect(column.unique_constraint).to_not be_composite }
           end
 
           context "with 'true' value" do
-            before { @column = DataColumnSchema.new(:rep_code, unique: true).in_table table_schema }
+            let(:column) { DataColumnSchema.new(:rep_code, unique: true).in_table table_schema }
             it_behaves_like "rep code unique constraint"
           end
 
           context "with 'false' value" do
-            before { @column = DataColumnSchema.new(:rep_code, unique: false).in_table table_schema }
-            it { should be_nil }
+            let(:column) { DataColumnSchema.new(:rep_code, unique: false).in_table table_schema }
+            it { expect(column.unique_constraint).to be nil }
           end
         end
 
-        context "when the column schema does not define unique constraint" do
-          before { @column = DataColumnSchema.new(:rep_code).in_table table_schema }
-            it { should be_nil }
+        context "when a unique constraint is not defined" do
+          let(:column) { DataColumnSchema.new(:rep_code).in_table table_schema }
+          it { expect(column.unique_constraint).to be nil }
         end
       end
 
 
       describe '#has_foreign_key?' do
-        subject { @column.has_foreign_key? }
-
-        context "when the column schema defines a foreign key" do
+        context "when a column schema defines a foreign key" do
           context "with default SQL schema" do
-            before { @column = DataColumnSchema.new(:ref => :offices) }
-            it { should be true }
+            it { expect(DataColumnSchema.new(:ref => :offices).has_foreign_key?).to be true }
           end
 
           context "with custom SQL schema combined with ref table name" do
-            before { @column = DataColumnSchema.new(:ref => 'bnr.offices') }
-            it { should be true }
+            it { expect(DataColumnSchema.new(:ref => 'bnr.offices').has_foreign_key?).to be true }
           end
 
-          context "with custom SQL schema defined using hash based option" do
-            before { @column = DataColumnSchema.new(:ref => { table: :offices, sql_schema: :bnr }) }
-            it { should be true }
+          context "with custom SQL schema defined using a hash based option" do
+            let(:column) { DataColumnSchema.new(:ref => { table: :offices, sql_schema: :bnr }) }
+            it { expect(column.has_foreign_key?).to be true }
           end
 
           context "with ref to custom data column" do
-            before { @column = DataColumnSchema.new(:ref => { table: :offices, column: :office_code }) }
-            it { should be true }
+            let(:column) { DataColumnSchema.new(:ref => { table: :offices, column: :office_code }) }
+            it { expect(column.has_foreign_key?).to be true }
           end
         end
 
-        context "when the column schema does not define a foreign key" do
-          before { @column = DataColumnSchema.new(:rep_code) }
-          it { should be false }
+        context "when a foreign key is not defined" do
+          it { expect(DataColumnSchema.new(:rep_code).has_foreign_key?).to be false }
         end
       end
 
 
       describe '#foreign_key' do
-        subject(:foreign_key) { @column.foreign_key }
-
-        context "when the column schema defines a foreign key" do
+        context "when a column schema defines a foreign key" do
           shared_examples_for "foreign key constraint" do
-            it { should be_a Gauge::DB::Constraints::ForeignKeyConstraint }
-            it { expect(foreign_key.table).to eq table_schema.to_sym }
-            it { expect(foreign_key.columns).to have(1).item }
-            it { expect(foreign_key.ref_columns).to have(1).column }
-            it { should_not be_composite }
+            it { expect(column.foreign_key).to be_a Gauge::DB::Constraints::ForeignKeyConstraint }
+            it { expect(column.foreign_key.table).to eq table_schema.to_sym }
+            it { expect(column.foreign_key.columns).to have(1).item }
+            it { expect(column.foreign_key.ref_columns).to have(1).column }
+            it { expect(column.foreign_key).to_not be_composite }
           end
 
           context "with default SQL schema" do
-            before { @column = DataColumnSchema.new(:ref => :offices).in_table table_schema }
+            let(:column) { DataColumnSchema.new(:ref => :offices).in_table table_schema }
 
             it_behaves_like "foreign key constraint"
-            it { expect(foreign_key.name).to eq 'fk_bnr_reps_dbo_offices_office_id' }
-            it { expect(foreign_key.columns).to include :office_id }
-            it { expect(foreign_key.ref_table).to be :dbo_offices }
-            it { expect(foreign_key.ref_columns).to include :id }
+            it { expect(column.foreign_key.name).to eq 'fk_bnr_reps_dbo_offices_office_id' }
+            it { expect(column.foreign_key.columns).to include :office_id }
+            it { expect(column.foreign_key.ref_table).to be :dbo_offices }
+            it { expect(column.foreign_key.ref_columns).to include :id }
           end
 
           context "with custom SQL schema combined with ref table name" do
-            before { @column = DataColumnSchema.new(:ref => 'bnr.offices').in_table table_schema }
+            let(:column) { DataColumnSchema.new(:ref => 'bnr.offices').in_table table_schema }
 
             it_behaves_like "foreign key constraint"
-            it { expect(foreign_key.name).to eq 'fk_bnr_reps_bnr_offices_office_id' }
-            it { expect(foreign_key.columns).to include :office_id }
-            it { expect(foreign_key.ref_table).to be :bnr_offices }
-            it { expect(foreign_key.ref_columns).to include :id }
+            it { expect(column.foreign_key.name).to eq 'fk_bnr_reps_bnr_offices_office_id' }
+            it { expect(column.foreign_key.columns).to include :office_id }
+            it { expect(column.foreign_key.ref_table).to be :bnr_offices }
+            it { expect(column.foreign_key.ref_columns).to include :id }
           end
 
           context "with custom SQL schema defined using hash based option" do
-            before do
-              @column = DataColumnSchema.new(:ref => { table: :offices, schema: :bnr }).in_table table_schema
-            end
+            let(:column) { DataColumnSchema.new(:ref => { table: :offices, schema: :bnr }).in_table table_schema }
 
             it_behaves_like "foreign key constraint"
-            it { expect(foreign_key.name).to eq 'fk_bnr_reps_bnr_offices_office_id' }
-            it { expect(foreign_key.columns).to include :office_id }
-            it { expect(foreign_key.ref_table).to be :bnr_offices }
-            it { expect(foreign_key.ref_columns).to include :id }
+            it { expect(column.foreign_key.name).to eq 'fk_bnr_reps_bnr_offices_office_id' }
+            it { expect(column.foreign_key.columns).to include :office_id }
+            it { expect(column.foreign_key.ref_table).to be :bnr_offices }
+            it { expect(column.foreign_key.ref_columns).to include :id }
           end
 
           context "with ref to custom data column" do
-            before do
-              @column = DataColumnSchema.new(:office_code,
-                :ref => { table: :offices, column: :office_code }).in_table table_schema
+            let(:column) do
+              DataColumnSchema.new(:office_code, :ref => { table: :offices, column: :office_code }).in_table table_schema
             end
 
             it_behaves_like "foreign key constraint"
-            it { expect(foreign_key.name).to eq 'fk_bnr_reps_dbo_offices_office_code' }
-            it { expect(foreign_key.columns).to include :office_code }
-            it { expect(foreign_key.ref_table).to be :dbo_offices }
-            it { expect(foreign_key.ref_columns).to include :office_code }
+            it { expect(column.foreign_key.name).to eq 'fk_bnr_reps_dbo_offices_office_code' }
+            it { expect(column.foreign_key.columns).to include :office_code }
+            it { expect(column.foreign_key.ref_table).to be :dbo_offices }
+            it { expect(column.foreign_key.ref_columns).to include :office_code }
           end
         end
 
-        context "when the column schema does not define a foreign key" do
-          before { @column = DataColumnSchema.new(:rep_code) }
-          it { should be_nil }
+        context "when a foreign key is not defined" do
+          it { expect(DataColumnSchema.new(:rep_code).foreign_key).to be nil }
         end
       end
 
@@ -736,31 +694,33 @@ module Gauge
         end
       end
 
+
   private
 
       def columns
         [
-          [[:last_name, {}],                                        'nvarchar(255) null'],
-          [[:rep_code, {len: 10}],                                  'nvarchar(10) null'],
-          [[:description, {len: :max}],                             'nvarchar(max) null'],
-          [[:total_amount, {type: :money}],                         'decimal(18,2) null'],
-          [[:rate, {type: :percent, required: true}],               'decimal(18,4) not null'],
-          [[:state_code, {type: :us_state}],                        'nchar(2) null'],
-          [[:country, {type: :country, required: true}],            'nchar(2) not null'],
-          [[:service_flag, {type: :char}],                          'nchar(1) null'],
-          [[:account_id, {id: true}],                               'bigint not null'],
-          [[:total_years, {type: :int, required: true}],            'int not null'],
-          [[nil, {id: true}],                                       'bigint not null'],
-          [[nil, {:ref => :primary_reps}],                          'bigint null'],
-          [[:created_at, {}],                                       'datetime null'],
-          [[:created_on, {required: true}],                         'date not null'],
-          [[:snapshot, {type: :xml}],                               'xml null'],
-          [[:photo, {type: :blob, required: true}],                 'varbinary(max) not null'],
-          [[:hash_code, {type: :binary, len: 10, required: true}],  'binary(10) not null'],
-          [[:is_active, {}],                                        'tinyint null'],
-          [[:status, {type: :short, required: true}],               'smallint not null'],
-          [[:risk_tolerance, {type: :enum, required: true}],        'tinyint not null'],
-          [[:trade_guid, {type: :guid}],                            'uniqueidentifier null']
+          [[:last_name, {}],                                         'nvarchar(255) null'],
+          [[:rep_code, { len: 10 }],                                 'nvarchar(10) null'],
+          [[:description, { len: :max }],                            'nvarchar(max) null'],
+          [[:total_amount, { type: :money }],                        'decimal(18,2) null'],
+          [[:rate, { type: :percent, required: true }],              'decimal(18,4) not null'],
+          [[:state_code, { type: :us_state }],                       'nchar(2) null'],
+          [[:country, { type: :country, required: true }],           'nchar(2) not null'],
+          [[:service_flag, { type: :char }],                         'nchar(1) null'],
+          [[:account_id, { id: true }],                              'bigint not null'],
+          [[:total_years, { type: :int, required: true }],           'int not null'],
+          [[nil, { id: true }],                                      'bigint not null'],
+          [[nil, { :ref => :primary_reps }],                         'bigint null'],
+          [[nil, { :ref => 'ref.financial_info'}],                   'tinyint null'],
+          [[:created_at, {}],                                        'datetime null'],
+          [[:created_on, { required: true }],                        'date not null'],
+          [[:snapshot, { type: :xml }],                              'xml null'],
+          [[:photo, { type: :blob, required: true }],                'varbinary(max) not null'],
+          [[:hash_code, { type: :binary, len: 10, required: true }], 'binary(10) not null'],
+          [[:is_active, {}],                                         'tinyint null'],
+          [[:status, { type: :short, required: true }],              'smallint not null'],
+          [[:risk_tolerance, { type: :enum, required: true }],       'tinyint not null'],
+          [[:trade_guid, { type: :guid }],                           'uniqueidentifier null']
         ]
       end
     end
