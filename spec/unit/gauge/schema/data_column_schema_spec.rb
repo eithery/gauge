@@ -5,7 +5,7 @@ require 'spec_helper'
 
 module Gauge
   module Schema
-    describe DataColumnSchema, f: true do
+    describe DataColumnSchema do
       let(:column) { DataColumnSchema.new(:account_number, type: :string, required: true) }
       let(:ref_column) { DataColumnSchema.new(:ref => 'br.primary_reps') }
       let(:id_column) { DataColumnSchema.new(id: true) }
@@ -613,7 +613,7 @@ module Gauge
             it { expect(column.foreign_key.ref_columns).to include :id }
           end
 
-          context "with custom SQL schema defined using hash based option" do
+          context "with custom SQL schema defined using a hash based option" do
             let(:column) { DataColumnSchema.new(:ref => { table: :offices, schema: :bnr }).in_table table_schema }
 
             it_behaves_like "foreign key constraint"
@@ -623,7 +623,7 @@ module Gauge
             it { expect(column.foreign_key.ref_columns).to include :id }
           end
 
-          context "with ref to custom data column" do
+          context "with ref to a custom data column" do
             let(:column) do
               DataColumnSchema.new(:office_code, :ref => { table: :offices, column: :office_code }).in_table table_schema
             end
@@ -643,54 +643,52 @@ module Gauge
 
 
       describe '#in_table' do
-        before { @table_schema = double('table_schema') }
+        let(:table_schema) { double('table_schema') }
 
-        it "sets table name for the data column" do
-          column.in_table @table_schema
-          column.table.should == @table_schema
+        it "sets a table name for the data column" do
+          column.in_table table_schema
+          expect(column.table).to be table_schema
         end
 
-        it "returns self (column schema instance)" do
-          column.in_table(@table_schema).should be_equal(column)
+        it "returns a self (column schema instance)" do
+          expect(column.in_table(table_schema)).to be column
         end
       end
 
 
       describe '#computed?' do
-        subject { @column_schema.computed? }
-        context "for regular columns" do
-          before { @column_schema = DataColumnSchema.new(:rep_code, len: 10) }
-          it { should be false }
+        it "returns false for regular columns" do
+          expect(DataColumnSchema.new(:rep_code, len: 10).computed?).to be false
         end
 
-        context "for computed columns" do
-          before { @column_schema = DataColumnSchema.new(:source_firm_code, computed: { function: :get_source_code }) }
-          it { should be true }
+        it "returns true for computed columns" do
+          computed_column = DataColumnSchema.new(:source_firm_code, computed: { function: :get_source_code })
+          expect(computed_column.computed?).to be true
         end
       end
 
 
       describe '#bool?' do
-        before do
-          @bool_columns = [
-            DataColumnSchema.new(:active, type: :bool),
-            DataColumnSchema.new(:is_active),
-            DataColumnSchema.new(:has_participants),
-            DataColumnSchema.new(:allow_delete)
-          ]
-          @other_columns = [
-            DataColumnSchema.new(:code),
-            DataColumnSchema.new(:created_at),
-            DataColumnSchema.new(:is_active, type: :enum)
-          ]
+        let(:bool_columns) do [
+          DataColumnSchema.new(:active, type: :bool),
+          DataColumnSchema.new(:is_active),
+          DataColumnSchema.new(:has_participants),
+          DataColumnSchema.new(:allow_delete)
+        ]
+        end
+        let(:other_columns) do [
+          DataColumnSchema.new(:code),
+          DataColumnSchema.new(:created_at),
+          DataColumnSchema.new(:is_active, type: :enum)
+        ]
         end
 
         it "returns true for boolean data columns" do
-          @bool_columns.each { |col| col.bool?.should be true }
+          bool_columns.each { |col| expect(col.bool?).to be true }
         end
 
         it "returns false for all other column types" do
-          @other_columns.each { |col| col.bool?.should be false }
+          other_columns.each { |col| expect(col.bool?).to be false }
         end
       end
 

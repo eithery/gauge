@@ -1,11 +1,11 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Gauge::Schema::DataTableSchema specs
 
 require 'spec_helper'
 
 module Gauge
   module Schema
-    describe DataTableSchema do
+    describe DataTableSchema, f: true do
       let(:dbo_table_schema) do
         DataTableSchema.new(:master_accounts) do
           col :account_number
@@ -22,8 +22,8 @@ module Gauge
       subject { dbo_table_schema }
 
       it { should respond_to :table_name, :local_name }
-      it { should respond_to :sql_schema, :database_schema, :table_schema }
-      it { should respond_to :object_name, :sql_name }
+      it { should respond_to :sql_schema, :sql_name }
+      it { should respond_to :object_name }
       it { should respond_to :reference_table? }
       it { should respond_to :columns }
       it { should respond_to :primary_key }
@@ -36,113 +36,76 @@ module Gauge
 
 
       describe '#table_name' do
-        context "when a data table defined in the default SQL schema" do
-          specify { dbo_table_schema.table_name.should == 'dbo.master_accounts' }
+        context "when a data table defined in a default SQL schema" do
+          it { expect(dbo_table_schema.table_name).to eq 'dbo.master_accounts' }
         end
 
-        context "when data table is defined in custom SQL schema" do
-          specify { ref_table_schema.table_name.should == 'ref.source_firms' }
+        context "when a data table is defined in a custom SQL schema" do
+          it { expect(ref_table_schema.table_name).to eq 'ref.source_firms' }
         end
       end
 
 
       describe '#local_name' do
-        context "when data table is defined in default SQL schema" do
-          specify { dbo_table_schema.local_name.should == 'master_accounts' }
+        context "when a data table is defined in a default SQL schema" do
+          it { expect(dbo_table_schema.local_name).to eq 'master_accounts' }
         end
 
-        context "when data table is defined in custom SQL schema" do
-          specify { ref_table_schema.local_name.should == 'source_firms' }
+        context "when a data table is defined in a custom SQL schema" do
+          it { expect(ref_table_schema.local_name).to eq 'source_firms' }
         end
       end
 
 
       describe '#object_name' do
-        specify { table_schema.object_name.should == "Data table" }
+        it { expect(table_schema.object_name).to eq 'Data table' }
       end
 
 
       describe '#sql_schema' do
-        context "when data table is defined in default SQL schema" do
-          specify { dbo_table_schema.sql_schema.should == :dbo }
+        context "when a data table is defined in a default SQL schema" do
+          it { expect(dbo_table_schema.sql_schema).to be :dbo }
         end
 
-        context "when data table is defined in custom SQL schema" do
-          specify { ref_table_schema.sql_schema.should == :ref }
+        context "when a data table is defined in a custom SQL schema" do
+          it { expect(ref_table_schema.sql_schema).to be :ref }
         end
       end
 
 
       describe '#sql_name' do
-        specify { table_schema.sql_name.should == table_schema.table_name }
-      end
-
-
-      describe '#database_schema' do
-        before { @database = DatabaseSchema.new(:test_db) }
-
-        context "when database schema is passed in constructor args" do
-          before { @table_schema = DataTableSchema.new(:master_accounts, database: @database)}
-          specify { @table_schema.database_schema.should == @database }
-        end
-
-        context "when no database schema passed in constructors args" do
-          before { @table_schema = DataTableSchema.new(:master_accounts) }
-          specify { @table_schema.database_schema.should be_nil }
-        end
-      end
-
-
-      describe '#table_schema' do
-        it "returns self instance" do
-          subject.table_schema.should be_equal(subject)
-        end
+        it { expect(table_schema.sql_name).to eq table_schema.table_name }
       end
 
 
       describe '#reference_table?' do
-        context "when data table represents a reference_table" do
-          context "defined explicitly" do
-            before { @table_schema = DataTableSchema.new(:activation_reasons, type: :reference) }
-            specify { @table_schema.should be_reference_table }
-          end
-
-          context "defined based on the table name" do
-            before { @table_schema = DataTableSchema.new(:risk_tolerance, sql_schema: :ref) }
-            specify { @table_schema.should be_reference_table }
-          end
+        it "returns true for reference table types" do
+          table_schema = DataTableSchema.new(:activation_reasons, table_type: :reference)
+          expect(table_schema.reference_table?).to be true
         end
 
-        context "when data table is not a reference_table" do
-          before { @table_schema = DataTableSchema.new(:master_accounts) }
-          specify { @table_schema.should_not be_reference_table }
-        end
-      end
-
-
-      describe '#contains?' do
-        context "when the column defined in table definition" do
-          specify { table_schema.contains?(:account_number).should be true }
-          specify { table_schema.contains?('account_number').should be true }
+        it "returns true if ref SQL schema defined for a table" do
+          table_schema = DataTableSchema.new(:risk_tolerance, sql_schema: :ref)
+          expect(table_schema.reference_table?).to be true
         end
 
-        context "when the column is not defined in table definition" do
-          specify { table_schema.contains?(:rep_code).should be false }
-          specify { table_schema.contains?('rep_code').should be false }
+        it "returns false when a data table is not a reference table" do
+          table_schema = DataTableSchema.new(:master_accounts)
+          expect(table_schema.reference_table?).to be false
         end
       end
 
 
       describe '#to_sym' do
-        context "for default SQL schema" do
-          it "returns the local table name concatenated with 'dbo' and converted to symbol" do
-            dbo_table_schema.to_sym.should == :dbo_master_accounts
+        context "for a default SQL schema" do
+          it "returns a local table name concatenated with 'dbo' and converted to a symbol" do
+            expect(dbo_table_schema.to_sym).to be :dbo_master_accounts
           end
         end
 
-        context "for custom SQL schema" do
-          it "concatenates SQL schema and local table name" do
-            ref_table_schema.to_sym.should == :ref_source_firms
+        context "for a custom SQL schema" do
+          it "concatenates SQL schema and a local table name" do
+            expect(ref_table_schema.to_sym).to be :ref_source_firms
           end
         end
       end
@@ -151,191 +114,220 @@ module Gauge
       describe '#columns' do
         context "when id column is taken by convention" do
           it "contains the number of columns defined in metadata + 1" do
-            table_schema.should have(3).columns
-            table_schema.should contain_column(:account_number)
-            table_schema.should contain_column(:total_amount)
-            table_schema.should_not contain_column(:rep_code)
+            expect(table_schema).to have(3).columns
+            expect(table_schema).to contain_columns(:account_number, :total_amount)
+            expect(table_schema).to_not contain_columns(:rep_code)
           end
 
           it "contains 'id' data column" do
-            table_schema.should contain_column(:id)
+            expect(table_schema).to contain_columns(:id)
           end
         end
 
         context "when id column is defined in metadata" do
-          before do
-            @table_with_id = DataTableSchema.new(:carriers) do
+          let(:table_with_id) do
+            DataTableSchema.new(:carriers) do
               col :carrier_id, id: true
               col :code
             end
           end
+
           it "contains exact number of columns defined in metadata" do
-            @table_with_id.should have(2).columns
-            @table_with_id.should contain_column :code
-            @table_with_id.should_not contain_column :display_name
+            expect(table_with_id).to have(2).columns
+            expect(table_with_id).to contain_columns(:code)
+            expect(table_with_id).to_not contain_columns(:display_name)
           end
 
-          it "contains the data column defined as id" do
-            @table_with_id.should contain_column :carrier_id
-            @table_with_id.should_not contain_column :id
+          it "contains a data column defined as id" do
+            expect(table_with_id).to contain_columns(:carrier_id)
+            expect(table_with_id).to_not contain_columns(:id)
           end
         end
 
-        context "when table definition contains timestamps" do
+        context "when a table definition contains timestamps" do
           context "in default case" do
-            before do
-              @table_with_timestamps = DataTableSchema.new(:customers) { timestamps dates: :short }
-            end
+            let(:table_with_timestamps) { DataTableSchema.new(:customers) { timestamps dates: :short }}
 
-            it "should contain 4 timestamp columns and id" do
-              @table_with_timestamps.should have(6).columns
-              @table_with_timestamps.should contain_column :created
-              @table_with_timestamps.should contain_column :created_by
-              @table_with_timestamps.should contain_column :modified
-              @table_with_timestamps.should contain_column :modified_by
-              @table_with_timestamps.should contain_column :version
-              @table_with_timestamps.should contain_column :id
+            it "contains timestamp columns and id" do
+              expect(table_with_timestamps).to have(6).columns
+              expect(table_with_timestamps).to contain_columns(:id, :created, :created_by, :modified, :modified_by, :version)
+              expect(table_with_timestamps).to_not contain_columns(:createdBy, :modifiedBy)
             end
           end
 
-          context "in camel case" do
-            before do
-              @table_with_timestamps = DataTableSchema.new(:customers) do
-                timestamps naming: :camel, dates: :short
-              end
+          context "in snake case" do
+            let(:table_with_timestamps) do
+              DataTableSchema.new(:customers) { timestamps naming: :camel, dates: :short }
             end
-            it "should contain 4 timestamp columns named in camel case and id" do
-              @table_with_timestamps.should have(6).columns
-              @table_with_timestamps.should contain_column :created
-              @table_with_timestamps.should contain_column :createdBy
-              @table_with_timestamps.should contain_column :modified
-              @table_with_timestamps.should contain_column :modifiedBy
-              @table_with_timestamps.should contain_column :version
-              @table_with_timestamps.should contain_column :id
+
+            it "contains timestamp columns named in snake case and id" do
+              expect(table_with_timestamps).to have(6).columns
+              expect(table_with_timestamps).to contain_columns(:created, :createdBy, :modified, :modifiedBy, :version, :id)
+              expect(table_with_timestamps).to_not contain_columns(:created_by, :modified_by)
             end
           end
         end
 
         context "when no columns specified in metadata" do
-          before { @empty_table_schema = DataTableSchema.new(:customers) }
+          let(:empty_table_schema) { DataTableSchema.new(:customers) }
 
           it "contains only one 'id' data column" do
-            @empty_table_schema.should have(1).column
-            @empty_table_schema.should contain_column(:id)
+            expect(empty_table_schema).to have(1).column
+            expect(empty_table_schema).to contain_columns(:id)
           end
         end
       end
 
 
-      describe '#col' do
-        before { table_schema }
-
-        it "creates new data column schema" do
-          column = double('column_schema', has_index?: false)
-          column.stub(in_table: column)
-          DataColumnSchema.should_receive(:new).with(:office_code, hash_including(type: :string)).and_return(column)
-          table_schema.col :office_code, type: :string
+      describe '#contains?' do
+        context "when a column defined in a table definition" do
+          it { expect(table_schema.contains?(:account_number)).to be true }
+          it { expect(table_schema.contains?('account_number')).to be true }
         end
 
-        it "adds the new column schema to columns collection" do
-          expect { table_schema.col :office_code }.to change { table_schema.columns.count }.by(1)
-        end
-
-        it "sets data table attribute for newly created data column" do
-          table_schema.col :office_code, type: :string
-          last_column_should_have_table
-
-          table_schema.col :ref => 'ref.risk_tolerance'
-          last_column_should_have_table
-
-          table_schema.col :ref => :investment_time_horizon, schema: :ref
-          last_column_should_have_table
+        context "when a column is not defined" do
+          it { expect(table_schema.contains?(:rep_code)).to be false }
+          it { expect(table_schema.contains?('rep_code')).to be false }
         end
       end
 
 
-      describe '#index' do
-        subject { @reps.indexes.first }
+      describe '#col' do
+        it "creates a new data column schema" do
+          column = double('column_schema', in_table: table_schema)
+          DataColumnSchema.should_receive(:new).with(:office_code, hash_including(type: :string)).and_return(column)
+          table_schema.col :office_code, type: :string
+        end
 
-        it "creates new index" do
-          Gauge::DB::Index.should_receive(:new).with('idx_dbo_master_accounts_rep_code', 'dbo.master_accounts',
-            :rep_code, hash_including(clustered: true))
+        it "adds a new column schema to columns collection" do
+          expect { table_schema.col :office_code }.to change { table_schema.columns.count }.by(1)
+        end
+
+        it "sets a data table attribute for newly created data column" do
+          table_schema.col :office_code, type: :string
+          expect(table_schema.columns.last.table).to be table_schema
+
+          table_schema.col :ref => 'ref.risk_tolerance'
+          expect(table_schema.columns.last.table).to be table_schema
+
+          table_schema.col :ref => :investment_time_horizon, schema: :ref
+          expect(table_schema.columns.last.table).to be table_schema
+        end
+      end
+
+
+      describe '#timestamps' do
+        it "creates 5 new data column schema instances" do
+          column_schema = DataColumnSchema.new(:office_code, table: 'master_accounts')
+          expect(DataColumnSchema).to receive(:new).at_least(5).times.and_return(column_schema)
+          table_schema.timestamps
+        end
+
+        it "adds 5 new column schema instances to columns collection" do
+          expect { table_schema.timestamps }.to change { table_schema.columns.count }.by(5)
+        end
+
+        context "with default date naming convention" do
+          it { expect_added_columns(:created_at, :modified_at) { table_schema.timestamps }}
+        end
+
+        context "with 'short' date naming convention" do
+          it { expect_added_columns(:created, :modified) { table_schema.timestamps dates: :short }}
+        end
+
+        context "with default naming convention for string columns" do
+          it { expect_added_columns(:created_by, :modified_by) { table_schema.timestamps }}
+        end
+
+        context "with 'snake' column naming convention for string columns" do
+          it { expect_added_columns(:createdBy, :modifiedBy) { table_schema.timestamps naming: :camel }}
+        end
+      end
+
+
+      describe '#index', f1: true do
+        let(:index) { table.indexes.first }
+        subject { index }
+
+        it "creates a new index" do
+          expect(Gauge::DB::Index).to receive(:new).with('idx_dbo_master_accounts_rep_code',
+            hash_including(table: 'dbo.master_accounts', columns: :rep_code, clustered: true))
           table_schema.col :rep_code
           table_schema.index :rep_code, clustered: true
         end
 
-        it "adds new index to indexes collection" do
-          index_stub = double('index')
-          Gauge::DB::Index.stub(:new).and_return(index_stub)
+        it "adds a new index to indexes collection" do
+          index = double('index')
+          Gauge::DB::Index.stub(:new).and_return(index)
           table_schema.col :rep_code
           expect { table_schema.index :rep_code }.to change { table_schema.indexes.count }.by(1)
-          table_schema.indexes.should include(index_stub)
+          expect(table_schema.indexes).to include(index)
         end
 
-        context "when index includes one column" do
-          before do
-            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
+        context "for a regular one column index" do
+          let(:table) do
+            DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :rep_name
               index :rep_code
             end
           end
 
-          specify { @reps.indexes.should have(1).item }
+          it { expect(table.indexes).to have(1).item }
           it_behaves_like "an index", name: 'idx_bnr_reps_rep_code', table: :bnr_reps, column: :rep_code
-          it { is_expected.not_to be_clustered }
-          it { is_expected.not_to be_unique }
+          it { expect(index).to_not be_clustered }
+          it { expect(index).to_not be_unique }
         end
 
-        context "when index defined on multiple columns" do
-          before do
-            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
+        context "for a composite index" do
+          let(:table) do
+            DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :office_code
               index [:rep_code, :office_code]
             end
           end
 
-          specify { @reps.indexes.should have(1).item }
+          it { expect(table.indexes).to have(1).item }
           it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
             table: :bnr_reps, columns: [:rep_code, :office_code]
-          it { is_expected.not_to be_clustered }
-          it { is_expected.not_to be_unique }
+          it { expect(index).to_not be_clustered }
+          it { expect(index).to_not be_unique }
         end
 
-        context "when index defined as unique" do
-          before do
-            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
+        context "when an index defined as unique" do
+          let(:table) do
+            DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :office_code
               index [:rep_code, :office_code], unique: true
             end
           end
 
-          specify { @reps.indexes.should have(1).item }
+          it { expect(table.indexes).to have(1).item }
           it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
             table: :bnr_reps, columns: [:rep_code, :office_code]
-          it { is_expected.not_to be_clustered }
-          it { is_expected.to be_unique }
+          it { expect(index).to_not be_clustered }
+          it { expect(index).to be_unique }
         end
 
-        context "when index is defined as clustered" do
-          before do
-            @reps = DataTableSchema.new(:reps, sql_schema: :bnr) do
+        context "when an index is defined as clustered" do
+          let(:table) do
+            DataTableSchema.new(:reps, sql_schema: :bnr) do
               col :rep_code
               col :office_code
               index [:rep_code, :office_code], clustered: true
             end
           end
 
-          specify { @reps.indexes.should have(1).item }
+          it { expect(table.indexes).to have(1).item }
           it_behaves_like "an index", name: 'idx_bnr_reps_rep_code_office_code',
             table: :bnr_reps, columns: [:rep_code, :office_code]
-          it { is_expected.to be_clustered }
-          it { is_expected.to be_unique }
+          it { expect(index).to be_clustered }
+          it { expect(index).to be_unique }
         end
 
-        context "when index defined on missing column" do
+        context "when an index defined on a missing column" do
           specify do
             expect {
               DataTableSchema.new(:reps, sql_schema: :bnr) do
@@ -404,37 +396,6 @@ module Gauge
               end
             }.to raise_error(/missing column 'office_code' in bnr.reps data table/i)
           end
-        end
-      end
-
-
-      describe '#timestamps' do
-        before { table_schema }
-
-        it "creates 5 new data column schema instances" do
-          @column_schema = DataColumnSchema.new(:office_code, table: 'master_accounts')
-          DataColumnSchema.should_receive(:new).at_least(5).times.and_return(@column_schema)
-          table_schema.timestamps
-        end
-
-        it "adds 5 new column schema instances to columns collection" do
-          expect { table_schema.timestamps }.to change { table_schema.columns.count }.by(5)
-        end
-
-        context "with default date naming convention" do
-          specify { columns_should_be_added(:created_at, :modified_at) { table_schema.timestamps }}
-        end
-
-        context "with 'short' date naming convention" do
-          specify { columns_should_be_added(:created, :modified) { table_schema.timestamps dates: :short }}
-        end
-
-        context "with default naming convention for string columns" do
-          specify { columns_should_be_added(:created_by, :modified_by) { table_schema.timestamps }}
-        end
-
-        context "with 'camel' column naming convention for string columns" do
-          specify { columns_should_be_added(:createdBy, :modifiedBy) { table_schema.timestamps naming: :camel }}
         end
       end
 
@@ -827,17 +788,13 @@ module Gauge
         end
       end
 
+
   private
 
-      def last_column_should_have_table
-        table_schema.columns.last.table.should be_equal(table_schema)
-      end
-
-
-      def columns_should_be_added(*columns)
-        columns.each { |col| table_schema.should_not contain_column(col) }
+      def expect_added_columns(*columns)
+        expect(table_schema).to_not contain_columns(columns)
         yield
-        columns.each { |col| table_schema.should contain_column(col) }
+        expect(table_schema).to contain_columns(columns)
       end
     end
   end

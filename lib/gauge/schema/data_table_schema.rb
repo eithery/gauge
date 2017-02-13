@@ -1,4 +1,4 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Class Gauge::Schema::DataTableSchema
 # Data table schema
 # Contains metadata info defining a data table structure.
@@ -69,15 +69,17 @@ module Gauge
           modified_by_column(options) => { type: :string },
           version: { type: :long, default: 0 }
         }
-        .each { |name, options| col name, type: options[:type], required: true, default: options[:default] }
+        .each do |name, options|
+          col name, type: options[:type], required: true, default: options[:default]
+        end
       end
 
 
-      def index(columns, options={})
+      def index(columns, unique: false, clustered: false)
         index_columns = [columns].flatten
         index_columns.each { |col| raise "Missing column '#{col}' in #{table_name} data table." unless contains?(col) }
         index_name = "idx_#{to_sym}_" + index_columns.map { |col| col.to_s.downcase }.join('_')
-        indexes << Gauge::DB::Index.new(index_name, table_name, columns, options)
+        indexes << Gauge::DB::Index.new(index_name, table: table_name, columns: columns, unique: unique, clustered: clustered)
       end
 
 

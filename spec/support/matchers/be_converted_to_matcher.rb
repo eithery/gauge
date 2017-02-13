@@ -7,6 +7,7 @@ require 'gauge'
 module Gauge
   module SchemaMatchers
     class BeConvertedToMatcher
+
       def initialize(sql_type)
         @sql_type = sql_type
       end
