@@ -1,4 +1,4 @@
-# Eithery Lab., 2017
+# Eithery Lab, 2017
 # Gauge::Schema::DatabaseSchema specs
 
 require 'spec_helper'

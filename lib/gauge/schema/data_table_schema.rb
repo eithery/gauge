@@ -87,7 +87,7 @@ module Gauge
         constraint_columns = [columns].flatten
         constraint_columns.each { |col| raise "Missing column '#{col}' in #{table_name} data table." unless contains?(col) }
         constraint_name = "uc_#{to_sym}_" + constraint_columns.map { |col| col.to_s.downcase }.join('_')
-        unique_constraints << Gauge::DB::Constraints::UniqueConstraint.new(constraint_name, table_name, columns)
+        unique_constraints << Gauge::DB::Constraints::UniqueConstraint.new(constraint_name, table: table_name, columns: columns)
       end
 
 
@@ -144,10 +144,9 @@ private
 
 
       def define_primary_key
-        options = {}
-        options[:clustered] = false if indexes.any? { |idx| idx.clustered? }
+        has_clustered_index = indexes.any? { |idx| idx.clustered? }
         key_columns = columns.select { |col| col.id? }.map { |col| col.to_sym }
-        DB::Constraints::PrimaryKeyConstraint.new("pk_#{to_sym}", table_name, key_columns, options)
+        DB::Constraints::PrimaryKeyConstraint.new("pk_#{to_sym}", table: table_name, columns: key_columns, clustered: !has_clustered_index)
       end
 
 
@@ -166,7 +165,7 @@ private
         return [] unless business_key_columns.any?
 
         index_name = "idx_#{to_sym}_" + business_key_columns.each { |col| col.to_s }.join('_')
-        [DB::Index.new(index_name, table_name, business_key_columns, clustered: true)]
+        [DB::Index.new(index_name, table: table_name, columns: business_key_columns, clustered: true)]
       end
 
 
@@ -177,7 +176,7 @@ private
 
       def define_indexes_on_foreign_keys
         foreign_keys.map do |foreign_key|
-          Gauge::DB::Index.new("idx_#{to_sym}_#{foreign_key.columns.join('_')}", table_name, foreign_key.columns)
+          Gauge::DB::Index.new("idx_#{to_sym}_#{foreign_key.columns.join('_')}", table: table_name, columns: foreign_key.columns)
         end
       end
     end
