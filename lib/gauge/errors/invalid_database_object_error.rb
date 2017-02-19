@@ -1,12 +1,12 @@
 # Eithery Lab, 2017
-# Class Gauge::Errors::InvalidDatabaseObject
+# Class Gauge::Errors::InvalidDatabaseObjectError
 # Invalid database object error.
 
 require 'gauge'
 
 module Gauge
   module Errors
-    class InvalidDatabaseObject < StandardError
+    class InvalidDatabaseObjectError < StandardError
       def initialize(message="Invalid database object")
         super
       end
