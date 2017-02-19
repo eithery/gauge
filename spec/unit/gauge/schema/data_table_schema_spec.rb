@@ -5,6 +5,8 @@ require 'spec_helper'
 
 module Gauge
   module Schema
+    include Errors
+
     describe DataTableSchema do
       let(:dbo_table_schema) do
         DataTableSchema.new(:master_accounts) do
@@ -334,7 +336,7 @@ module Gauge
                 col :rep_name
                 index [:rep_code, :office_code]
               end
-            }.to raise_error(/missing column 'office_code' in bnr.reps data table/i)
+            }.to raise_error(InvalidMetadataError, /missing column 'office_code' in bnr.reps data table/i)
           end
         end
       end
@@ -393,7 +395,7 @@ module Gauge
                 col :rep_name
                 unique [:rep_code, :office_code]
               end
-            }.to raise_error(/missing column 'office_code' in bnr.reps data table/i)
+            }.to raise_error(InvalidMetadataError, /missing column 'office_code' in bnr.reps data table/i)
           end
         end
       end

@@ -8,6 +8,7 @@ module Gauge
   module Errors
     class InvalidMetadataError < StandardError
       def initialize(message='Invalid metadata')
+        super
       end
     end
   end

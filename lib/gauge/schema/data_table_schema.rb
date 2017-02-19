@@ -77,7 +77,9 @@ module Gauge
 
       def index(columns, unique: false, clustered: false)
         index_columns = [columns].flatten
-        index_columns.each { |col| raise "Missing column '#{col}' in #{table_name} data table." unless contains?(col) }
+        index_columns.each do |col|
+          raise Errors::InvalidMetadataError, "Missing column '#{col}' in #{table_name} data table." unless contains?(col)
+        end
         index_name = "idx_#{to_sym}_" + index_columns.map { |col| col.to_s.downcase }.join('_')
         indexes << Gauge::DB::Index.new(index_name, table: table_name, columns: columns, unique: unique, clustered: clustered)
       end
@@ -85,7 +87,9 @@ module Gauge
 
       def unique(columns)
         constraint_columns = [columns].flatten
-        constraint_columns.each { |col| raise "Missing column '#{col}' in #{table_name} data table." unless contains?(col) }
+        constraint_columns.each do |col|
+          raise Errors::InvalidMetadataError, "Missing column '#{col}' in #{table_name} data table." unless contains?(col)
+        end
         constraint_name = "uc_#{to_sym}_" + constraint_columns.map { |col| col.to_s.downcase }.join('_')
         unique_constraints << Gauge::DB::Constraints::UniqueConstraint.new(constraint_name, table: table_name, columns: columns)
       end
