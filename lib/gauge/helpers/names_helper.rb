@@ -1,12 +1,12 @@
 # Eithery Lab, 2017
-# Class Gauge::Helpers::NameParser
+# Module Gauge::Helpers::NamesHelper
 # Provides helper methods to parse database object names.
 
 require 'gauge'
 
 module Gauge
   module Helpers
-    class NameParser
+    module NamesHelper
 
       def self.local_name_of(dbo_name)
         parsed_name(dbo_name).last
@@ -15,7 +15,7 @@ module Gauge
 
       def self.sql_schema_of(dbo_name)
         schema = parsed_name(dbo_name)[-2]
-        schema.blank? ? 'dbo' : schema
+        schema.blank? ? 'dbo' : schema.downcase
       end
 
 
