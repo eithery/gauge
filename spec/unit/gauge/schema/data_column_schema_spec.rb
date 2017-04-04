@@ -5,11 +5,12 @@ require 'spec_helper'
 
 module Gauge
   module Schema
-    describe DataColumnSchema do
+    describe DataColumnSchema, f: true do
+
       let(:column) { DataColumnSchema.new(:account_number, type: :string, required: true) }
       let(:ref_column) { DataColumnSchema.new(:ref => 'br.primary_reps') }
       let(:id_column) { DataColumnSchema.new(id: true) }
-      let(:table_schema) { DataTableSchema.new(:reps, sql_schema: :bnr) }
+      let(:table_schema) { DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) }
 
       subject { column }
 
@@ -212,20 +213,24 @@ module Gauge
           expect(:guid).to be_converted_to :uniqueidentifier
         end
 
-        context "when a data column represents a surrogate primary key" do
+        context "when a data column represents a surrogate primary key" do 
           context "for a regular data table" do
-            before { id_column.in_table DataTableSchema.new(:customers) }
+            before { id_column.in_table DataTableSchema.new(:customers, db: :test_db) }
             it { expect(id_column.data_type).to be :bigint }
           end
 
           context "for a reference data table containing metadata" do
             context "defined explicitly" do
-              before { id_column.in_table DataTableSchema.new(:activation_reasons, table_type: :reference) }
+              before do
+                id_column.in_table DataTableSchema.new(:activation_reasons, table_type: :reference, db: :test_db)
+              end
               it { expect(id_column.data_type).to be :tinyint }
             end
 
             context "defined based on the table name" do
-              before { id_column.in_table DataTableSchema.new(:risk_tolerance, sql_schema: :ref) }
+              before do
+                id_column.in_table DataTableSchema.new(:risk_tolerance, sql_schema: :ref, db: :test_db)
+              end
               it { expect(id_column.data_type).to be :tinyint }
             end
           end

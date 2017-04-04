@@ -24,11 +24,6 @@ module Gauge
       end
 
 
-      def database_schema
-        self
-      end
-
-
       def table_schema(table_name)
         tables[table_name.to_s.downcase.to_sym] || tables[Gauge::Helpers::NameParser.dbo_key_of table_name]
       end
@@ -68,12 +63,19 @@ module Gauge
 
 
       def define_table(table_name, options={}, &block)
+        options[:db] = to_sym
         table_schema = DataTableSchema.new(table_name, options, &block)
         tables[table_schema.to_sym] = table_schema
       end
 
 
       def define_view(view_name, options={}, &block)
+      end
+
+
+      def cleanup_sql_files
+        database_path = "#{ApplicationHelper.sql_home}/#{name}"
+        FileUtils.remove_dir(database_path, force: true)
       end
 
 

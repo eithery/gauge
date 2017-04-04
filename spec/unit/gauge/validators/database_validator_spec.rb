@@ -1,5 +1,5 @@
-# Eithery Lab., 2015.
-# Gauge::Validators::DatabaseValidator specs.
+# Eithery Lab, 2017
+# Gauge::Validators::DatabaseValidator specs
 
 require 'spec_helper'
 
@@ -11,13 +11,13 @@ module Gauge
           length: Schema::DataColumnSchema::DEFAULT_VARCHAR_LENGTH) }
       let(:dba) { double('dba', table_exists?: true, column_exists?: true, column: db_column) }
       let(:schema) do
-        db_schema = Schema::DatabaseSchema.new(:test_db)
+        schema = double('schema')
         tables = {}
         %w(master_accounts customers primary_reps).map do |table_name|
           tables[table_name.to_sym] = Schema::DataTableSchema.new(table_name.to_sym)
         end
-        db_schema.stub(tables: tables)
-        db_schema
+        schema.stub(tables: tables)
+        schema
       end
 
       it_behaves_like "any database object validator"
@@ -30,18 +30,18 @@ module Gauge
           DataTableValidator.any_instance.stub(:log)
         end
 
-        it "creates validator to check all data tables" do
+        it "creates a validator to check all data tables" do
           table_validator = double('table_validator', check: true, errors: [])
           DataTableValidator.should_receive(:new).once.and_return(table_validator)
           validator.check schema, dba
         end
 
-        it "creates validator to check all data views" do
+        it "creates a validator to check all data views" do
           table_validator = double('table_validator', check: true, errors: [])
           DataTableValidator.stub(:new).and_return(table_validator)
 
           view_validator = double('view_validator', check: true, errors: [])
-          DataViewValidator.should_receive(:new).once.and_return(view_validator)
+          expect(DataViewValidator).to receive(:new).once.and_return(view_validator)
           validator.check schema, dba
         end
 
@@ -58,13 +58,13 @@ module Gauge
           empty_schema.stub(tables: {})
           validator.stub(:error)
           validator.check empty_schema, dba
-          validator.errors.should include(/cannot found data tables metadata for (.*?)test_db(.*?) database/i)
+          expect(validator.errors).to include(/cannot found data tables metadata for (.*?)test_db(.*?) database/i)
         end
 
         it "deletes all SQL migration script files generated during previous runs" do
           schema.stub(tables: {})
           validator.stub(:error)
-          SQL::Builder.any_instance.should_receive(:cleanup).with(schema)
+          expect(SQL::Builder.any_instance).to receive(:cleanup).with(schema)
           validator.check schema, dba
         end
       end

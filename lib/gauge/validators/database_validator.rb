@@ -1,14 +1,15 @@
-# Eithery Lab., 2015.
+# Eithery Lab, 2017
 # Class Gauge::Validators::DatabaseValidator
-# Checks a database structure against the predefined schema.
+# Checks a database structure against a predefined schema.
 
 require 'gauge'
 
 module Gauge
   module Validators
     class DatabaseValidator < Validators::Base
-      check_all :data_tables, with_schema: ->database { database.tables.values }
-      check_all :data_views, with_schema: ->database { database.views.values }
+      check_all :data_tables, with_schema: ->db { db.tables.values }
+      check_all :data_views, with_schema: ->db { db.views.values }
+
 
       def check(database_schema, database)
         SQL::Builder.new.cleanup database_schema

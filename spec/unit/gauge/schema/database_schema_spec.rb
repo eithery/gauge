@@ -8,7 +8,7 @@ module Gauge
     include Constants
 
     describe DatabaseSchema do
-      let(:db_path) { File.expand_path(ApplicationHelper.db_path + '/test_db/') }
+      let(:db_path) { File.expand_path(ApplicationHelper.db_home + '/test_db/') }
       let(:db_schema) { DatabaseSchema.new(db_path) }
       let(:empty_db_schema) { DatabaseSchema.new('path/to/db') }
 
@@ -17,11 +17,12 @@ module Gauge
       it { should respond_to :path }
       it { should respond_to :name, :database_name }
       it { should respond_to :object_type }
-      it { should respond_to :database_schema, :table_schema }
+      it { should respond_to :table_schema }
       it { should respond_to :tables, :views }
       it { should respond_to :define_table, :define_view }
       it { should respond_to :has_table?, :has_view? }
       it { should respond_to :to_sym }
+      it { should respond_to :cleanup_sql_files }
       it { expect(DatabaseSchema).to respond_to :current }
 
 
@@ -50,11 +51,6 @@ module Gauge
         it "alias of #name" do
           expect(db_schema.database_name).to eq db_schema.name
         end
-      end
-
-
-      describe '#database_schema' do
-        it { expect(db_schema.database_schema).to be db_schema }
       end
 
 
@@ -118,8 +114,8 @@ module Gauge
       describe '#define_table' do
         it "creates a data table schema" do
           table = double('table', to_sym: :customers)
-          expect(DataTableSchema).to receive(:new).with(:customers, {}).once.and_return(table)
-          empty_db_schema.define_table :customers
+          expect(DataTableSchema).to receive(:new).with(:customers, db: :db).once.and_return(table)
+          empty_db_schema.define_table :customers, db: :db
         end
 
         it "adds a data table schema into the tables collection" do
@@ -163,6 +159,14 @@ module Gauge
 
 
       describe '#has_view?' do
+      end
+
+
+      describe '#cleanup_sql_files' do
+        it "deletes all SQL migration files belong to a database" do
+          expect(FileUtils).to receive(:remove_dir).once.with(/\/sql\/test_db/, hash_including(force: true))
+          db_schema.cleanup_sql_files
+        end
       end
 
 

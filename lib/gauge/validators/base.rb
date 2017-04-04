@@ -1,6 +1,6 @@
-# Eithery Lab., 2017.
+# Eithery Lab, 2017.
 # Class Gauge::Validators::Base
-# Represents an abstract validator to check a database structure.
+# An abstract validator to check a database structure.
 
 require 'gauge'
 
@@ -9,51 +9,48 @@ module Gauge
     class Base
       include Logger
 
-      def self.check_all(validator_name, options={})
+      def self.check_all(validator_name, with_schema:, with_dbo: nil)
         check_all_methods << method_name = "check_all_#{validator_name}".to_sym
 
-        define_method(method_name) do |dbo_schema, dbo, sql|
-          db_schema_provider = options[:with_schema]
-          dbo_provider = options[:with_dbo]
-          actual_dbo = dbo_provider ? dbo_provider.call(dbo, dbo_schema) : dbo
+        define_method(method_name) do |schema, dbo, sql|
+          actual_dbo = with_dbo ? with_dbo.call(dbo, schema) : dbo
 
           validator = validator_for validator_name
-          db_schema_provider.call(dbo_schema).each do |schema|
+          with_schema.call(schema).each do |s|
             validator.errors.clear
-            validator.check schema, actual_dbo, sql
-            collect_errors validator
+            validator.check s, actual_dbo, sql
+            collect_errors_from validator
           end
         end
       end
 
 
-      def self.check_before(validator_name, options={})
-        define_method(:do_check_before) do |dbo_schema, dbo, sql|
+      def self.check_before(validator_name)
+        define_method(:do_check_before) do |schema, dbo, sql|
           result = true
           validator = validator_for validator_name
-          result = validator.do_validate(dbo_schema, dbo, sql)
-          collect_errors validator
+          result = validator.do_validate(schema, dbo, sql)
+          collect_errors_from validator
           result
         end
       end
 
 
-      def self.check(*validators, options)
-        define_method(:do_check) do |dbo_schema, dbo, sql|
-          dbo_provider = options[:with_dbo]
+      def self.check(*validators, with_dbo: nil)
+        define_method(:do_check) do |schema, dbo, sql|
           validators.each do |validator_name|
             validator = validator_for validator_name
-            actual_dbo = dbo_provider ? dbo_provider.call(dbo, dbo_schema) : dbo
-            validator.do_validate(dbo_schema, actual_dbo, sql)
-            collect_errors validator
+            actual_dbo = with_dbo ? with_dbo.call(dbo, schema) : dbo
+            validator.do_validate(schema, actual_dbo, sql)
+            collect_errors_from validator
           end
         end
       end
 
 
       def self.validate(&block)
-        define_method :do_validate do |dbo_schema, dbo, sql|
-          instance_exec dbo_schema, dbo, sql, &block
+        define_method :do_validate do |schema, dbo, sql|
+          instance_exec(schema, dbo, sql, &block)
         end
       end
 
@@ -63,14 +60,15 @@ module Gauge
       end
 
 
-      def check(dbo_schema, dbo, sql=nil)
+      def check(schema, dbo, sql=nil)
         result = true
-        result = do_check_before(dbo_schema, dbo, sql) if respond_to? :do_check_before
+        result = do_check_before(schema, dbo, sql) if respond_to? :do_check_before
         if result
-          self.class.check_all_methods.each { |method| __send__(method, dbo_schema, dbo, sql) }
-          do_check(dbo_schema, dbo, sql) if respond_to? :do_check
+          self.class.check_all_methods.each { |method| __send__(method, schema, dbo, sql) }
+          do_check(schema, dbo, sql) if respond_to? :do_check
         end
       end
+
 
   private
 
@@ -80,7 +78,7 @@ module Gauge
       end
 
 
-      def collect_errors(validator)
+      def collect_errors_from(validator)
         errors.concat validator.errors
       end
 

@@ -14,5 +14,8 @@
 /.idea
 /*.sublime*
 
+# Ignore VS Code folders.
+/.vscode
+
 # Ignore Mac directory files.
 .DS_Store

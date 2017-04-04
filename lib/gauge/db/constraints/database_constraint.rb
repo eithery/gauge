@@ -4,16 +4,19 @@
 
 require 'gauge'
 require_relative '../database_object'
+require_relative '../../helpers/names_helper'
 
 module Gauge
   module DB
     module Constraints
       class DatabaseConstraint < Gauge::DB::DatabaseObject
+        include Gauge::Helpers::NamesHelper
+
         attr_reader :table
 
         def initialize(name, table:)
           super(name)
-          @table = Gauge::Helpers::NameParser.dbo_key_of table
+          @table = dbo_key_of(table)
         end
       end
     end

@@ -52,22 +52,6 @@ module Gauge
       end
 
 
-      shared_examples_for "any database object validator" do
-        subject { validator }
-
-        it { should respond_to :check }
-        it { should respond_to :errors }
-
-        specify { validator.class.should respond_to :check_all }
-        specify { validator.class.should respond_to :check_before }
-        specify { validator.class.should respond_to :check }
-        specify { validator.class.should respond_to :validate }
-
-        specify { validator.errors.should_not be_nil }
-        specify { validator.errors.should be_empty }
-      end
-
-
       def displayed_names_of(columns)
         columns.map { |col| "\\'(.*?)#{col}(.*?)\\'" }.join(', ')
       end

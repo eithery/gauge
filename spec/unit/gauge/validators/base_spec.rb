@@ -1,23 +1,24 @@
-# Eithery Lab., 2017.
-# Gauge::Validators::Base specs.
+# Eithery Lab, 2017.
+# Gauge::Validators::Base specs
 
 require 'spec_helper'
 
 module Gauge
   module Validators
+
     class DummyTableValidator < Validators::Base; end
-    class BaseMock < Base
+    class BaseMock < Validators::Base
       check_all :dummy_tables, with_schema: ->db {[]}
     end
 
+
     describe Base do
       let(:validator) { BaseMock.new }
-      let(:sql) { double('sql') }
 
       it_behaves_like "any database object validator"
 
       describe '.check_all' do
-        it "defines 'do_check_all' instance method" do
+        it "defines 'check_all_<validator_name>' instance method" do
           [:data_tables, :data_views, :data_columns].each do |target|
             expect { BaseMock.check_all(target, with_schema: ->db {[]}) }
               .to change { validator.respond_to? "check_all_#{target}" }.from(false).to(true)
@@ -49,50 +50,53 @@ module Gauge
       end
 
 
-      describe '#check' do
-        before do
-          @dbo_schema = double('dbo_schema')
-          @dbo = double('dbo')
-        end
+      describe '#errors' do
+        it { expect(BaseMock.new.errors).to be_empty }
+      end
 
-        it "performs preliminary check before main validation stage" do
-          validator.should_receive(:do_check_before).with(@dbo_schema, @dbo, sql)
+
+      describe '#check' do
+        let(:schema) { double(' schema') }
+        let(:dbo) { double('dbo') }
+        let(:sql) { double('sql') }
+
+        it "performs a preliminary check before main validation stage" do
+          expect(validator).to receive(:do_check_before).with(schema, dbo, sql)
           validate
         end
 
-
-        context "when preliminary check is passed successfully" do
+        context "when a preliminary check is passed successfully" do
           before { validator.stub(:do_check_before).and_return(true) }
 
-          it "performs validation check with all inner validators" do
+          it "performs a validation check with all inner validators" do
             validator.stub(:do_check)
-            validator.should_receive(:check_all_dummy_tables).with(@dbo_schema, @dbo, sql)
+            expect(validator).to receive(:check_all_dummy_tables).with(schema, dbo, sql)
             validate
           end
 
-          it "performs validation check with additional registered validators" do
+          it "performs a validation check with additional registered validators" do
             validator.stub(:do_check_all)
-            validator.should_receive(:do_check).with(@dbo_schema, @dbo, sql)
+            expect(validator).to receive(:do_check).with(schema, dbo, sql)
             validate
           end
         end
 
-
-        context "when preliminary check is failed" do
+        context "when a preliminary check is failed" do
           before { validator.stub(:do_check_before).and_return(false) }
 
-          specify "no main validation stage performed" do
-            validator.should_not_receive(:check_all_dummy_tables)
-            validator.should_not_receive(:do_check)
+          it "is no main validation stage performed" do
+            expect(validator).to_not receive(:check_all_dummy_tables)
+            expect(validator).to_not receive(:do_check)
             validate
           end
         end
       end
 
+
   private
 
       def validate
-        validator.check @dbo_schema, @dbo, sql
+        validator.check schema, dbo, sql
       end
     end
   end

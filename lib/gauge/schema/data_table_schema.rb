@@ -8,12 +8,13 @@ require 'gauge'
 module Gauge
   module Schema
     class DataTableSchema
-      attr_reader :sql_schema, :columns
+      attr_reader :sql_schema, :database, :columns
 
-      def initialize(table_name, sql_schema: :dbo, table_type: nil, &block)
+      def initialize(table_name, sql_schema: :dbo, db:, table_type: nil, &block)
         @local_name = table_name
         @columns = []
         @sql_schema = sql_schema
+        @database = db.to_s.downcase.to_sym
         @table_type = table_type
 
         instance_eval(&block) if block
@@ -26,6 +27,9 @@ module Gauge
       end
 
 
+      alias_method :sql_name, :table_name
+
+
       def local_name
         @local_name.to_s
       end
@@ -33,11 +37,6 @@ module Gauge
 
       def object_name
         'Data table'
-      end
-
-
-      def sql_name
-        table_name
       end
 
 
@@ -112,6 +111,13 @@ module Gauge
 
       def foreign_keys
         @foreign_keys ||= define_foreign_keys
+      end
+
+
+      def cleanup_sql_files
+        tables_path = "#{ApplicationHelper.sql_home}/#{database}/tables"
+        FileUtils.remove_file("#{tables_path}/create_#{to_sym}.sql", force: true)
+        FileUtils.remove_file("#{tables_path}/alter_#{to_sym}.sql", force: true)
       end
 
 

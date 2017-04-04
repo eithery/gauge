@@ -7,6 +7,8 @@ require 'gauge'
 module Gauge
   module Schema
     class DataColumnSchema
+      include Gauge::Helpers::NamesHelper
+
       attr_reader :table
 
       DEFAULT_VARCHAR_LENGTH = 255
@@ -15,7 +17,7 @@ module Gauge
       UID = 'abs(convert(bigint,convert(varbinary,newid())))'
 
 
-      def initialize(*args, &block)
+      def initialize(name, options={}, &block)
         @column_name = unsplat_name *args
         @options = unsplat_options(*args) || {}
         instance_eval(&block) if block
@@ -148,7 +150,7 @@ module Gauge
       def foreign_key
         if has_foreign_key?
           ref_table_name = "#{ref_table_options[:schema]}.#{ref_table_options[:table]}"
-          ref_table = Gauge::Helpers::NameParser.dbo_key_of ref_table_name
+          ref_table = dbo_key_of(ref_table_name)
           Gauge::DB::Constraints::ForeignKeyConstraint.new("fk_#{table.to_sym}_#{ref_table}_#{to_sym}",
             table: table.table_name, columns: to_sym, ref_table: ref_table_name, ref_columns: ref_column)
         end

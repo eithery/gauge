@@ -9,13 +9,13 @@ module Gauge
 
     describe DataTableSchema do
       let(:dbo_table_schema) do
-        DataTableSchema.new(:master_accounts) do
+        DataTableSchema.new(:master_accounts, db: :test_db) do
           col :account_number
           col :total_amount
         end
       end
       let(:ref_table_schema) do
-        DataTableSchema.new(:source_firms, sql_schema: :ref) do
+        DataTableSchema.new(:source_firms, sql_schema: :ref, db: :test_db) do
           col :source_firm_id, id: true
         end
       end
@@ -25,6 +25,7 @@ module Gauge
 
       it { should respond_to :table_name, :local_name }
       it { should respond_to :sql_schema, :sql_name }
+      it { should respond_to :database, :database_name }
       it { should respond_to :object_name }
       it { should respond_to :reference_table? }
       it { should respond_to :columns }
@@ -35,6 +36,7 @@ module Gauge
       it { should respond_to :col, :timestamps }
       it { should respond_to :index, :unique }
       it { should respond_to :to_sym }
+      it { should respond_to :cleanup_sql_files }
 
 
       describe '#table_name' do
@@ -80,19 +82,44 @@ module Gauge
       end
 
 
+      describe '#database' do
+        it { expect(table_schema.database).to be :test_db }
+
+        it "could be passed as a string" do
+          table = DataTableSchema.new(:accounts, db: 'Package_Me')
+          expect(table.database).to be :package_me
+        end
+
+        it "is converted to a lowercase symbol" do
+          table = DataTableSchema.new(:accounts, db: 'REPPROFILE')
+          expect(table.database).to be :repprofile
+        end
+      end
+
+
+      describe '#database_name' do
+        it { expect(table_schema.database_name).to eq 'test_db' }
+
+        it "returns a lowercase string" do
+          table = DataTableSchema.new(:accounts, db: 'REPPROFILE')
+          expect(table.database_name).to eq 'repprofile'
+        end
+      end
+
+
       describe '#reference_table?' do
         it "returns true for reference table types" do
-          table_schema = DataTableSchema.new(:activation_reasons, table_type: :reference)
+          table_schema = DataTableSchema.new(:activation_reasons, db: :test_db, table_type: :reference)
           expect(table_schema.reference_table?).to be true
         end
 
         it "returns true if ref SQL schema defined for a table" do
-          table_schema = DataTableSchema.new(:risk_tolerance, sql_schema: :ref)
+          table_schema = DataTableSchema.new(:risk_tolerance, sql_schema: :ref, db: :test_db)
           expect(table_schema.reference_table?).to be true
         end
 
         it "returns false when a data table is not a reference table" do
-          table_schema = DataTableSchema.new(:master_accounts)
+          table_schema = DataTableSchema.new(:master_accounts, db: :test_db)
           expect(table_schema.reference_table?).to be false
         end
       end
@@ -128,7 +155,7 @@ module Gauge
 
         context "when id column is defined in metadata" do
           let(:table_with_id) do
-            DataTableSchema.new(:carriers) do
+            DataTableSchema.new(:carriers, db: :test_db) do
               col :carrier_id, id: true
               col :code
             end
@@ -148,7 +175,7 @@ module Gauge
 
         context "when a table definition contains timestamps" do
           context "in default case" do
-            let(:table_with_timestamps) { DataTableSchema.new(:customers) { timestamps dates: :short }}
+            let(:table_with_timestamps) { DataTableSchema.new(:customers, db: :test_db) { timestamps dates: :short }}
 
             it "contains timestamp columns and id" do
               expect(table_with_timestamps).to have(6).columns
@@ -159,7 +186,7 @@ module Gauge
 
           context "in snake case" do
             let(:table_with_timestamps) do
-              DataTableSchema.new(:customers) { timestamps naming: :camel, dates: :short }
+              DataTableSchema.new(:customers, db: :test_db) { timestamps naming: :camel, dates: :short }
             end
 
             it "contains timestamp columns named in snake case and id" do
@@ -171,7 +198,7 @@ module Gauge
         end
 
         context "when no columns specified in metadata" do
-          let(:empty_table_schema) { DataTableSchema.new(:customers) }
+          let(:empty_table_schema) { DataTableSchema.new(:customers, db: :test_db) }
 
           it "contains only one 'id' data column" do
             expect(empty_table_schema).to have(1).column
@@ -267,7 +294,7 @@ module Gauge
 
         context "for a regular one column index" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code
               col :rep_name
               index :rep_code
@@ -282,7 +309,7 @@ module Gauge
 
         context "for a composite index" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code
               col :office_code
               index [:rep_code, :office_code]
@@ -298,7 +325,7 @@ module Gauge
 
         context "when an index defined as unique" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code
               col :office_code
               index [:rep_code, :office_code], unique: true
@@ -314,7 +341,7 @@ module Gauge
 
         context "when an index is defined as clustered" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code
               col :office_code
               index [:rep_code, :office_code], clustered: true
@@ -331,7 +358,7 @@ module Gauge
         context "when an index defined on a missing column" do
           it "raises an error" do
             expect {
-              DataTableSchema.new(:reps, sql_schema: :bnr) do
+              DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code
                 col :rep_name
                 index [:rep_code, :office_code]
@@ -362,7 +389,7 @@ module Gauge
 
         context "for a regular unique constraint defined on one column" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code
               col :rep_name
               unique :rep_code
@@ -375,7 +402,7 @@ module Gauge
 
         context "for a composite unique constraint" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code
               col :office_code
               unique [:rep_code, :office_code]
@@ -390,7 +417,7 @@ module Gauge
         context "when a unique constraint defined on missing column" do
           it "raises an error" do
             expect {
-              DataTableSchema.new(:reps, sql_schema: :bnr) do
+              DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code
                 col :rep_name
                 unique [:rep_code, :office_code]
@@ -423,7 +450,7 @@ module Gauge
 
         context "when a primary key defined using :id attribute" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code, id: true
               col :rep_name
             end
@@ -436,7 +463,7 @@ module Gauge
 
         context "when a primary key is not clustered" do
           let(:table) do
-            DataTableSchema.new(:source_firms, sql_schema: :ref) do
+            DataTableSchema.new(:source_firms, sql_schema: :ref, db: :test_db) do
               col :code, len: 10, business_id: true
               col :source_name
             end
@@ -449,7 +476,7 @@ module Gauge
 
         context "when a primary key is composite" do
           let(:table) do
-            DataTableSchema.new(:account_owners) do
+            DataTableSchema.new(:account_owners, db: :test_db) do
               col :master_account_id, :ref => :br_master_account, id: true
               col :natural_owner_id, :ref => :br_natural_owner, id: true
               col :ordinal, type: :byte, required: true, check: '> 0'
@@ -465,7 +492,7 @@ module Gauge
 
         context "when a business key defined" do
           let(:table) do
-            DataTableSchema.new(:reps) do
+            DataTableSchema.new(:reps, db: :test_db) do
               col :rep_id, id: true
               col :rep_code, business_id: true
             end
@@ -477,7 +504,7 @@ module Gauge
 
         context "when a clustered index defined" do
           let(:table) do
-            DataTableSchema.new(:reps) do
+            DataTableSchema.new(:reps, db: :test_db) do
               col :rep_id, id: true
               col :rep_code, index: { clustered: true }
             end
@@ -489,7 +516,7 @@ module Gauge
 
         context "when a composite clustered index defined" do
           let(:table) do
-            DataTableSchema.new(:fund_accounts) do
+            DataTableSchema.new(:fund_accounts, db: :test_db) do
               col :fund_account_number
               col :cusip, len: 9
               index [:fund_account_number, :cusip], clustered: true
@@ -513,7 +540,7 @@ module Gauge
 
         context "when one index is defined" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code, index: true
             end
           end
@@ -526,7 +553,7 @@ module Gauge
 
         context "when multiple indexes defined" do
           let(:table) do
-            DataTableSchema.new(:trades) do
+            DataTableSchema.new(:trades, db: :test_db) do
               col :batch_id, index: true
               col :trade_id, index: true
               col :rep_code, index: true
@@ -541,7 +568,7 @@ module Gauge
 
         context "when an unique index is defined" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_id, id: true
               col :rep_code, index: { unique: true }
             end
@@ -556,7 +583,7 @@ module Gauge
         context "when a clustered index is defined" do
           context "as a regular one column index" do
             let(:table) do
-              DataTableSchema.new(:reps, sql_schema: :bnr) do
+              DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code, index: { clustered: true }
                 col :rep_name
               end
@@ -570,7 +597,7 @@ module Gauge
 
           context "as a natural business key (using 'business_id')" do
             let(:table) do
-              DataTableSchema.new(:reps, sql_schema: :bnr) do
+              DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code, business_id: true
                 col :rep_name
               end
@@ -584,7 +611,7 @@ module Gauge
 
           context "as an implicit index defined on a foreign key column" do
             let(:table) do
-              DataTableSchema.new(:reps, sql_schema: :bnr) do
+              DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code
                 col :ref => 'bnr.offices', required: true
               end
@@ -600,7 +627,7 @@ module Gauge
         context "when a composite (multicolumn) index defined" do
           context "and it is a regular (nonclustered and not unique)" do
             let(:table) do
-              DataTableSchema.new(:reps, sql_schema: :bnr) do
+              DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code, len: 10
                 col :rep_name
                 col :office_code, len: 10
@@ -617,7 +644,7 @@ module Gauge
 
           context "and it is unique" do
             let(:table) do
-              DataTableSchema.new(:reps, sql_schema: :bnr) do
+              DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code, len: 10
                 col :rep_name
                 col :office_code, len: 10
@@ -634,7 +661,7 @@ module Gauge
 
           context "and it is clustered" do
             let(:table) do
-              DataTableSchema.new(:reps, sql_schema: :bnr) do
+              DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code, len: 10
                 col :rep_name
                 col :office_code, len: 10
@@ -651,7 +678,7 @@ module Gauge
 
           context "and it is clustered but not unique" do
             let(:table) do
-              DataTableSchema.new(:reps, sql_schema: :bnr) do
+              DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code, len: 10
                 col :rep_name
                 col :office_code, len: 10
@@ -667,7 +694,7 @@ module Gauge
 
           context "and it is a natural business key (using 'business_id')" do
             let(:table) do
-              DataTableSchema.new(:fund_accounts) do
+              DataTableSchema.new(:fund_accounts, db: :test_db) do
                 col :fund_account_number, len: 20, business_id: true
                 col :cusip, len: 9, business_id: true
               end
@@ -694,7 +721,7 @@ module Gauge
 
         context "when one unique constraint defined" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code, unique: true
             end
           end
@@ -706,7 +733,7 @@ module Gauge
 
         context "when multiple unique constraints defined" do
           let(:table) do
-            DataTableSchema.new(:trades) do
+            DataTableSchema.new(:trades, db: :test_db) do
               col :batch_id, unique: true
               col :trade_id, unique: true
               col :rep_code, unique: true
@@ -719,7 +746,7 @@ module Gauge
 
         context "when a composite unique constraint defined" do
           let(:table) do
-            DataTableSchema.new(:reps, sql_schema: :bnr) do
+            DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) do
               col :rep_code, len: 10
               col :rep_name
               col :office_code, len: 10
@@ -745,7 +772,7 @@ module Gauge
 
         context "when one foreign key defined" do
           let(:table) do
-            DataTableSchema.new(:trades, sql_schema: :bnr) do
+            DataTableSchema.new(:trades, sql_schema: :bnr, db: :test_db) do
               col :ref => 'bnr.products'
             end
           end
@@ -757,7 +784,7 @@ module Gauge
 
         context "when multiple foreign keys defined" do
           let(:table) do
-            DataTableSchema.new(:trades, sql_schema: :bnr) do
+            DataTableSchema.new(:trades, sql_schema: :bnr, db: :test_db) do
               col :rep_code, :ref => { table: :reps, column: :code }
               col :ref => 'bnr.products'
             end
@@ -769,6 +796,17 @@ module Gauge
         end
 
         context "when a composite foreign key is defined" do
+        end
+      end
+
+
+      describe '#cleanup_sql_files' do
+        it "deletes all SQL migration files belong to a data table" do
+          expect(FileUtils).to receive(:remove_file).with(/\/sql\/test_db\/tables\/create_dbo_master_accounts.sql/,
+            hash_including(force: true)).once
+          expect(FileUtils).to receive(:remove_file).with(/\/sql\/test_db\/tables\/alter_dbo_master_accounts.sql/,
+            hash_including(force: true)).once
+          table_schema.cleanup_sql_files
         end
       end
 
