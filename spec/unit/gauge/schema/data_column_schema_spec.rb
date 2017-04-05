@@ -8,7 +8,7 @@ module Gauge
     describe DataColumnSchema do
 
       let(:column) { DataColumnSchema.new(name: :rep_code, table: reps) }
-      let(:reps) { DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) }
+      let(:reps) { DataTableSchema.new(name: :reps, sql_schema: :bnr, db: :test_db) }
 
       subject { column }
 
@@ -63,6 +63,15 @@ module Gauge
           expect(column.column_id).to be :rep_code
           ref_column = DataColumnSchema.new(:ref => :primary_reps)
           expect(ref_column.column_id).to be :primary_rep_id
+        end
+      end
+
+
+      describe '#to_sym' do
+        it "always returns column_id" do
+          ref_column = DataColumnSchema.new(:ref => :primary_reps)
+          expect(column.to_sym).to be column.column_id
+          expect(ref_column.to_sym).to be ref_column.column_id
         end
       end
 
@@ -190,18 +199,18 @@ module Gauge
           let(:id_column) { DataColumnSchema.new(id: true, table: table) }
 
           context "for a regular data table" do
-            let(:table) { DataTableSchema.new(:customers, db: :test_db) }
+            let(:table) { DataTableSchema.new(name: :customers, db: :test_db) }
             it { expect(id_column.data_type).to be :bigint }
           end
 
           context "for a reference data table containing metadata" do
             context "defined explicitly" do
-              let(:table) { DataTableSchema.new(:activation_reasons, table_type: :reference, db: :test_db) }
+              let(:table) { DataTableSchema.new(name: :activation_reasons, table_type: :reference, db: :test_db) }
               it { expect(id_column.data_type).to be :tinyint }
             end
 
             context "defined based on the table SQL schema" do
-              let(:table) { DataTableSchema.new(:risk_tolerance, sql_schema: :ref, db: :test_db) }
+              let(:table) { DataTableSchema.new(name: :risk_tolerance, sql_schema: :ref, db: :test_db) }
               it { expect(id_column.data_type).to be :tinyint }
             end
           end
@@ -429,21 +438,6 @@ module Gauge
             column = DataColumnSchema.new(col.first)
             expect(column.sql_attributes).to eq col.last
           end
-        end
-      end
-
-
-      describe '#to_sym' do
-        let(:ref_column) { DataColumnSchema.new(:ref => :primary_reps) }
-
-        it "returns a column name converted to a symbol" do
-          expect(column.to_sym).to be :rep_code
-          expect(ref_column.to_sym).to be :primary_rep_id
-        end
-
-        it "returns column_id" do
-          expect(column.to_sym).to be column.column_id
-          expect(ref_column.to_sym).to be ref_column.column_id
         end
       end
 

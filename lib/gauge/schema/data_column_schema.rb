@@ -32,6 +32,8 @@ module Gauge
         column_name.downcase.to_sym
       end
 
+      alias_method :to_sym, :column_id
+
 
       def column_name
         name = @options[:name]
@@ -104,11 +106,6 @@ module Gauge
 
       def sql_attributes
         "#{sql_type} #{sql_nullability}"
-      end
-
-
-      def to_sym
-        column_id
       end
 
 
