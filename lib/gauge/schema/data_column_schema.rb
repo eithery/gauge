@@ -9,47 +9,43 @@ module Gauge
     class DataColumnSchema
       include Gauge::Helpers::NamesHelper
 
-      attr_reader :table
-      alias_method :table_schema, :table
-
       DEFAULT_VARCHAR_LENGTH = 255
       DEFAULT_CHAR_LENGTH = 1
       DEFAULT_ISO_CODE_LENGTH = 2
       UID = 'abs(convert(bigint,convert(varbinary,newid())))'
 
 
-      def initialize(name: nil, table: nil, type: nil, required: false, len: nil, default: nil,
-          id: false, business_id: false, ref: nil, index: nil, unique: nil, computed: nil)
-        @column_name = name
-        @table = table
-        @type = type
-        @required = required
-        @len = len
-        @default = default
-        @id = id
-        @business_id = business_id
-        @ref = ref
-        @index = index
-        @unique = unique
-        @computed = computed
+      def initialize(options={})
+        @options = options
+        verify_column_type
+      end
 
-        invalid_column_type
+
+      def table
+        @options[:table]
+      end
+
+      alias_method :table_schema, :table
+
+
+      def column_id
+        column_name.downcase.to_sym
       end
 
 
       def column_name
-        return @column_name.to_s unless @column_name.blank?
-        col_name = column_name_from_ref || column_name_from_id
-        return col_name.to_s unless col_name.blank?
+        name = @options[:name]
+        name = column_name_from_ref || column_name_from_id if name.blank?
+        return name.to_s unless name.blank?
 
         raise ArgumentError, "Data column name is not specified"
       end
 
 
       def column_type
-        return @type.to_sym unless @type.nil?
-        return :string unless @len.nil?
-        return :id unless @ref.nil?
+        return type.to_sym unless type.nil?
+        return :string unless len.nil?
+        return :id unless ref.nil?
         return :bool if bool_by_name?
         return :datetime if datetime_by_name?
         return :date if date_by_name?
@@ -75,7 +71,7 @@ module Gauge
 
 
       def length
-        @len || default_length
+        len || default_length
       end
 
 
@@ -85,15 +81,16 @@ module Gauge
 
 
       def allow_null?
-        not (identity? || @required == true)
+        not (identity? || @options[:required] == true)
       end
 
 
       def default_value
-        return false if @default.nil? && bool? && !allow_null?
-        return UID if @default == :uid
-        return sql_function(@default) if function?(@default)
-        @default
+        default = @options[:default]
+        return false if default.nil? && bool? && !allow_null?
+        return UID if default == :uid
+        return sql_function(default) if function?(default)
+        default
       end
 
 
@@ -111,17 +108,17 @@ module Gauge
 
 
       def to_sym
-        column_name.downcase.to_sym
+        column_id
       end
 
 
       def id?
-        @id == true
+        @options[:id] == true
       end
 
 
       def business_id?
-        @business_id == true
+        @options[:business_id] == true
       end
 
 
@@ -131,35 +128,37 @@ module Gauge
 
 
       def has_index?
-        not (@index.nil? || @index == false)
+        idx = @options[:index]
+        not (idx.nil? || idx == false)
       end
 
 
       def index
         if has_index?
-          options = @index
-          options = {} unless options.respond_to? :[]
+          index_options = @options[:index]
+          index_options = {} unless index_options.kind_of? Hash
           Gauge::DB::Index.new("idx_#{table.to_sym}_#{column_name}", table: table.table_name,
-            columns: to_sym, unique: options[:unique], clustered: options[:clustered])
+            columns: column_id, unique: index_options[:unique], clustered: index_options[:clustered])
         end
       end
 
 
       def has_unique_constraint?
-        not (@unique.nil? || @unique == false)
+        unique = @options[:unique]
+        not (unique.nil? || unique == false)
       end
 
 
       def unique_constraint
         if has_unique_constraint?
           Gauge::DB::Constraints::UniqueConstraint.new("uc_#{table.to_sym}_#{column_name}",
-            table: table.table_name, columns: to_sym)
+            table: table.table_name, columns: column_id)
         end
       end
 
 
       def has_foreign_key?
-        !@ref.nil?
+        !ref.nil?
       end
 
 
@@ -167,21 +166,21 @@ module Gauge
         if has_foreign_key?
           ref_table_name = "#{ref_table_options[:schema]}.#{ref_table_options[:table]}"
           ref_table = dbo_key_of(ref_table_name)
-          Gauge::DB::Constraints::ForeignKeyConstraint.new("fk_#{table.to_sym}_#{ref_table}_#{to_sym}",
-            table: table.table_name, columns: to_sym, ref_table: ref_table_name, ref_columns: ref_column)
+          Gauge::DB::Constraints::ForeignKeyConstraint.new("fk_#{table.to_sym}_#{ref_table}_#{column_id}",
+            table: table.table_name, columns: column_id, ref_table: ref_table_name, ref_columns: ref_column)
         end
       end
 
 
       def computed?
-        !@computed.nil?
+        !@options[:computed].nil?
       end
 
 
   private
 
       def column_name_from_ref
-        return nil if @ref.nil?
+        return nil if ref.nil?
         ref_table_options[:table].to_s.singularize + '_id'
       end
 
@@ -192,13 +191,13 @@ module Gauge
 
 
       def define_ref_table_options
-        return @ref if @ref.kind_of? Hash
+        return ref if ref.kind_of? Hash
 
-        options = {}
-        parts = @ref.to_s.split('.')
-        options[:schema] = parts.length > 1 ? parts.first.downcase.to_sym : :dbo
-        options[:table] = parts.last.downcase.to_sym
-        options
+        ref_options = {}
+        parts = ref.to_s.split('.')
+        ref_options[:schema] = parts.length > 1 ? parts.first.downcase.to_sym : :dbo
+        ref_options[:table] = parts.last.downcase.to_sym
+        ref_options
       end
 
 
@@ -228,7 +227,7 @@ module Gauge
 
 
       def id_data_type
-        return :tinyint if !@ref.nil? && ref_table_options[:schema] == :ref
+        return :tinyint if !ref.nil? && ref_table_options[:schema] == :ref
         table&.reference_table? ? :tinyint : :bigint
       end
 
@@ -299,9 +298,24 @@ module Gauge
       end
 
 
-      def invalid_column_type
-        raise ArgumentError, 'Invalid column type.' unless @type.nil? ||
-          type_map.include?(@type.to_sym)
+      def type
+        @options[:type]
+      end
+
+
+      def len
+        @options[:len]
+      end
+
+
+      def ref
+        @options[:ref]
+      end
+
+
+      def verify_column_type
+        raise ArgumentError, 'Invalid column type.' unless type.nil? ||
+          type_map.include?(type.to_sym)
       end
     end
   end

@@ -5,7 +5,7 @@ require 'spec_helper'
 
 module Gauge
   module Schema
-    describe DataColumnSchema, f: true do
+    describe DataColumnSchema do
 
       let(:column) { DataColumnSchema.new(name: :rep_code, table: reps) }
       let(:reps) { DataTableSchema.new(:reps, sql_schema: :bnr, db: :test_db) }
@@ -13,7 +13,7 @@ module Gauge
       subject { column }
 
       it { should respond_to :table, :table_schema }
-      it { should respond_to :column_name }
+      it { should respond_to :column_id, :column_name }
       it { should respond_to :column_type, :data_type, :sql_type }
       it { should respond_to :id?, :business_id? }
       it { should respond_to :length }
@@ -54,6 +54,15 @@ module Gauge
         it "is alias for #table method" do
           expect(column.table_schema).to be column.table
           expect(column.table_schema).to_not be nil
+        end
+      end
+
+
+      describe '#column_id' do
+        it "returns a column name converted to a symbol" do
+          expect(column.column_id).to be :rep_code
+          ref_column = DataColumnSchema.new(:ref => :primary_reps)
+          expect(ref_column.column_id).to be :primary_rep_id
         end
       end
 
@@ -425,10 +434,16 @@ module Gauge
 
 
       describe '#to_sym' do
+        let(:ref_column) { DataColumnSchema.new(:ref => :primary_reps) }
+
         it "returns a column name converted to a symbol" do
           expect(column.to_sym).to be :rep_code
-          ref_column = DataColumnSchema.new(:ref => :primary_reps)
           expect(ref_column.to_sym).to be :primary_rep_id
+        end
+
+        it "returns column_id" do
+          expect(column.to_sym).to be column.column_id
+          expect(ref_column.to_sym).to be ref_column.column_id
         end
       end
 
