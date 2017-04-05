@@ -15,7 +15,9 @@ module Gauge
 
       def matches?(column_types)
         @column_types = [column_types].flatten
-        columns = @column_types.map { |t| Schema::DataColumnSchema.new('sample_column_name', type: t) }
+        columns = @column_types.map do |t|
+          Schema::DataColumnSchema.new(name: 'sample_column_name', type: t)
+        end
         columns.all? { |col| col.data_type == @sql_type }
       end
 

@@ -55,8 +55,8 @@ module Gauge
       end
 
 
-      def col(*args, &block)
-        columns << DataColumnSchema.new(*args, &block).in_table(self)
+      def col(name, options={})
+        columns << DataColumnSchema.new(name: name, table: self)
       end
 
 
