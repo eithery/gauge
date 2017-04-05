@@ -8,10 +8,12 @@ require 'gauge'
 module Gauge
   module Schema
     class DataTableSchema
+      include Gauge::Helpers
+
       attr_reader :sql_schema, :database, :columns
 
-      def initialize(table_name, sql_schema: :dbo, db:, table_type: nil, &block)
-        @local_name = table_name
+      def initialize(name:, sql_schema: :dbo, db:, table_type: nil, &block)
+        @local_name = name
         @columns = []
         @sql_schema = sql_schema
         @database = db.to_s.downcase.to_sym
@@ -22,10 +24,16 @@ module Gauge
       end
 
 
+      def table_id
+        "#{sql_schema}_#{local_name}".downcase.to_sym
+      end
+
+      alias_method :to_sym, :table_id
+
+
       def table_name
         "#{sql_schema}.#{local_name}"
       end
-
 
       alias_method :sql_name, :table_name
 
@@ -45,52 +53,36 @@ module Gauge
       end
 
 
-      def to_sym
-        "#{sql_schema}_#{local_name}".downcase.to_sym
+      def contains_column?(column_name)
+        columns.any? { |col| col.column_id == column_name.to_s.downcase.to_sym }
       end
 
 
-      def contains?(column_name)
-        columns.any? { |col| col.to_sym == column_name.downcase.to_sym }
+      def column(column_name)
+        columns.select { |col| col.column_id == column_name.to_s.downcase.to_sym }.first
       end
 
-
-      def col(name, options={})
-        columns << DataColumnSchema.new(name: name, table: self)
-      end
+      alias_method :[], :column
 
 
-      def timestamps(options={})
-        {
-          created_at_column(options) => { type: :datetime },
-          created_by_column(options) => { type: :string },
-          modified_at_column(options) => { type: :datetime },
-          modified_by_column(options) => { type: :string },
-          version: { type: :long, default: 0 }
-        }
-        .each do |name, options|
-          col name, type: options[:type], required: true, default: options[:default]
+      def col(name=nil, options={})
+        if name.kind_of? Hash
+          options = name
+          name = nil
         end
+        columns << DataColumnSchema.new({ name: name, table: self }.merge(options))
       end
 
 
-      def index(columns, unique: false, clustered: false)
-        index_columns = [columns].flatten
-        index_columns.each do |col|
-          raise Errors::InvalidMetadataError, "Missing column '#{col}' in #{table_name} data table." unless contains?(col)
-        end
-        index_name = "idx_#{to_sym}_" + index_columns.map { |col| col.to_s.downcase }.join('_')
-        indexes << Gauge::DB::Index.new(index_name, table: table_name, columns: columns, unique: unique, clustered: clustered)
-      end
-
-
-      def unique(columns)
-        constraint_columns = [columns].flatten
-        constraint_columns.each do |col|
-          raise Errors::InvalidMetadataError, "Missing column '#{col}' in #{table_name} data table." unless contains?(col)
-        end
-        constraint_name = "uc_#{to_sym}_" + constraint_columns.map { |col| col.to_s.downcase }.join('_')
-        unique_constraints << Gauge::DB::Constraints::UniqueConstraint.new(constraint_name, table: table_name, columns: columns)
+      def timestamps(*overrides)
+        timestamp_columns = [ 
+          { name: column_name_for(:created_at, overrides), type: :datetime, required: true },
+          { name: column_name_for(:updated_at, overrides), type: :datetime, required: true },
+          { name: column_name_for(:created_by, overrides), required: true },
+          { name: column_name_for(:updated_by, overrides), required: true },
+          { name: :version, type: :int }
+        ]
+        timestamp_columns.each { |col| columns << DataColumnSchema.new(col) }
       end
 
 
@@ -104,8 +96,25 @@ module Gauge
       end
 
 
+      def index(columns, unique: false, clustered: false)
+        index_columns = [columns].flatten
+        verify_columns(index_columns)
+        index_name = "idx_#{table_id}_" + index_columns.map { |col| col.to_s.downcase }.join('_')
+        indexes << Gauge::DB::Index.new(index_name, table: table_name, columns: columns, unique: unique, clustered: clustered)
+      end
+
+
       def unique_constraints
         @unique_constraints ||= define_unique_constraints
+      end
+
+
+      def unique(columns)
+        constraint_columns = [columns].flatten
+        verify_columns(constraint_columns)
+        constraint_name = "uc_#{table_id}_" + constraint_columns.map { |col| col.to_s.downcase }.join('_')
+        unique_constraints << Gauge::DB::Constraints::UniqueConstraint.new(constraint_name, table: table_name,
+          columns: columns)
       end
 
 
@@ -115,9 +124,9 @@ module Gauge
 
 
       def cleanup_sql_files
-        tables_path = "#{ApplicationHelper.sql_home}/#{database}/tables"
-        FileUtils.remove_file("#{tables_path}/create_#{to_sym}.sql", force: true)
-        FileUtils.remove_file("#{tables_path}/alter_#{to_sym}.sql", force: true)
+        remove_file :create
+        remove_file :alter
+        remove_file :drop
       end
 
 
@@ -128,23 +137,19 @@ private
       end
 
 
-      def created_at_column(options)
-        options[:dates] == :short ? :created : :created_at
+      def column_name_for(column_name, overrides)
+        overridden_name = overrides.select { |col| timestamp_columns[column_name].include?(col.to_s.downcase.to_sym) }.first
+        overridden_name.nil? ? column_name : overridden_name
       end
 
 
-      def created_by_column(options)
-        options[:naming] == :camel ? :createdBy : :created_by
-      end
-
-
-      def modified_at_column(options)
-        options[:dates] == :short ? :modified : :modified_at
-      end
-
-
-      def modified_by_column(options)
-        options[:naming] == :camel ? :modifiedBy : :modified_by
+      def timestamp_columns
+        @timestamp_columns ||= {
+          created_at: [:created],
+          created_by: [:createdby],
+          updated_at: [:updated, :updatedat, :modified, :modifiedat, :modified_at],
+          updated_by: [:updatedby, :modifiedby, :modified_by]
+        }
       end
 
 
@@ -155,8 +160,9 @@ private
 
       def define_primary_key
         has_clustered_index = indexes.any? { |idx| idx.clustered? }
-        key_columns = columns.select { |col| col.id? }.map { |col| col.to_sym }
-        DB::Constraints::PrimaryKeyConstraint.new("pk_#{to_sym}", table: table_name, columns: key_columns, clustered: !has_clustered_index)
+        key_columns = columns.select { |col| col.id? }.map { |col| col.column_id }
+        DB::Constraints::PrimaryKeyConstraint.new("pk_#{table_id}", table: table_name, columns: key_columns,
+          clustered: !has_clustered_index)
       end
 
 
@@ -170,15 +176,6 @@ private
       end
 
 
-      def define_business_id
-        business_key_columns = columns.select { |col| col.business_id? }.map { |col| col.to_sym }
-        return [] unless business_key_columns.any?
-
-        index_name = "idx_#{to_sym}_" + business_key_columns.each { |col| col.to_s }.join('_')
-        [DB::Index.new(index_name, table: table_name, columns: business_key_columns, clustered: true)]
-      end
-
-
       def define_foreign_keys
         columns.select { |col| col.has_foreign_key? }.map { |col| col.foreign_key }
       end
@@ -186,8 +183,33 @@ private
 
       def define_indexes_on_foreign_keys
         foreign_keys.map do |foreign_key|
-          Gauge::DB::Index.new("idx_#{to_sym}_#{foreign_key.columns.join('_')}", table: table_name, columns: foreign_key.columns)
+          Gauge::DB::Index.new("idx_#{table_id}_#{foreign_key.columns.join('_')}", table: table_name,
+            columns: foreign_key.columns)
         end
+      end
+
+
+      def define_business_id
+        business_key_columns = columns.select { |col| col.business_id? }.map { |col| col.column_id }
+        return [] unless business_key_columns.any?
+
+        index_name = "idx_#{table_id}_" + business_key_columns.each { |col| col.to_s }.join('_')
+        [DB::Index.new(index_name, table: table_name, columns: business_key_columns, clustered: true)]
+      end
+
+
+      def verify_columns(columns)
+        columns.each do |col|
+          unless contains_column?(col)
+            raise Errors::InvalidMetadataError, "Missing column '#{col}' in #{table_name} data table."
+          end
+        end
+      end
+
+
+      def remove_file(kind)
+        tables_path = "#{ApplicationHelper.sql_home}/#{database}/tables"
+        FileUtils.remove_file("#{tables_path}/#{kind.to_s}_#{table_id}.sql", force: true)
       end
     end
   end
