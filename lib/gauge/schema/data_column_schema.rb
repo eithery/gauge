@@ -163,7 +163,7 @@ module Gauge
         if has_foreign_key?
           ref_table_name = "#{ref_table_options[:schema]}.#{ref_table_options[:table]}"
           ref_table = dbo_key_of(ref_table_name)
-          Gauge::DB::Constraints::ForeignKeyConstraint.new("fk_#{table.to_sym}_#{ref_table}_#{column_id}",
+          Gauge::DB::Constraints::ForeignKeyConstraint.new("fk_#{table.table_id}_#{ref_table}_#{column_id}",
             table: table.table_name, columns: column_id, ref_table: ref_table_name, ref_columns: ref_column)
         end
       end

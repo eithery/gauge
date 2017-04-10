@@ -5,7 +5,7 @@ require 'spec_helper'
 
 module Gauge
   module Helpers
-    describe NamesHelper do
+    describe NamesHelper, f: true do
       class NamesHelperStub
         include NamesHelper
       end

@@ -9,15 +9,16 @@ module Gauge
   module Schema
     class DataTableSchema
       include Gauge::Helpers
+      include Gauge::Helpers::NamesHelper
 
       attr_reader :sql_schema, :database, :columns
 
-      def initialize(name:, sql_schema: :dbo, db:, table_type: nil, &block)
-        @local_name = name
-        @columns = []
-        @sql_schema = sql_schema
+      def initialize(name:, sql_schema: nil, db:, table_type: nil, &block)
+        @local_name = local_name_of(name)
+        @sql_schema = sql_schema || sql_schema_of(name).to_sym
         @database = db.to_s.downcase.to_sym
         @table_type = table_type
+        @columns = []
 
         instance_eval(&block) if block
         define_surrogate_id unless has_id?
@@ -97,10 +98,9 @@ module Gauge
 
 
       def index(columns, unique: false, clustered: false)
-        index_columns = [columns].flatten
-        verify_columns(index_columns)
-        index_name = "idx_#{table_id}_" + index_columns.map { |col| col.to_s.downcase }.join('_')
-        indexes << Gauge::DB::Index.new(index_name, table: table_name, columns: columns, unique: unique, clustered: clustered)
+        index_name = "idx_#{table_id}_" + constraint_columns(columns).map { |col| col.to_s.downcase }.join('_')
+        indexes << Gauge::DB::Index.new(index_name, table: table_name, columns: columns,
+          unique: unique, clustered: clustered)
       end
 
 
@@ -110,9 +110,7 @@ module Gauge
 
 
       def unique(columns)
-        constraint_columns = [columns].flatten
-        verify_columns(constraint_columns)
-        constraint_name = "uc_#{table_id}_" + constraint_columns.map { |col| col.to_s.downcase }.join('_')
+        constraint_name = "uc_#{table_id}_" + constraint_columns(columns).map { |col| col.to_s.downcase }.join('_')
         unique_constraints << Gauge::DB::Constraints::UniqueConstraint.new(constraint_name, table: table_name,
           columns: columns)
       end
@@ -120,6 +118,14 @@ module Gauge
 
       def foreign_keys
         @foreign_keys ||= define_foreign_keys
+      end
+
+
+      def foreign_key(columns, ref_table:, ref_columns:)
+        ref_table_id = dbo_key_of(ref_table)
+        constraint_name = "fk_#{table_id}_#{ref_table_id}_#{constraint_columns(columns).join('_')}"
+        foreign_keys << Gauge::DB::Constraints::ForeignKeyConstraint.new(constraint_name, table: table_name,
+          columns: columns, ref_table: ref_table, ref_columns: ref_columns)
       end
 
 
@@ -195,6 +201,13 @@ private
 
         index_name = "idx_#{table_id}_" + business_key_columns.each { |col| col.to_s }.join('_')
         [DB::Index.new(index_name, table: table_name, columns: business_key_columns, clustered: true)]
+      end
+
+
+      def constraint_columns(columns)
+        cols = [columns].flatten
+        verify_columns(cols)
+        cols
       end
 
 

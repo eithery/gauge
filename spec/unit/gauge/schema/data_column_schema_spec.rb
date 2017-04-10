@@ -5,7 +5,7 @@ require 'spec_helper'
 
 module Gauge
   module Schema
-    describe DataColumnSchema do
+    describe DataColumnSchema, f: true do
 
       let(:column) { DataColumnSchema.new(name: :rep_code, table: reps) }
       let(:reps) { DataTableSchema.new(name: :reps, sql_schema: :bnr, db: :test_db) }

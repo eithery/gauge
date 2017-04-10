@@ -7,7 +7,7 @@ module Gauge
   module Schema
     include Errors
 
-    describe DataTableSchema do
+    describe DataTableSchema, f: true do
 
       let(:table) do
         DataTableSchema.new(name: :reps, db: :test_db) do
@@ -34,9 +34,9 @@ module Gauge
       it { should respond_to :to_sym }
       it { should respond_to :col, :timestamps }
       it { should respond_to :primary_key }
-      it { should respond_to :indexes, :unique_constraints }
-      it { should respond_to :index, :unique }
-      it { should respond_to :foreign_keys }
+      it { should respond_to :indexes, :index }
+      it { should respond_to :unique_constraints, :unique }
+      it { should respond_to :foreign_keys, :foreign_key }
       it { should respond_to :cleanup_sql_files }
 
 
@@ -45,11 +45,21 @@ module Gauge
           it "returns a local table name concatenated with 'dbo' and converted to a symbol" do
             expect(table.table_id).to be :dbo_reps
           end
+
+          it "converts a passed full table name with SQL schema to a symbol" do
+            table = DataTableSchema.new(name: 'dbo.reps', db: :test_db)
+            expect(table.table_id).to be :dbo_reps
+          end
         end
 
         context "for a custom SQL schema" do
           it "concatenates SQL schema and a local table name" do
             expect(ref_table.table_id).to be :ref_source_firms
+          end
+
+          it "converts a passed full table name with SQL schema to a symbol" do
+            table = DataTableSchema.new(name: 'bnr.reps', db: :test_db)
+            expect(table.table_id).to be :bnr_reps
           end
         end
       end
@@ -867,6 +877,116 @@ module Gauge
         end
 
         context "when a composite foreign key is defined" do
+          let(:table) do
+            DataTableSchema.new(name: :trades, sql_schema: :bnr, db: :test_db) do
+              col :fund_account_number, len: 20, required: true
+              col :product_cusip, len: 9, required: true
+              foreign_key [:fund_account_number, :product_cusip], ref_table: :fund_accounts,
+                ref_columns: [:fund_account_number, :cusip]
+            end
+          end
+
+          it { expect(table.foreign_keys).to have(1).item }
+          it_behaves_like "a foreign key constraint",
+            name: 'fk_bnr_trades_dbo_fund_accounts_fund_account_number_product_cusip',
+            table: :bnr_trades, columns: [:fund_account_number, :product_cusip], ref_table: :dbo_fund_accounts,
+            ref_columns: [:fund_account_number, :cusip]
+        end
+      end
+
+
+      describe '#foreign_key' do
+        subject { table.foreign_keys.last }
+
+        it "creates a new foreign key" do
+          expect(Gauge::DB::Constraints::ForeignKeyConstraint).to receive(:new).with('fk_dbo_reps_dbo_offices_office_code',
+            hash_including(table: 'dbo.reps', columns: :office_code, ref_table: :offices, ref_columns: :code))
+          table.col :office_code
+          table.foreign_key :office_code, ref_table: :offices, ref_columns: :code
+        end
+
+        it "adds a new foreign key to foreign_keys collection" do
+          foreign_key = double('foreign_key')
+          Gauge::DB::Constraints::ForeignKeyConstraint.stub(:new).and_return(foreign_key)
+          table.col :office_code
+          expect { table.foreign_key :office_code, ref_table: :offices, ref_columns: :code }
+            .to change { table.foreign_keys.count }.by(1)
+          expect(table.foreign_keys).to include(foreign_key)
+        end
+
+        context "for a regular one column" do
+          context "referenced to a table in default SQL schema" do
+            let(:table) do
+              DataTableSchema.new(name: :reps, db: :test_db) do
+                col :office_code
+                foreign_key :office_code, ref_table: :offices, ref_columns: :code
+              end
+            end
+
+            it { expect(table.foreign_keys).to have(1).item }
+            it_behaves_like "a foreign key constraint", name: 'fk_dbo_reps_dbo_offices_office_code',
+              table: :dbo_reps, column: :office_code, ref_table: :dbo_offices, ref_column: :code
+          end
+
+          context "referenced to a table in custom SQL schema" do
+            let(:table) do
+              DataTableSchema.new(name: :reps, sql_schema: :bnr, db: :test_db) do
+                col :office_code
+                foreign_key :office_code, ref_table: 'bnr.offices', ref_columns: :code
+              end
+            end
+
+            it { expect(table.foreign_keys).to have(1).item }
+            it_behaves_like "a foreign key constraint", name: 'fk_bnr_reps_bnr_offices_office_code',
+              table: :bnr_reps, column: :office_code, ref_table: :bnr_offices, ref_column: :code
+          end
+        end
+
+        context "for a composite foreign key" do
+          context "referenced to a table in default SQL schema" do
+            let(:table) do
+              DataTableSchema.new(name: :trades, db: :test_db) do
+                col :fund_account_number
+                col :product_cusip
+                foreign_key [:fund_account_number, :product_cusip], ref_table: :fund_accounts,
+                  ref_columns: [:number, :cusip]
+              end
+            end
+
+            it { expect(table.foreign_keys).to have(1).item }
+            it_behaves_like "a foreign key constraint",
+              name: 'fk_dbo_trades_dbo_fund_accounts_fund_account_number_product_cusip',
+              table: :dbo_trades, columns: [:fund_account_number, :product_cusip],
+              ref_table: :dbo_fund_accounts, ref_columns: [:number, :cusip]
+          end
+
+          context "referenced to a table in custom SQL schema" do
+            let(:table) do
+              DataTableSchema.new(name: 'bnr.trades', db: :test_db) do
+                col :fund_account_number
+                col :product_cusip
+                foreign_key [:fund_account_number, :product_cusip], ref_table: 'bnr.fund_accounts',
+                  ref_columns: [:number, :cusip]
+              end
+            end
+
+            it { expect(table.foreign_keys).to have(1).item }
+            it_behaves_like "a foreign key constraint",
+              name: 'fk_bnr_trades_bnr_fund_accounts_fund_account_number_product_cusip',
+              table: :bnr_trades, columns: [:fund_account_number, :product_cusip],
+              ref_table: :bnr_fund_accounts, ref_columns: [:number, :cusip]
+          end
+        end
+
+        context "when a foreign key defined on missing data column" do
+          it "raises an error" do
+            expect {
+              DataTableSchema.new(name: :reps, sql_schema: :bnr, db: :test_db) do
+                col :rep_code
+                foreign_key :office_code, ref_table: :offices, ref_columns: :code
+              end
+            }.to raise_error(InvalidMetadataError, /missing column 'office_code' in bnr.reps data table/i)
+          end
         end
       end
 
