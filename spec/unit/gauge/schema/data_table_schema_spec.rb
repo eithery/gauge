@@ -7,7 +7,7 @@ module Gauge
   module Schema
     include Errors
 
-    describe DataTableSchema, f: true do
+    describe DataTableSchema do
 
       let(:table) do
         DataTableSchema.new(name: :reps, db: :test_db) do
