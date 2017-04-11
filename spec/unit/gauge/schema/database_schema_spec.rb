@@ -8,7 +8,7 @@ module Gauge
     include Constants
     include Gauge::Helpers
 
-    describe DatabaseSchema, f: true do
+    describe DatabaseSchema do
       let(:db_path) { File.expand_path(ApplicationHelper.db_home + '/test_db/') }
       let(:db_schema) { DatabaseSchema.new(db_path) }
       let(:empty_db_schema) { DatabaseSchema.new('path/to/db') }
