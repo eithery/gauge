@@ -10,11 +10,11 @@ class Object
 private
 
   def table(*args, &block)
-    Gauge::Schema::DatabaseSchema.current.define_table(*args, &block)
+    Gauge::Schema::DatabaseSchema.current.table(*args, &block)
   end
 
 
   def view(*args, &block)
-    Gauge::Schema::DatabaseSchema.current.define_view(*args, &block)
+    Gauge::Schema::DatabaseSchema.current.view(*args, &block)
   end
 end

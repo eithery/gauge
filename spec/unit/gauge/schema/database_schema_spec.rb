@@ -6,8 +6,9 @@ require 'spec_helper'
 module Gauge
   module Schema
     include Constants
+    include Gauge::Helpers
 
-    describe DatabaseSchema do
+    describe DatabaseSchema, f: true do
       let(:db_path) { File.expand_path(ApplicationHelper.db_home + '/test_db/') }
       let(:db_schema) { DatabaseSchema.new(db_path) }
       let(:empty_db_schema) { DatabaseSchema.new('path/to/db') }
@@ -15,20 +16,32 @@ module Gauge
       subject { empty_db_schema }
 
       it { should respond_to :path }
+      it { should respond_to :database_id }
       it { should respond_to :name, :database_name }
       it { should respond_to :object_type }
       it { should respond_to :table_schema }
       it { should respond_to :tables, :views }
-      it { should respond_to :define_table, :define_view }
+      it { should respond_to :table, :view }
       it { should respond_to :has_table?, :has_view? }
       it { should respond_to :to_sym }
       it { should respond_to :cleanup_sql_files }
-      it { expect(DatabaseSchema).to respond_to :current }
 
 
       describe '#initialize' do
         it "accepts a path to the database metadata location" do
           expect(DatabaseSchema.new('/path/to/db').path).to eq '/path/to/db'
+        end
+      end
+
+
+      describe '#database_id' do
+        it { expect(db_schema.database_id).to be :test_db }
+      end
+
+
+      describe '#to_sym' do
+        it "always returns database_id" do
+          expect(db_schema.to_sym).to be db_schema.database_id
         end
       end
 
@@ -48,7 +61,7 @@ module Gauge
 
 
       describe '#database_name' do
-        it "alias of #name" do
+        it "is alias of #name" do
           expect(db_schema.database_name).to eq db_schema.name
         end
       end
@@ -82,17 +95,7 @@ module Gauge
       end
 
 
-      describe '#to_sym' do
-        it { expect(db_schema.to_sym).to be :test_db }
-      end
-
-
       describe '#tables' do
-        it "loads metadata for all data tables in the database" do
-          expect(db_schema.as_null_object).to receive(:load).with(/test_db\/tables\/(.*)\.rb/i).at_least(4).times
-          db_schema.tables
-        end
-
         context "when a database does not have tables" do
           it { expect(empty_db_schema.tables).to be_empty }
         end
@@ -111,15 +114,15 @@ module Gauge
       end
 
 
-      describe '#define_table' do
+      describe '#table' do
         it "creates a data table schema" do
-          table = double('table', to_sym: :customers)
-          expect(DataTableSchema).to receive(:new).with(:customers, db: :db).once.and_return(table)
-          empty_db_schema.define_table :customers, db: :db
+          table = double('table', table_id: :customers)
+          expect(DataTableSchema).to receive(:new).with(hash_including(name: :customers, db: :db)).once.and_return(table)
+          empty_db_schema.table :customers
         end
 
         it "adds a data table schema into the tables collection" do
-          expect { empty_db_schema.define_table :new_table }.to change { empty_db_schema.tables.count }.from(0).to(1)
+          expect { empty_db_schema.table :new_table }.to change { empty_db_schema.tables.count }.from(0).to(1)
         end
       end
 
@@ -137,7 +140,7 @@ module Gauge
       end
 
 
-      describe '#define_view' do
+      describe '#view' do
         it "creates a data view schema"
         it "adds a data view schema into the views collection"
       end
@@ -166,17 +169,6 @@ module Gauge
         it "deletes all SQL migration files belong to a database" do
           expect(FileUtils).to receive(:remove_dir).once.with(/\/sql\/test_db/, hash_including(force: true))
           db_schema.cleanup_sql_files
-        end
-      end
-
-
-      describe '.current' do
-        it { expect(DatabaseSchema.current).to be nil }
-
-        it "being initialized during metadata load" do
-          expect(DatabaseSchema).to receive(:current=).once.with(empty_db_schema)
-          expect(DatabaseSchema).to receive(:current=).once.with(nil)
-          empty_db_schema.tables
         end
       end
     end

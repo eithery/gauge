@@ -7,11 +7,12 @@ require 'gauge'
 module Gauge
   module Schema
     class DatabaseSchema
-      class << self
-        attr_accessor :current
-      end
+      include Gauge::Helpers
+      include Gauge::Helpers::NamesHelper
 
       attr_reader :path, :name
+      alias_method :database_name, :name
+
 
       def initialize(path)
         @path = path
@@ -19,13 +20,15 @@ module Gauge
       end
 
 
-      def database_name
-        name
+      def database_id
+        name.downcase.to_sym
       end
+
+      alias_method :to_sym, :database_id
 
 
       def table_schema(table_name)
-        tables[table_name.to_s.downcase.to_sym] || tables[Gauge::Helpers::NameParser.dbo_key_of table_name]
+        tables[table_name.to_s.downcase.to_sym] || tables[dbo_id(table_name)]
       end
 
 
@@ -34,19 +37,20 @@ module Gauge
       end
 
 
-      def to_sym
-        name.downcase.to_sym
-      end
-
-
       def tables
-        load_tables if @tables.nil?
+        if @tables.nil?
+          @tables = {}
+          load_schemas_for :tables
+        end
         @tables
       end
 
 
       def views
-        load_views if @views.nil?
+        if @views.nil?
+          @views = {}
+          load_schemas_for :views
+        end
         @views
       end
 
@@ -57,19 +61,19 @@ module Gauge
 
 
       def has_view?(view_name)
-        view_key = Gauge::Helpers::NameParser.dbo_key_of view_name
-        views.include?(view_key)
+        view_id = NameParser.dbo_key_of view_name
+        views.include?(view_id)
       end
 
 
-      def define_table(table_name, options={}, &block)
-        options[:db] = to_sym
-        table_schema = DataTableSchema.new(table_name, options, &block)
-        tables[table_schema.to_sym] = table_schema
+      def table(table_name, sql_schema: nil, table_type: nil, &block)
+        table_schema = DataTableSchema.new(name: table_name, sql_schema: sql_schema, db: database_id,
+          table_type: table_type, &block)
+        tables[table_schema.table_id] = table_schema
       end
 
 
-      def define_view(view_name, options={}, &block)
+      def view(view_name, sql_schema: nil, &block)
       end
 
 
@@ -81,25 +85,8 @@ module Gauge
 
   private
 
-      def load_tables
-        @tables = {}
-        load_schemas_for 'tables'
-      end
-
-
-      def load_views
-        @views = {}
-        load_schemas_for 'views'
-      end
-
-
       def load_schemas_for(kind)
-        begin
-          DatabaseSchema.current = self
-          Dir["#{path}/**/#{kind}/**/*.rb"].each { |f| load f }
-        ensure
-          DatabaseSchema.current = nil
-        end
+        Dir["#{path}/**/#{kind.to_s}/**/*.rb"].each { |f| instance_eval(File.read(f)) }
       end
     end
   end

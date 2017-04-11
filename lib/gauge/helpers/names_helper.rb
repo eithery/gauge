@@ -19,7 +19,7 @@ module Gauge
       end
 
 
-      def dbo_key_of(dbo_name)
+      def dbo_id(dbo_name)
         "#{sql_schema_of(dbo_name)}_#{local_name_of(dbo_name)}".downcase.to_sym
       end
 

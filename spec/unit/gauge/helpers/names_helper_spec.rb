@@ -5,14 +5,14 @@ require 'spec_helper'
 
 module Gauge
   module Helpers
-    describe NamesHelper do
+    describe NamesHelper, f: true do
       class NamesHelperStub
         include NamesHelper
       end
 
       let(:helper) { NamesHelperStub.new }
 
-      it { expect(helper).to respond_to :local_name_of, :sql_schema_of, :dbo_key_of }
+      it { expect(helper).to respond_to :local_name_of, :sql_schema_of, :dbo_id }
 
 
       describe '#local_name_of' do
@@ -49,16 +49,16 @@ module Gauge
       end
 
 
-      describe '#dbo_key_of' do
+      describe '#dbo_id' do
         it "returns a database object name with 'dbo' SQL schema converted to a symbol" do
           NAMES_WITH_DBO_SCHEMA.each do |dbo_name|
-            expect(helper.dbo_key_of(dbo_name)).to be :dbo_reps
+            expect(helper.dbo_id(dbo_name)).to be :dbo_reps
           end
         end
 
         it "returns a database object name with custom SQL schema converted to a symbol" do
           NAMES_WITH_CUSTOM_SCHEMA.each do |dbo_name|
-            expect(helper.dbo_key_of(dbo_name)).to be :bnr_reps
+            expect(helper.dbo_id(dbo_name)).to be :bnr_reps
           end
         end
       end
