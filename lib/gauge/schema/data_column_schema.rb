@@ -45,7 +45,7 @@ module Gauge
 
 
       def column_type
-        return type.to_sym unless type.nil?
+        return type.to_s.downcase.to_sym unless type.nil?
         return :string unless len.nil?
         return :id unless ref.nil?
         return :bool if bool_by_name?
@@ -134,7 +134,7 @@ module Gauge
         if has_index?
           index_options = @options[:index]
           index_options = {} unless index_options.kind_of? Hash
-          Gauge::DB::Index.new("idx_#{table.to_sym}_#{column_name}", table: table.table_name,
+          Gauge::DB::Index.new("idx_#{table.table_id}_#{column_id}", table: table.table_name,
             columns: column_id, unique: index_options[:unique], clustered: index_options[:clustered])
         end
       end
@@ -148,7 +148,7 @@ module Gauge
 
       def unique_constraint
         if has_unique_constraint?
-          Gauge::DB::Constraints::UniqueConstraint.new("uc_#{table.to_sym}_#{column_name}",
+          Gauge::DB::Constraints::UniqueConstraint.new("uc_#{table.table_id}_#{column_id}",
             table: table.table_name, columns: column_id)
         end
       end
@@ -162,7 +162,7 @@ module Gauge
       def foreign_key
         if has_foreign_key?
           ref_table_name = "#{ref_table_options[:schema]}.#{ref_table_options[:table]}"
-          ref_table = dbo_key_of(ref_table_name)
+          ref_table = dbo_id(ref_table_name)
           Gauge::DB::Constraints::ForeignKeyConstraint.new("fk_#{table.table_id}_#{ref_table}_#{column_id}",
             table: table.table_name, columns: column_id, ref_table: ref_table_name, ref_columns: ref_column)
         end
@@ -171,6 +171,11 @@ module Gauge
 
       def computed?
         !@options[:computed].nil?
+      end
+
+
+      def to_s
+        "Column #{column_name} #{sql_attributes}"
       end
 
 
@@ -312,7 +317,7 @@ module Gauge
 
       def verify_column_type
         raise ArgumentError, 'Invalid column type.' unless type.nil? ||
-          type_map.include?(type.to_sym)
+          type_map.include?(type.to_s.downcase.to_sym)
       end
     end
   end

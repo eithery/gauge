@@ -21,7 +21,7 @@ module Gauge
       it { should respond_to :allow_null? }
       it { should respond_to :default_value, :sql_default_value }
       it { should respond_to :sql_attributes }
-      it { should respond_to :to_sym }
+      it { should respond_to :to_sym, :to_s }
       it { should respond_to :has_index?, :index }
       it { should respond_to :has_unique_constraint?, :unique_constraint }
       it { should respond_to :has_foreign_key?, :foreign_key }
@@ -72,6 +72,8 @@ module Gauge
           ref_column = DataColumnSchema.new(:ref => :primary_reps)
           expect(column.to_sym).to be column.column_id
           expect(ref_column.to_sym).to be ref_column.column_id
+          expect(column.to_sym).to_not be nil
+          expect(ref_column.to_sym).to_not be nil
         end
       end
 
@@ -79,6 +81,7 @@ module Gauge
       describe '#column_name' do
         context "when a name is explicitly passed in constructor arguments" do
           it { expect(column.column_name).to eq 'rep_code' }
+          it { expect(DataColumnSchema.new(name: 'AccountNumber').column_name).to eq 'AccountNumber' }
         end
 
         context "when no name passed in constructor args" do
@@ -101,7 +104,7 @@ module Gauge
           context "and no refs to another table defined" do
             it "raises an error" do
               expect { DataColumnSchema.new.column_name }
-                .to raise_error(ArgumentError, /column name is not specified/)
+                .to raise_error(ArgumentError, /column name is not specified/i)
             end
           end
         end
@@ -115,6 +118,8 @@ module Gauge
             expect(string_column.column_type).to be :string
             country_column = DataColumnSchema.new(name: :customers, type: :country)
             expect(country_column.column_type).to be :country
+            bool_column = DataColumnSchema.new(name: 'active', type: 'BOOL')
+            expect(bool_column.column_type).to be :bool
           end
         end
 
@@ -149,9 +154,9 @@ module Gauge
                 DataColumnSchema.new(name: col_name)
               end
             end
-            it "should be boolean" do
+            it "is expected to be boolean" do
               bool_columns.each { |col| expect(col.column_type).to be :bool }
-            end  
+            end
           end
 
           context "and a column name contains 'date' or '_at' suffix" do
@@ -160,7 +165,7 @@ module Gauge
                 DataColumnSchema.new(name: col_name)
               end
             end
-            it "should be datetime" do
+            it "is expected to be datetime" do
               date_time_columns.each { |col| expect(col.column_type).to be :datetime }
             end
           end
@@ -195,7 +200,7 @@ module Gauge
           expect(:guid).to be_converted_to :uniqueidentifier
         end
 
-        context "when a data column represents a surrogate primary key" do
+        context "when a data column is a surrogate primary key" do
           let(:id_column) { DataColumnSchema.new(id: true, table: table) }
 
           context "for a regular data table" do
@@ -329,7 +334,7 @@ module Gauge
 
 
       describe '#char_column?' do
-        it "returns true when a column type is one of character types" do
+        it "returns true when a column type is one of the character types" do
           [:string, :char, :us_state, :country].map { |t| DataColumnSchema.new(name: :col_name, type: t) }
             .each { |col| expect(col.char_column?).to be true }
         end
@@ -402,6 +407,7 @@ module Gauge
           context "for other columns" do
             let(:column) { DataColumnSchema.new(name: :rep_code) }
             it { expect(column.default_value).to be nil }
+            it { expect(DataColumnSchema.new(name: 'active', type: :bool).default_value).to be nil }
           end
         end
       end
@@ -482,6 +488,31 @@ module Gauge
       end
 
 
+      describe '#bool?' do
+        let(:bool_columns) do [
+          DataColumnSchema.new(name: :active, type: :bool),
+          DataColumnSchema.new(name: :is_active),
+          DataColumnSchema.new(name: :has_participants),
+          DataColumnSchema.new(name: :allow_delete)
+        ]
+        end
+        let(:other_columns) do [
+          DataColumnSchema.new(name: :code),
+          DataColumnSchema.new(name: :created_at),
+          DataColumnSchema.new(name: :is_active, type: :enum)
+        ]
+        end
+
+        it "returns true for boolean data columns" do
+          bool_columns.each { |col| expect(col.bool?).to be true }
+        end
+
+        it "returns false for all other column types" do
+          other_columns.each { |col| expect(col.bool?).to be false }
+        end
+      end
+
+
       describe '#has_index?' do
         it "returns true when a column schema defines an index" do
           expect(DataColumnSchema.new(name: :rep_code, index: true).has_index?).to be true
@@ -496,7 +527,7 @@ module Gauge
 
 
       describe '#index' do
-        context "when a column schema defines index" do
+        context "when a column schema defines an index" do
           shared_examples_for "rep code index" do
             it { expect(column.index).to be_a Gauge::DB::Index }
             it { expect(column.index.name).to eq 'idx_bnr_reps_rep_code' }
@@ -679,27 +710,12 @@ module Gauge
       end
 
 
-      describe '#bool?' do
-        let(:bool_columns) do [
-          DataColumnSchema.new(name: :active, type: :bool),
-          DataColumnSchema.new(name: :is_active),
-          DataColumnSchema.new(name: :has_participants),
-          DataColumnSchema.new(name: :allow_delete)
-        ]
-        end
-        let(:other_columns) do [
-          DataColumnSchema.new(name: :code),
-          DataColumnSchema.new(name: :created_at),
-          DataColumnSchema.new(name: :is_active, type: :enum)
-        ]
-        end
-
-        it "returns true for boolean data columns" do
-          bool_columns.each { |col| expect(col.bool?).to be true }
-        end
-
-        it "returns false for all other column types" do
-          other_columns.each { |col| expect(col.bool?).to be false }
+      describe '#to_s' do
+        it "returns a column name, type, length, and nullability" do
+          columns.each do |col|
+            column = DataColumnSchema.new(col.first)
+            expect(column.to_s).to eq "Column #{column.column_name} #{col.last}"
+          end
         end
       end
 
@@ -708,7 +724,7 @@ module Gauge
 
       def columns
         @columns ||= [
-          [{ name: :last_nam },                                          'nvarchar(255) null'],
+          [{ name: :last_name },                                         'nvarchar(255) null'],
           [{ name: :rep_code, len: 10 },                                 'nvarchar(10) null'],
           [{ name: :description, len: :max },                            'nvarchar(max) null'],
           [{ name: :total_amount, type: :money },                        'decimal(18,2) null'],
