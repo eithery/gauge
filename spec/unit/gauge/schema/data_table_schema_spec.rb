@@ -219,8 +219,8 @@ module Gauge
       describe '#column' do
         it "returns a column when it exists in the table" do
           expect(table.column(:rep_code)).to be_a DataColumnSchema
-          expect(table.column(:rep_code).column_id).to be :rep_code 
-          expect(table.column('REP_CODE').column_id).to be :rep_code 
+          expect(table.column(:rep_code).column_id).to be :rep_code
+          expect(table.column('REP_CODE').column_id).to be :rep_code
         end
 
         it "return nil when a column does not exist in the table" do

@@ -6,6 +6,7 @@ require 'spec_helper'
 module Gauge
   module Schema
     include Constants
+    include Gauge::Helpers
 
     describe Repo do
       let(:repo) { Repo.new('db') }
@@ -186,7 +187,7 @@ module Gauge
         end
 
         it "raise an error if the metadata type cannot be determined" do
-          expect { repo.validator_for('invalid_db_object') }.to raise_error(Errors::InvalidDatabaseObject,
+          expect { repo.validator_for('invalid_db_object') }.to raise_error(Errors::InvalidDatabaseObjectError,
             /cannot determine a metadata type for 'invalid_db_object'/i)
         end
       end

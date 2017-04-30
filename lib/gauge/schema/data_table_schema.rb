@@ -76,7 +76,7 @@ module Gauge
 
 
       def timestamps(*overrides)
-        timestamp_columns = [ 
+        timestamp_columns = [
           { name: column_name_for(:created_at, overrides), type: :datetime, required: true },
           { name: column_name_for(:updated_at, overrides), type: :datetime, required: true },
           { name: column_name_for(:created_by, overrides), required: true },
@@ -122,7 +122,7 @@ module Gauge
 
 
       def foreign_key(columns, ref_table:, ref_columns:)
-        ref_table_id = dbo_key_of(ref_table)
+        ref_table_id = dbo_id(ref_table)
         constraint_name = "fk_#{table_id}_#{ref_table_id}_#{constraint_columns(columns).join('_')}"
         foreign_keys << Gauge::DB::Constraints::ForeignKeyConstraint.new(constraint_name, table: table_name,
           columns: columns, ref_table: ref_table, ref_columns: ref_columns)

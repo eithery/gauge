@@ -1,12 +1,14 @@
 # Eithery Lab., 2017
 # Class Gauge::Schema::Repo
-# Represents a repository containing metadata describing the database structure.
+# A repository containing metadata for databases.
 
 require 'gauge'
 
 module Gauge
   module Schema
     class Repo
+      include Gauge::Helpers
+
       def initialize(*paths)
         paths.each do |path|
           home = File.absolute_path(path, ApplicationHelper.root_path)
@@ -50,7 +52,7 @@ module Gauge
         elsif table?(dbo)
           Validators::DataTableValidator.new
         else
-          raise Errors::InvalidDatabaseObject, "Cannot determine a metadata type for '#{dbo}'"
+          raise Errors::InvalidDatabaseObjectError, "Cannot determine a metadata type for '#{dbo}'"
         end
       end
 
