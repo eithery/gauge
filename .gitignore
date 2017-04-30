@@ -10,12 +10,11 @@
 /tmp
 /data
 
-# Ignore all RubyMine and Sublime Text related files.
+# Ignore RubyMine files.
 /.idea
+# Ignore Sublime Text files.
 /*.sublime*
-
-# Ignore VS Code folders.
+# Ignore Visual Studio Code setting folders.
 /.vscode
-
-# Ignore Mac directory files.
+# Ignore MacOS directory folders.
 .DS_Store
