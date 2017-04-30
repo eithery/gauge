@@ -12,7 +12,7 @@ module Gauge
 
         def initialize(name, table:, columns:, ref_table:, ref_columns:)
           super(name, table: table, columns: columns)
-          @ref_table = dbo_key_of(ref_table)
+          @ref_table = dbo_id(ref_table)
           @ref_columns = flatten_array_of ref_columns
         end
 

@@ -16,7 +16,7 @@ module Gauge
 
         def initialize(name, table:)
           super(name)
-          @table = dbo_key_of(table)
+          @table = dbo_id(table)
         end
       end
     end
