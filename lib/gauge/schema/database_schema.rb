@@ -21,10 +21,20 @@ module Gauge
 
 
       def database_id
-        name.downcase.to_sym
+        name.to_s.downcase.to_sym
       end
 
       alias_method :to_sym, :database_id
+
+
+      def to_s
+        "Database #{name}"
+      end
+
+
+      def object_type
+        'Database'
+      end
 
 
       def table_schema(table_name)
@@ -32,8 +42,8 @@ module Gauge
       end
 
 
-      def object_type
-        'Database'
+      def view_schema(view_name)
+        views[view_name.to_s.downcase.to_sym] || views[dbo_id(view_name)]
       end
 
 
@@ -61,8 +71,7 @@ module Gauge
 
 
       def has_view?(view_name)
-        view_id = NameParser.dbo_key_of view_name
-        views.include?(view_id)
+        !view_schema(view_name).nil?
       end
 
 
@@ -74,6 +83,8 @@ module Gauge
 
 
       def view(view_name, sql_schema: nil, &block)
+        view_schema = DataViewSchema.new(name: view_name, sql_schema: sql_schema, db: database_id, &block)
+        views[view_schema.view_id] = view_schema
       end
 
 
