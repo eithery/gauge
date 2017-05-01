@@ -7,14 +7,16 @@ module Gauge
     class DatabaseObject
       attr_reader :name
 
-      def initialize(object_name)
-        @name = object_name.to_s
+      def initialize(name:)
+        @name = name.to_s
       end
 
 
-      def to_sym
+      def db_object_id
         name.downcase.gsub(/\./, '_').to_sym
       end
+
+      alias_method :to_sym, :db_object_id
     end
   end
 end
