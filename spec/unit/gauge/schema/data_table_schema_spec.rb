@@ -26,12 +26,12 @@ module Gauge
 
       it { should respond_to :table_id, :table_name, :sql_name }
       it { should respond_to :sql_schema, :local_name }
-      it { should respond_to :object_name }
+      it { should respond_to :object_type }
       it { should respond_to :database }
       it { should respond_to :reference_table? }
       it { should respond_to :columns, :contains_column? }
       it { should respond_to :column, :[]}
-      it { should respond_to :to_sym }
+      it { should respond_to :to_sym, :to_s }
       it { should respond_to :col, :timestamps }
       it { should respond_to :primary_key }
       it { should respond_to :indexes, :index }
@@ -69,6 +69,16 @@ module Gauge
         it "always returns a table_id" do
           expect(table.to_sym).to be table.table_id
           expect(ref_table.to_sym).to be ref_table.table_id
+          expect(table.to_sym).to_not be nil
+          expect(ref_table.to_sym).to_not be nil
+        end
+      end
+
+
+      describe '#to_s' do
+        it "returns a data table schema string representation" do
+          expect(table.to_s).to eq "Data table dbo.reps"
+          expect(ref_table.to_s).to eq "Data table ref.source_firms"
         end
       end
 
@@ -76,26 +86,40 @@ module Gauge
       describe '#table_name' do
         context "when a data table defined in a default SQL schema" do
           it { expect(table.table_name).to eq 'dbo.reps' }
+          it "preserves a local name case" do
+            expect(DataTableSchema.new(name: 'ACCOUNTS', db: :test_db).table_name).to eq 'dbo.ACCOUNTS'
+          end
         end
 
         context "when a data table is defined in a custom SQL schema" do
           it { expect(ref_table.table_name).to eq 'ref.source_firms' }
+          it "preserves a local name case" do
+            expect(DataTableSchema.new(name: 'REF.ACCOUNTS', db: :test_db).table_name).to eq 'ref.ACCOUNTS'
+          end
         end
       end
 
 
       describe '#sql_name' do
         it { expect(table.sql_name).to eq table.table_name }
+        it { expect(table.sql_name).to_not be nil }
       end
 
 
       describe '#local_name' do
         context "when a data table is defined in a default SQL schema" do
           it { expect(table.local_name).to eq 'reps' }
+          it "preserves a local name case" do
+            expect(DataTableSchema.new(name: 'REPS', db: :test_db).local_name).to eq 'REPS'
+          end
         end
 
         context "when a data table is defined in a custom SQL schema" do
           it { expect(ref_table.local_name).to eq 'source_firms' }
+          it "preserves a local name case" do
+            expect(DataTableSchema.new(name: :sourceFirms, sql_schema: :bnr, db: :test_db).local_name)
+              .to eq 'sourceFirms'
+          end
         end
       end
 
@@ -103,16 +127,22 @@ module Gauge
       describe '#sql_schema' do
         context "when a data table is defined in a default SQL schema" do
           it { expect(table.sql_schema).to be :dbo }
+          it "downcases SQL schema and converts it to a symbol" do
+            expect(DataTableSchema.new(name: :reps, sql_schema: 'DBO', db: :test_db).sql_schema).to be :dbo
+          end
         end
 
         context "when a data table is defined in a custom SQL schema" do
           it { expect(ref_table.sql_schema).to be :ref }
+          it "downcases SQL schema and converts it to a symbol" do
+            expect(DataTableSchema.new(name: :reps, sql_schema: :BNR, db: :test_db).sql_schema).to be :bnr
+          end
         end
       end
 
 
-      describe '#object_name' do
-        it { expect(table.object_name).to eq 'Data table' }
+      describe '#object_type' do
+        it { expect(table.object_type).to eq 'Data table' }
       end
 
 
@@ -140,6 +170,7 @@ module Gauge
         it "returns true if ref SQL schema defined for a table" do
           table = DataTableSchema.new(name: :risk_tolerance, sql_schema: :ref, db: :test_db)
           expect(table.reference_table?).to be true
+          expect(DataTableSchema.new(name: 'ref.payment_types', db: :test_db).reference_table?).to be true
         end
 
         it "returns false when a data table is not a reference table" do
@@ -233,6 +264,8 @@ module Gauge
         it "is a #column method alias" do
           expect(table[:rep_code]).to be table.column(:rep_code)
           expect(table[:office_code]).to be table.column(:office_code)
+          expect(table[:rep_code].column_id).to be :rep_code
+          expect(table[:office_code]).to be nil
         end
       end
 
@@ -275,7 +308,7 @@ module Gauge
             expect(column.column_id).to be :risk_tolerance_id
           end
 
-          it "passes other options to DataColumnSchema instance" do
+          it "passes other data column options to DataColumnSchema instance" do
             table.col :ref => 'ref.offices', required: true, len: 10
             expect(column.has_foreign_key?).to be true
             expect(column.allow_null?).to be false
@@ -298,7 +331,7 @@ module Gauge
           expect { table.timestamps }.to change { table.columns.count }.by(5)
         end
 
-        it "adds version column" do
+        it "adds 'version' column" do
           table.timestamps
           expect(table).to contain_columns(:version)
           version_column = table.columns.last
@@ -552,7 +585,7 @@ module Gauge
         end
 
         context "when a composite (multicolumn) index defined" do
-          context "and it is a regular (nonclustered and not unique)" do
+          context "and it is a regular index (nonclustered and not unique)" do
             let(:table) do
               DataTableSchema.new(name: :reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code, len: 10
@@ -603,7 +636,7 @@ module Gauge
             it { expect(index).to be_unique }
           end
 
-          context "and it is clustered but not unique" do
+          context "and it is defined as clustered but not unique" do
             let(:table) do
               DataTableSchema.new(name: :reps, sql_schema: :bnr, db: :test_db) do
                 col :rep_code, len: 10
@@ -1001,15 +1034,6 @@ module Gauge
             hash_including(force: true)).once
           table.cleanup_sql_files
         end
-      end
-
-
-  private
-
-      def expect_added_columns(*columns)
-        expect(table).to_not contain_columns(columns)
-        yield
-        expect(table).to contain_columns(columns)
       end
     end
   end

@@ -711,7 +711,7 @@ module Gauge
 
 
       describe '#to_s' do
-        it "returns a column name, type, length, and nullability" do
+        it "returns a column schema string representation" do
           columns.each do |col|
             column = DataColumnSchema.new(col.first)
             expect(column.to_s).to eq "Column #{column.column_name} #{col.last}"

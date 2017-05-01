@@ -1,7 +1,6 @@
 # Eithery Lab, 2017
 # Class Gauge::Schema::DataTableSchema
-# Data table schema
-# Contains metadata info defining a data table structure.
+# Defines a data table.
 
 require 'gauge'
 
@@ -15,7 +14,7 @@ module Gauge
 
       def initialize(name:, sql_schema: nil, db:, table_type: nil, &block)
         @local_name = local_name_of(name)
-        @sql_schema = sql_schema || sql_schema_of(name).to_sym
+        @sql_schema = sql_schema.nil? ? sql_schema_of(name).to_sym : sql_schema.to_s.downcase.to_sym
         @database = db.to_s.downcase.to_sym
         @table_type = table_type
         @columns = []
@@ -32,6 +31,11 @@ module Gauge
       alias_method :to_sym, :table_id
 
 
+      def to_s
+        "Data table #{table_name}"
+      end
+
+
       def table_name
         "#{sql_schema}.#{local_name}"
       end
@@ -44,7 +48,7 @@ module Gauge
       end
 
 
-      def object_name
+      def object_type
         'Data table'
       end
 
