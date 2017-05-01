@@ -14,7 +14,7 @@ module Gauge
           home = File.absolute_path(path, ApplicationHelper.root_path)
           Dir["#{home}/*/"].each do |db_path|
             db = DatabaseSchema.new(db_path)
-            databases[db.to_sym] = db
+            databases[db.database_id] = db
           end
         end
       end
@@ -31,13 +31,13 @@ module Gauge
 
 
       def database?(database_name)
-        db_key = database_name.to_s.downcase.to_sym
-        databases.include?(db_key)
+        db_id = database_name.to_s.downcase.to_sym
+        databases.include?(db_id)
       end
 
 
-      def table?(dbo_name)
-        databases.values.any? { |db| db.has_table? dbo_name }
+      def table?(table_name)
+        databases.values.any? { |db| db.has_table?(table_name) }
       end
 
 

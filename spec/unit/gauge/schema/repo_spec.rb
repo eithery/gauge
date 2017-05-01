@@ -11,7 +11,7 @@ module Gauge
     describe Repo do
       let(:repo) { Repo.new('db') }
       let(:abs_db_path) { File.expand_path(ApplicationHelper.root_path + '/spec/support/data') }
-      let(:db_schema) { double('db_schema', to_sym: :test_db) }
+      let(:db_schema) { double('db_schema', database_id: :test_db) }
 
       it { should respond_to :databases }
       it { should respond_to :clear }
@@ -155,7 +155,7 @@ module Gauge
         end
 
         context "when the passed name is an existing data table name" do
-          it "returns a valid table schema" do
+          it "returns a valid data table schema" do
             reps_table = repo.databases[:test_db].tables[:dbo_primary_reps]
             ref_table = repo.databases[:test_db].tables[:ref_contract_types]
 
