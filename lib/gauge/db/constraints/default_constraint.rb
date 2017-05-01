@@ -10,10 +10,17 @@ module Gauge
       class DefaultConstraint < DatabaseConstraint
         attr_reader :column, :default_value
 
-        def initialize(name, table:, column:, default_value:)
-          super(name, table: table)
+        def initialize(name:, table:, column:, default_value:)
+          super(name: name, table: table)
           @column = column.to_sym.downcase
           @default_value = default_value
+        end
+
+
+        def ==(other_constraint)
+          return false if other_constraint.nil?
+          table == other_constraint.table && column == other_constraint.column &&
+            default_value == other_constraint.default_value
         end
       end
     end
