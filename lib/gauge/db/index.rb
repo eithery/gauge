@@ -1,6 +1,6 @@
 # Eithery Lab, 2017
 # Class Gauge::DB::Index
-# A database index on the data table or data view.
+# A database index defined on a data table or data view.
 
 require 'gauge'
 
@@ -8,8 +8,8 @@ module Gauge
   module DB
     class Index < Constraints::CompositeConstraint
 
-      def initialize(name, table:, columns:, unique: false, clustered: false)
-        super(name, table: table, columns: columns)
+      def initialize(name:, table:, columns:, unique: false, clustered: false)
+        super(name: name, table: table, columns: columns)
         @clustered = clustered
         @unique = unique
       end

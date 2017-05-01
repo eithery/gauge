@@ -18,6 +18,7 @@ module Gauge
 
 
         it { expect(described_class).to be < CompositeConstraint }
+        it { should respond_to :== }
 
 
         describe '#==' do
