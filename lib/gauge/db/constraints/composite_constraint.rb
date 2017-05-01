@@ -11,8 +11,8 @@ module Gauge
       class CompositeConstraint < DatabaseConstraint
         attr_reader :columns
 
-        def initialize(name, table:, columns:)
-          super(name, table: table)
+        def initialize(name:, table:, columns:)
+          super(name: name, table: table)
           @columns = flatten_array_of columns
         end
 
@@ -25,7 +25,7 @@ module Gauge
   protected
 
         def flatten_array_of(columns)
-          [columns].flatten.map { |col| col.downcase.to_sym }
+          [columns].flatten.map { |col| col.to_s.downcase.to_sym }
         end
       end
     end

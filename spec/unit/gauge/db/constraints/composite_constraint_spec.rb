@@ -7,12 +7,15 @@ module Gauge
   module DB
     module Constraints
       describe CompositeConstraint do
+
         let(:one_column_constraint) do
-          CompositeConstraint.new('CC_COMPOSITE_CONSTRAINT_NAME', table: :trades, columns: :rep_code)
+          CompositeConstraint.new(name: 'CC_COMPOSITE_CONSTRAINT_NAME', table: :trades, columns: :rep_code)
         end
         let(:multiple_columns_constraint) do
-          CompositeConstraint.new('CC_COMPOSITE_CONSTRAINT_NAME', table: :trades, columns: [:office_code, :rep_code])
+          CompositeConstraint.new(name: 'CC_COMPOSITE_CONSTRAINT_NAME', table: :trades,
+            columns: [:office_code, :rep_code])
         end
+
         subject { one_column_constraint }
 
 
@@ -24,6 +27,7 @@ module Gauge
 
         describe '#columns' do
           context "when a constraint is applied to one column" do
+            it { expect(one_column_constraint).to have(1).column }
             it { expect(one_column_constraint.columns).to include(:rep_code) }
           end
 
