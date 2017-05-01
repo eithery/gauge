@@ -14,8 +14,8 @@ module Gauge
 
         attr_reader :table
 
-        def initialize(name, table:)
-          super(name)
+        def initialize(name:, table:)
+          super(name: name)
           @table = dbo_id(table)
         end
       end

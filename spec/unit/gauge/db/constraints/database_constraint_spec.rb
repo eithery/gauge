@@ -9,7 +9,7 @@ module Gauge
       include Constants
 
       describe DatabaseConstraint do
-        subject { DatabaseConstraint.new('DC_DB_CONSTRAINT_NAME', table: :fund_accounts) }
+        subject { DatabaseConstraint.new(name: 'DC_DB_CONSTRAINT_NAME', table: :fund_accounts) }
 
         it { expect(described_class).to be < DatabaseObject}
 
@@ -19,7 +19,7 @@ module Gauge
         describe '#table' do
           it "equals to the table name passed in the initializer" do
             TABLES.each do |table_name, actual_table|
-              constraint = DatabaseConstraint.new 'DC_DB_CONSTRAINT_NAME', table: table_name
+              constraint = DatabaseConstraint.new(name: 'DC_DB_CONSTRAINT_NAME', table: table_name)
               expect(constraint.table).to be actual_table
             end
           end
