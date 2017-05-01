@@ -14,7 +14,6 @@ module Gauge
 
       subject { index }
 
-
       it { expect(described_class).to be < Constraints::CompositeConstraint }
 
       it { should respond_to :clustered? }

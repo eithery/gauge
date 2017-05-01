@@ -16,7 +16,6 @@ module Gauge
 
         subject { unique_constraint }
 
-
         it { expect(described_class).to be < CompositeConstraint }
         it { should respond_to :== }
 
