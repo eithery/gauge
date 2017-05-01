@@ -67,6 +67,10 @@ module Gauge
             expect(primary_key.==(key)).to be false
           end
 
+          it "returns false when other primary key is nil" do
+            expect(primary_key.==(nil)).to be false
+          end
+
           context "for composite primary keys" do
             it "returns true for primary keys on same columns in various order" do
               key = PrimaryKeyConstraint.new(name: 'pk_fund_accounts', table: :fund_accounts,

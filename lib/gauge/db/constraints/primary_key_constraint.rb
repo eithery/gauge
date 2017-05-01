@@ -20,6 +20,7 @@ module Gauge
 
 
         def ==(other_key)
+          return false if other_key.nil?
           table == other_key.table && columns.sort == other_key.columns.sort && clustered? == other_key.clustered?
         end
       end
