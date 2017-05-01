@@ -9,12 +9,15 @@ module Gauge
       include Constants
 
       describe ForeignKeyConstraint do
+
         let(:foreign_key) do
-          ForeignKeyConstraint.new('FK_TRADES_PRIMARY_REPS', table: :trades,
+          ForeignKeyConstraint.new(name: 'FK_TRADES_PRIMARY_REPS', table: :trades,
             columns: :rep_code, ref_table: :primary_reps, ref_columns: :code)
         end
+
         let(:composite_foreign_key) do
-          ForeignKeyConstraint.new('fk_trade_accounts', table: :trades, columns: [:account_number, :source_firm_code],
+          ForeignKeyConstraint.new(name: 'fk_trade_accounts', table: :trades,
+            columns: [:account_number, :source_firm_code],
             ref_table: :accounts, ref_columns: [:number, 'Source'])
         end
 
@@ -25,12 +28,13 @@ module Gauge
         it { should respond_to :ref_table }
         it { should respond_to :ref_table_sql }
         it { should respond_to :ref_columns }
+        it { should respond_to :== }
 
 
         describe '#ref_table' do
           it "equals to a table name passed in the initializer" do
             TABLES.each do |table_name, actual_table|
-              foreign_key = ForeignKeyConstraint.new('fk_trades_primary_reps', table: :direct_trades,
+              foreign_key = ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: :direct_trades,
                 columns: :rep_code, ref_table: table_name, ref_columns: :code)
               expect(foreign_key.ref_table).to be actual_table
             end
@@ -49,8 +53,8 @@ module Gauge
 
           it "returns a full table name for SQL statements" do
             REF_TABLES.each do |table, sql|
-              foreign_key = ForeignKeyConstraint.new('fk_some_name', table: :some_table, columns: :some_column,
-                ref_table: table, ref_columns: :some_ref_column)
+              foreign_key = ForeignKeyConstraint.new(name: 'fk_some_name', table: :some_table,
+                columns: :some_column, ref_table: table, ref_columns: :some_ref_column)
               expect(foreign_key.ref_table_sql).to eq sql
             end
           end
@@ -59,6 +63,7 @@ module Gauge
 
         describe '#ref_columns' do
           context "for regular foreign keys" do
+            it { expect(foreign_key.ref_columns).to have(1).item }
             it { expect(foreign_key.ref_columns).to include(:code) }
           end
 
@@ -78,15 +83,15 @@ module Gauge
 
           it "returns true for foreign keys defined on the same tables and columns" do
             [
-              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :trades, columns: :rep_code,
+              ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: :trades, columns: :rep_code,
                 ref_table: :primary_reps, ref_columns: :code),
-              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :dbo_trades, columns: :rep_code,
+              ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: :dbo_trades, columns: :rep_code,
                 ref_table: :dbo_primary_reps, ref_columns: :code),
-              ForeignKeyConstraint.new('fk_trades_primary_reps', table: 'trades', columns: 'rep_code',
+              ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: 'trades', columns: 'rep_code',
                 ref_table: 'primary_reps', ref_columns: 'code'),
-              ForeignKeyConstraint.new('fk_trades_primary_reps', table: 'dbo.trades', columns: 'rep_code',
+              ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: 'dbo.trades', columns: 'rep_code',
                   ref_table: 'dbo.primary_reps', ref_columns: 'code'),
-              ForeignKeyConstraint.new('fk_trades_primary_reps', table: 'TRADES', columns: 'REP_CODE',
+              ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: 'TRADES', columns: 'REP_CODE',
                 ref_table: 'DBO.PRIMARY_REPS', ref_columns: 'CODE')
             ]
             .each do |key|
@@ -97,7 +102,7 @@ module Gauge
           end
 
           it "returns true for foreign keys on the same table and columns but having different names" do
-            key = ForeignKeyConstraint.new('fk_trades_12345', table: :trades, columns: :rep_code,
+            key = ForeignKeyConstraint.new(name: 'fk_trades_12345', table: :trades, columns: :rep_code,
               ref_table: :primary_reps, ref_columns: :code)
             expect(foreign_key.==(key)).to be true
             expect(key.==(foreign_key)).to be true
@@ -105,13 +110,13 @@ module Gauge
 
           it "returns false for different foreign keys" do
             [
-              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :bnr_trades, columns: :rep_code,
+              ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: :bnr_trades, columns: :rep_code,
                 ref_table: :primary_reps, ref_columns: :code),
-              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :trades, columns: :rep_id,
+              ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: :trades, columns: :rep_id,
                 ref_table: :primary_reps, ref_columns: :code),
-              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :trades, columns: :rep_code,
+              ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: :trades, columns: :rep_code,
                 ref_table: :reps, ref_columns: :code),
-              ForeignKeyConstraint.new('fk_trades_primary_reps', table: :trades, columns: :rep_code,
+              ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: :trades, columns: :rep_code,
                 ref_table: :primary_reps, ref_columns: :id)
             ]
             .each do |key|
@@ -126,14 +131,15 @@ module Gauge
 
           context "for composite foreign keys" do
             it "returns true for foreign keys on same columns in various order" do
-              key = ForeignKeyConstraint.new('fk_trade_accounts', table: :trades,
-                columns: [:source_firm_code, :account_number], ref_table: :accounts, ref_columns: ['Source', :number])
+              key = ForeignKeyConstraint.new(name: 'fk_trade_accounts', table: :trades,
+                columns: [:source_firm_code, :account_number], ref_table: :accounts,
+                ref_columns: ['Source', :number])
               expect(composite_foreign_key.==(key)).to be true
               expect(key.==(composite_foreign_key)).to be true
             end
 
             it "returns false for different number of columns" do
-              key = ForeignKeyConstraint.new('fk_trade_accounts', table: :trades,
+              key = ForeignKeyConstraint.new(name: 'fk_trade_accounts', table: :trades,
                 columns: [:account_number, :source_firm_code, :ordinal], ref_table: :accounts,
                 ref_columns: [:number, 'Source', :ordinal])
               expect(composite_foreign_key.==(key)).to be false

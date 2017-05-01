@@ -10,8 +10,8 @@ module Gauge
       class ForeignKeyConstraint < CompositeConstraint
         attr_reader :ref_table, :ref_columns
 
-        def initialize(name, table:, columns:, ref_table:, ref_columns:)
-          super(name, table: table, columns: columns)
+        def initialize(name:, table:, columns:, ref_table:, ref_columns:)
+          super(name: name, table: table, columns: columns)
           @ref_table = dbo_id(ref_table)
           @ref_columns = flatten_array_of ref_columns
         end
