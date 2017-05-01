@@ -22,6 +22,11 @@ module Gauge
         end
 
 
+        def ==(other_constraint)
+          super && columns.sort == other_constraint.columns.sort
+        end
+
+
   protected
 
         def flatten_array_of(columns)

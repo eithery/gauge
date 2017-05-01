@@ -22,10 +22,6 @@ module Gauge
 
 
         describe '#==' do
-          it "returns true for same unique constraint instances" do
-            expect(unique_constraint.==(unique_constraint)).to be true
-          end
-
           it "returns true for unique constraints on the same table and column" do
             constraint = UniqueConstraint.new(name: 'uc_reps_rep_code', table: :reps, columns: :rep_code)
             expect(unique_constraint).to_not equal(constraint)
@@ -45,16 +41,13 @@ module Gauge
             expect(constraint.==(unique_constraint)).to be false
           end
 
-          it "return false when other unique constraint is nil" do
-            expect(unique_constraint.==(nil)).to be false
-          end
-
           context "for composite unique constraints" do
             it "returns true for unique constraints on same columns in various order" do
               constraint = UniqueConstraint.new(name: 'uc_fund_accounts', table: :fund_accounts,
                 columns: [:fund_account_number, :cusip])
               inverse_order_constraint = UniqueConstraint.new(name: 'uc_fund_accounts', table: :fund_accounts,
                 columns: [:cusip, :fund_account_number])
+
               expect(composite_unique_constraint.==(constraint)).to be true
               expect(constraint.==(composite_unique_constraint)).to be true
               expect(composite_unique_constraint.==(inverse_order_constraint)).to be true

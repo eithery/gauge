@@ -18,6 +18,12 @@ module Gauge
           super(name: name)
           @table = dbo_id(table)
         end
+
+
+        def ==(other_constraint)
+          return false if other_constraint.nil?
+          table == other_constraint.table
+        end
       end
     end
   end

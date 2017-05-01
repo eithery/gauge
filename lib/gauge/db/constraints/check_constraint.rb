@@ -18,9 +18,7 @@ module Gauge
 
 
         def ==(other_constraint)
-          return false if other_constraint.nil?
-          table == other_constraint.table && columns.sort == other_constraint.columns.sort &&
-            expression == other_constraint.expression
+          super && expression == other_constraint.expression
         end
       end
     end

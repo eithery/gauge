@@ -44,11 +44,7 @@ module Gauge
 
 
         describe '#==' do
-          it "returns true for same primary key instances" do
-            expect(primary_key.==(primary_key)).to be true
-          end
-
-          it "returns true for primary keys on the same table and column" do
+          it "returns true for primary keys on the same table and columns" do
             key = PrimaryKeyConstraint.new(name: 'pk_reps', table: :reps, columns: :rep_code)
             expect(key).to_not equal(primary_key)
             expect(key.==(primary_key)).to be true
@@ -65,10 +61,6 @@ module Gauge
             key = PrimaryKeyConstraint.new(name: 'PK_REPS', table: :reps, columns: :rep_code, clustered: false)
             expect(key.==(primary_key)).to be false
             expect(primary_key.==(key)).to be false
-          end
-
-          it "returns false when other primary key is nil" do
-            expect(primary_key.==(nil)).to be false
           end
 
           context "for composite primary keys" do

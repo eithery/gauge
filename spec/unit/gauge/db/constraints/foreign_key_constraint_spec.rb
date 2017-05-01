@@ -77,10 +77,6 @@ module Gauge
 
 
         describe '#==' do
-          it "returns true for the same foreign key instances" do
-            expect(foreign_key.==(foreign_key)).to be true
-          end
-
           it "returns true for foreign keys defined on the same tables and columns" do
             [
               ForeignKeyConstraint.new(name: 'fk_trades_primary_reps', table: :trades, columns: :rep_code,
@@ -123,10 +119,6 @@ module Gauge
               expect(foreign_key.==(key)).to be false
               expect(key.==(foreign_key)).to be false
             end
-          end
-
-          it "return false when other foreign key is nil" do
-            expect(foreign_key.==(nil)).to be false
           end
 
           context "for composite foreign keys" do

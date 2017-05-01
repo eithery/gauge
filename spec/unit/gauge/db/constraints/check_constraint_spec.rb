@@ -31,10 +31,6 @@ module Gauge
 
 
         describe '#==' do
-          it "returns true for same check constraint instances" do
-            expect(check_constraint.==(check_constraint)).to be true
-          end
-
           it "returns true for check constraints on the same table, column, and expression" do
             constraint = CheckConstraint.new(name: 'ck_reps_is_active', table: 'REPS',
               columns: 'is_active', check: 0..1)
@@ -55,6 +51,7 @@ module Gauge
               columns: :is_enabled, check: 0..1)
             other_table_constraint = CheckConstraint.new(name: 'ck_reps_is_active', table: :offices,
               columns: :is_active, check: 0..1)
+
             expect(check_constraint.==(constraint)).to be false
             expect(constraint.==(check_constraint)).to be false
             expect(check_constraint.==(other_table_constraint)).to be false
@@ -66,10 +63,6 @@ module Gauge
               columns: :is_active, check: '>= 2')
             expect(check_constraint.==(constraint)).to be false
             expect(constraint.==(check_constraint)).to be false
-          end
-
-          it "returns false when other check constraint is nil" do
-            expect(check_constraint.==(nil)).to be false
           end
         end
       end

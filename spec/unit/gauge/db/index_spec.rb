@@ -77,10 +77,6 @@ module Gauge
 
 
       describe '#==' do
-        it "returns true for same index instances" do
-          expect(index.==(index)).to be true
-        end
-
         it "returns true for indexes on the same table and column" do
           idx = Index.new(name: 'idx_reps_rep_code', table: :reps, columns: :rep_code)
           expect(index).to_not equal(idx)
@@ -98,10 +94,6 @@ module Gauge
           unique_index = Index.new(name: 'idx_reps_rep_code', table: :reps, columns: :rep_code, unique: true)
           expect(index.==(unique_index)).to be false
           expect(unique_index.==(index)).to be false
-        end
-
-        it "return false when other index is nil" do
-          expect(index.==(nil)).to be false
         end
 
         context "for composite indexes" do

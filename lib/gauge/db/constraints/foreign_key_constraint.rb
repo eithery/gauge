@@ -18,9 +18,7 @@ module Gauge
 
 
         def ==(other_key)
-          return false if other_key.nil?
-          table == other_key.table && columns.sort == other_key.columns.sort &&
-          ref_table == other_key.ref_table && ref_columns.sort == other_key.ref_columns.sort
+          super && ref_table == other_key.ref_table && ref_columns.sort == other_key.ref_columns.sort
         end
 
 

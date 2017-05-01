@@ -40,10 +40,6 @@ module Gauge
 
 
         describe '#==' do
-          it "returns true for same default constraint instances" do
-            expect(default_constraint.==(default_constraint)).to be true
-          end
-
           it "returns true for default constraints on the same table, column, and default value" do
             constraint = DefaultConstraint.new(name: 'df_reps_is_active', table: 'REPS',
               column: 'is_active', default_value: true)
@@ -64,6 +60,7 @@ module Gauge
               column: :is_enabled, default_value: true)
             other_table_constraint = DefaultConstraint.new(name: 'df_reps_is_active', table: :offices,
               column: :is_active, default_value: true)
+
             expect(default_constraint.==(constraint)).to be false
             expect(constraint.==(default_constraint)).to be false
             expect(default_constraint.==(other_table_constraint)).to be false

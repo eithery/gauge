@@ -11,6 +11,7 @@ module Gauge
         let(:one_column_constraint) do
           CompositeConstraint.new(name: 'CC_COMPOSITE_CONSTRAINT_NAME', table: :trades, columns: :rep_code)
         end
+        let(:composite_constraint) { one_column_constraint }
         let(:multiple_columns_constraint) do
           CompositeConstraint.new(name: 'CC_COMPOSITE_CONSTRAINT_NAME', table: :trades,
             columns: [:office_code, :rep_code])
@@ -23,6 +24,7 @@ module Gauge
 
         it { should respond_to :columns }
         it { should respond_to :composite? }
+        it { should respond_to :== }
 
 
         describe '#columns' do
@@ -47,6 +49,36 @@ module Gauge
 
           context "for composite (multiple column) database constraints" do
             it { expect(multiple_columns_constraint).to be_composite }
+          end
+        end
+
+
+        describe '#==' do
+          it "returns true for composite constraints on the same table and columns" do
+            constraint = CompositeConstraint.new(name: 'cc_composite_constraint_name', table: 'TRADES',
+              columns: 'rep_code')
+            expect(composite_constraint).to_not equal(constraint)
+            expect(composite_constraint.==(constraint)).to be true
+            expect(constraint.==(composite_constraint)).to be true
+          end
+
+          it "returns true for same composite constraints having different names" do
+            constraint = CompositeConstraint.new(name: 'cc_other_constraint_name', table: :TRADES,
+              columns: 'REP_CODE')
+            expect(composite_constraint.==(constraint)).to be true
+            expect(constraint.==(composite_constraint)).to be true
+          end
+
+          it "returns false for composite constraints on different tables or columns" do
+            constraint = CompositeConstraint.new(name: 'CC_COMPOSITE_CONSTRAINT_NAME', table: :trades,
+              columns: :office_code)
+            other_table_constraint = CompositeConstraint.new(name: 'CC_COMPOSITE_CONSTRAINT_NAME',
+              table: :fund_accounts, columns: :rep_code)
+
+            expect(composite_constraint.==(constraint)).to be false
+            expect(constraint.==(composite_constraint)).to be false
+            expect(composite_constraint.==(other_table_constraint)).to be false
+            expect(other_table_constraint.==(composite_constraint)).to be false
           end
         end
       end
