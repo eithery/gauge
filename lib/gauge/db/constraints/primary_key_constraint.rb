@@ -8,8 +8,8 @@ module Gauge
   module DB
     module Constraints
       class PrimaryKeyConstraint < CompositeConstraint
-        def initialize(name, table:, columns:, clustered: true)
-          super(name, table: table, columns: columns)
+        def initialize(name:, table:, columns:, clustered: true)
+          super(name: name, table: table, columns: columns)
           @clustered = clustered
         end
 
