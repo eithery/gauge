@@ -134,7 +134,7 @@ module Gauge
         if has_index?
           index_options = @options[:index]
           index_options = {} unless index_options.kind_of? Hash
-          Gauge::DB::Index.new("idx_#{table.table_id}_#{column_id}", table: table.table_name,
+          Gauge::DB::Index.new(name: "idx_#{table.table_id}_#{column_id}", table: table.table_name,
             columns: column_id, unique: index_options[:unique], clustered: index_options[:clustered])
         end
       end
@@ -148,7 +148,7 @@ module Gauge
 
       def unique_constraint
         if has_unique_constraint?
-          Gauge::DB::Constraints::UniqueConstraint.new("uc_#{table.table_id}_#{column_id}",
+          Gauge::DB::Constraints::UniqueConstraint.new(name: "uc_#{table.table_id}_#{column_id}",
             table: table.table_name, columns: column_id)
         end
       end
@@ -163,7 +163,7 @@ module Gauge
         if has_foreign_key?
           ref_table_name = "#{ref_table_options[:schema]}.#{ref_table_options[:table]}"
           ref_table = dbo_id(ref_table_name)
-          Gauge::DB::Constraints::ForeignKeyConstraint.new("fk_#{table.table_id}_#{ref_table}_#{column_id}",
+          Gauge::DB::Constraints::ForeignKeyConstraint.new(name: "fk_#{table.table_id}_#{ref_table}_#{column_id}",
             table: table.table_name, columns: column_id, ref_table: ref_table_name, ref_columns: ref_column)
         end
       end

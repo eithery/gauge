@@ -103,7 +103,7 @@ module Gauge
 
       def index(columns, unique: false, clustered: false)
         index_name = "idx_#{table_id}_" + constraint_columns(columns).map { |col| col.to_s.downcase }.join('_')
-        indexes << Gauge::DB::Index.new(index_name, table: table_name, columns: columns,
+        indexes << Gauge::DB::Index.new(name: index_name, table: table_name, columns: columns,
           unique: unique, clustered: clustered)
       end
 
@@ -115,7 +115,7 @@ module Gauge
 
       def unique(columns)
         constraint_name = "uc_#{table_id}_" + constraint_columns(columns).map { |col| col.to_s.downcase }.join('_')
-        unique_constraints << Gauge::DB::Constraints::UniqueConstraint.new(constraint_name, table: table_name,
+        unique_constraints << Gauge::DB::Constraints::UniqueConstraint.new(name: constraint_name, table: table_name,
           columns: columns)
       end
 
@@ -128,7 +128,7 @@ module Gauge
       def foreign_key(columns, ref_table:, ref_columns:)
         ref_table_id = dbo_id(ref_table)
         constraint_name = "fk_#{table_id}_#{ref_table_id}_#{constraint_columns(columns).join('_')}"
-        foreign_keys << Gauge::DB::Constraints::ForeignKeyConstraint.new(constraint_name, table: table_name,
+        foreign_keys << Gauge::DB::Constraints::ForeignKeyConstraint.new(name: constraint_name, table: table_name,
           columns: columns, ref_table: ref_table, ref_columns: ref_columns)
       end
 
@@ -171,7 +171,7 @@ private
       def define_primary_key
         has_clustered_index = indexes.any? { |idx| idx.clustered? }
         key_columns = columns.select { |col| col.id? }.map { |col| col.column_id }
-        DB::Constraints::PrimaryKeyConstraint.new("pk_#{table_id}", table: table_name, columns: key_columns,
+        DB::Constraints::PrimaryKeyConstraint.new(name: "pk_#{table_id}", table: table_name, columns: key_columns,
           clustered: !has_clustered_index)
       end
 
@@ -193,7 +193,7 @@ private
 
       def define_indexes_on_foreign_keys
         foreign_keys.map do |foreign_key|
-          Gauge::DB::Index.new("idx_#{table_id}_#{foreign_key.columns.join('_')}", table: table_name,
+          Gauge::DB::Index.new(name: "idx_#{table_id}_#{foreign_key.columns.join('_')}", table: table_name,
             columns: foreign_key.columns)
         end
       end
@@ -204,7 +204,7 @@ private
         return [] unless business_key_columns.any?
 
         index_name = "idx_#{table_id}_" + business_key_columns.each { |col| col.to_s }.join('_')
-        [DB::Index.new(index_name, table: table_name, columns: business_key_columns, clustered: true)]
+        [DB::Index.new(name: index_name, table: table_name, columns: business_key_columns, clustered: true)]
       end
 
 

@@ -674,8 +674,8 @@ module Gauge
         subject(:index) { table.indexes.first }
 
         it "creates a new index" do
-          expect(Gauge::DB::Index).to receive(:new).with('idx_dbo_reps_rep_code',
-            hash_including(table: 'dbo.reps', columns: :rep_code, clustered: true))
+          expect(Gauge::DB::Index).to receive(:new).with(name: 'idx_dbo_reps_rep_code', table: 'dbo.reps',
+            columns: :rep_code, unique: false, clustered: true)
           table.col :rep_code
           table.index :rep_code, clustered: true
         end
@@ -820,8 +820,8 @@ module Gauge
         subject { table.unique_constraints.first }
 
         it "creates a new unique constraint" do
-          expect(Gauge::DB::Constraints::UniqueConstraint).to receive(:new).with('uc_dbo_reps_rep_code',
-            hash_including(table: 'dbo.reps', columns: :rep_code))
+          expect(Gauge::DB::Constraints::UniqueConstraint).to receive(:new).with(name: 'uc_dbo_reps_rep_code',
+            table: 'dbo.reps', columns: :rep_code)
           table.col :rep_code
           table.unique :rep_code
         end
@@ -932,8 +932,9 @@ module Gauge
         subject { table.foreign_keys.last }
 
         it "creates a new foreign key" do
-          expect(Gauge::DB::Constraints::ForeignKeyConstraint).to receive(:new).with('fk_dbo_reps_dbo_offices_office_code',
-            hash_including(table: 'dbo.reps', columns: :office_code, ref_table: :offices, ref_columns: :code))
+          expect(Gauge::DB::Constraints::ForeignKeyConstraint).to receive(:new)
+            .with(name: 'fk_dbo_reps_dbo_offices_office_code', table: 'dbo.reps', columns: :office_code,
+            ref_table: :offices, ref_columns: :code)
           table.col :office_code
           table.foreign_key :office_code, ref_table: :offices, ref_columns: :code
         end
