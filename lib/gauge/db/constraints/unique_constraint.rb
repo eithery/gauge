@@ -9,7 +9,7 @@ module Gauge
     module Constraints
       class UniqueConstraint < CompositeConstraint
 
-        def initialize(name, table:, columns:)
+        def initialize(name:, table:, columns:)
           super
         end
 
