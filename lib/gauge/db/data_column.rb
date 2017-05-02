@@ -1,6 +1,6 @@
 # Eithery Lab, 2017
 # Class Gauge::DB::DataColumn
-# Defines an actual data table column.
+# An actual data table column.
 
 require 'gauge'
 
@@ -8,10 +8,17 @@ module Gauge
   module DB
     class DataColumn < DatabaseObject
 
-      def initialize(name, options={})
-        super(name)
+      def initialize(name:, options: {})
+        super(name: name)
         @options = options
       end
+
+
+      def column_id
+        name.to_s.downcase.to_sym
+      end
+
+      alias_method :column_id, :to_sym
 
 
       def data_type
@@ -34,11 +41,6 @@ module Gauge
         return sequel_constant(default) if default.kind_of? Sequel::SQL::Constant
         return $1 if default.to_s =~ /\A\((.*)\)\z/i
         default
-      end
-
-
-      def to_sym
-        name.downcase.to_sym
       end
 
 
