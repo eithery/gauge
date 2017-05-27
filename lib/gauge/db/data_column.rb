@@ -18,7 +18,7 @@ module Gauge
         name.to_s.downcase.to_sym
       end
 
-      alias_method :column_id, :to_sym
+      alias_method :to_sym, :column_id
 
 
       def data_type

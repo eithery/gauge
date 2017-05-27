@@ -30,7 +30,7 @@ module Gauge
             :Rep_Code => :rep_code
           }
           .each do |column_name, expected_symbol|
-            expect(DataColumn.new(name: column_name).to_sym).to eq expected_symbol
+            expect(DataColumn.new(name: column_name).column_id).to eq expected_symbol
           end
         end
       end
@@ -40,6 +40,7 @@ module Gauge
         it "is alias of 'column_id'" do
           expect(column.to_sym).to be column.column_id
           expect(column.to_sym).to_not be nil
+          expect(column.to_sym).to be :rep_code
         end
       end
 

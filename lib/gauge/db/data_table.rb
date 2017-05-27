@@ -7,69 +7,66 @@ require 'gauge'
 module Gauge
   module DB
     class DataTable < DatabaseObject
-      def initialize(name, db:)
-        super(name)
+      include Gauge::Helpers::NamesHelper
+
+      def initialize(name:, db:)
+        super(name: name)
         @database = db
       end
 
 
+      def table_id
+        dbo_id(name)
+      end
+
+      alias_method :to_sym, :table_id
+
+
       def columns
         local_name = name.split('.').last
-        @columns ||= @database.schema(local_name).map do |column_name, options|
-          DataColumn.new(column_name, options)
+        @columns ||= @database.schema(local_name).map do |column_name, column_options|
+          DataColumn.new(name: column_name, options: column_options)
         end
       end
 
 
       def column_exists?(column_name)
-        columns.any? { |col| col.to_sym == key_of(column_name) }
+        columns.any? { |col| col.column_id == column_name.to_s.downcase.to_sym }
       end
 
 
       def column(column_name)
-        columns.select { |col| col.to_sym == key_of(column_name) }.first
+        columns.select { |col| col.column_id == column_name.to_s.downcase.to_sym }.first
       end
 
 
       def primary_key
-        @database.primary_keys.select { |pk| pk.table == to_sym }.first
+        @database.primary_keys.select { |pk| pk.table == table_id }.first
       end
 
 
       def foreign_keys
-        @database.foreign_keys.select { |fk| fk.table == to_sym }
+        @database.foreign_keys.select { |fk| fk.table == table_id }
       end
 
 
       def unique_constraints
-        @database.unique_constraints.select { |uc| uc.table == to_sym }
+        @database.unique_constraints.select { |uc| uc.table == table_id }
       end
 
 
       def check_constraints
-        @database.check_constraints.select { |cc| cc.table == to_sym }
+        @database.check_constraints.select { |cc| cc.table == table_id }
       end
 
 
       def default_constraints
-        @database.default_constraints.select { |dc| dc.table == to_sym }
+        @database.default_constraints.select { |dc| dc.table == table_id }
       end
 
 
       def indexes
-        @database.indexes.select { |idx| idx.table == to_sym }
-      end
-
-
-      def to_sym
-        Gauge::Helpers::NameParser.dbo_key_of name
-      end
-
-
-  private
-
-      def key_of(column_name)
-        column_name.downcase.to_sym
+        @database.indexes.select { |idx| idx.table == table_id }
       end
     end
   end

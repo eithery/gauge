@@ -7,7 +7,8 @@ module Gauge
   module DB
     include Constraints
 
-    describe DataTable do
+    describe DataTable, f: true do
+
       let(:database) do
         database = double('database')
         database.stub(:schema).and_return([
@@ -19,14 +20,15 @@ module Gauge
         database
       end
 
-      let(:table) { DataTable.new('PRIMARY_REPS', db: database) }
-      let(:no_constraints_table) { DataTable.new('no_constraints_table', db: database) }
+      let(:table) { DataTable.new(name: 'PRIMARY_REPS', db: database) }
+      let(:empty_table) { DataTable.new(name: 'empty_table', db: database) }
 
       subject { table }
 
 
       it { expect(DataTable).to be < DatabaseObject }
 
+      it { should respond_to :table_id }
       it { should respond_to :columns }
       it { should respond_to :column_exists? }
       it { should respond_to :column }
@@ -39,17 +41,44 @@ module Gauge
       it { should respond_to :to_sym }
 
 
+      describe '#table_id' do
+        it "returns a data table name and schema combination converted to a symbol" do
+          {
+            'PRIMARY_REPS' => :dbo_primary_reps,
+            'master_Accounts' => :dbo_master_accounts,
+            'bnr.tradeS' => :bnr_trades,
+            :dbo_primary_reps => :dbo_primary_reps,
+            :Accounts => :dbo_accounts
+          }
+          .each do |table_name, expected_table_id|
+            expect(DataTable.new(name: table_name, db: database).table_id).to be expected_table_id
+          end
+        end
+      end
+
+
+      describe '#to_sym' do
+        it "is alias of 'table_id'" do
+          expect(table.to_sym).to be table.table_id
+          expect(empty_table.to_sym).to be empty_table.table_id
+          expect(table.to_sym).to_not be nil
+          expect(empty_table.to_sym).to_not be nil
+          expect(table.to_sym).to be :dbo_primary_reps
+        end
+      end
+
+
       describe '#columns' do
         it { expect(table.columns).to_not be_empty }
         it { expect(table).to have(4).columns }
 
         context "where the last column" do
-          subject(:last_column) { table.columns.last }
+          let(:last_column) { table.columns.last }
 
-          it { expect(table.columns.last).to be_a DataColumn }
-          it { expect(table.columns.last.name).to eq 'Is_Active' }
-          it { expect(table.columns.last.data_type).to be :tinyint }
-          it { expect(table.columns.last.to_sym).to be :is_active }
+          it { expect(last_column).to be_a DataColumn }
+          it { expect(last_column.name).to eq 'Is_Active' }
+          it { expect(last_column.data_type).to be :tinyint }
+          it { expect(last_column.column_id).to be :is_active }
         end
       end
 
@@ -102,9 +131,9 @@ module Gauge
 
       describe '#primary_key' do
         let(:primary_keys) {[
-          PrimaryKeyConstraint.new('pk_accounts', table: :accounts, columns: :account_number, clustered: true),
-          PrimaryKeyConstraint.new('pk_primary_reps', table: :primary_reps, columns: :rep_code),
-          PrimaryKeyConstraint.new('pk_office_types', table: :office_types, columns: :id, clustered: false)
+          PrimaryKeyConstraint.new(name: 'pk_accounts', table: :accounts, columns: :account_number, clustered: true),
+          PrimaryKeyConstraint.new(name: 'pk_primary_reps', table: :primary_reps, columns: :rep_code),
+          PrimaryKeyConstraint.new(name: 'pk_office_types', table: :office_types, columns: :id, clustered: false)
         ]}
         before { database.stub(:primary_keys).and_return(primary_keys) }
 
@@ -113,18 +142,18 @@ module Gauge
         end
 
         it "returns nil when the table does not have a primary key" do
-          expect(no_constraints_table.primary_key).to be nil
+          expect(empty_table.primary_key).to be nil
         end
       end
 
 
       describe '#foreign_keys' do
         let(:foreign_keys) {[
-          ForeignKeyConstraint.new('fk_accounts_rep_code', table: :accounts, columns: :rep_code,
+          ForeignKeyConstraint.new(name: 'fk_accounts_rep_code', table: :accounts, columns: :rep_code,
             ref_table: :primary_reps, ref_columns: :code ),
-          ForeignKeyConstraint.new('fk_reps_office_code', table: :primary_reps, columns: :office_code,
+          ForeignKeyConstraint.new(name: 'fk_reps_office_code', table: :primary_reps, columns: :office_code,
             ref_table: :offices, ref_columns: :code),
-          ForeignKeyConstraint.new('fk_trades_account', table: :trades, columns: [:account_number, :source_code],
+          ForeignKeyConstraint.new(name: 'fk_trades_account', table: :trades, columns: [:account_number, :source_code],
             ref_table: :accounts, ref_columns: [:number, :source])
         ]}
         before { database.stub(:foreign_keys).and_return(foreign_keys) }
@@ -135,16 +164,16 @@ module Gauge
         end
 
         it "returns an empty collection when the table does not have foreign keys" do
-          expect(no_constraints_table.foreign_keys).to be_empty
+          expect(empty_table.foreign_keys).to be_empty
         end
       end
 
 
       describe '#unique_constraints' do
         let(:unique_constraints) {[
-          UniqueConstraint.new('uq_account_number', table: :trades, columns: :account_number),
-          UniqueConstraint.new('uq_rep_code', table: :primary_reps, columns: :rep_code),
-          UniqueConstraint.new('uq_office_code', table: :primary_reps, columns: :office_code)
+          UniqueConstraint.new(name: 'uq_account_number', table: :trades, columns: :account_number),
+          UniqueConstraint.new(name: 'uq_rep_code', table: :primary_reps, columns: :rep_code),
+          UniqueConstraint.new(name: 'uq_office_code', table: :primary_reps, columns: :office_code)
         ]}
         before { database.stub(:unique_constraints).and_return(unique_constraints)}
 
@@ -154,16 +183,17 @@ module Gauge
         end
 
         it "returns an empty collection when the table does not have unique constraints" do
-          expect(no_constraints_table.unique_constraints).to be_empty
+          expect(empty_table.unique_constraints).to be_empty
         end
       end
 
 
       describe '#check_constraints' do
         let(:check_constraints) {[
-          CheckConstraint.new('cc_reps_is_enabled', table: :primary_reps, columns: :is_enabled, check: 0..1),
-          CheckConstraint.new('cc_reps_ordinal', table: :primary_reps, columns: :ordinal, check: 'len(ordinal) > 0'),
-          CheckConstraint.new('cc_trade_type', table: :trade, columns: :trade_type, check: 0..5)
+          CheckConstraint.new(name: 'cc_reps_is_enabled', table: :primary_reps, columns: :is_enabled, check: 0..1),
+          CheckConstraint.new(name: 'cc_reps_ordinal', table: :primary_reps, columns: :ordinal,
+            check: 'len(ordinal) > 0'),
+          CheckConstraint.new(name: 'cc_trade_type', table: :trade, columns: :trade_type, check: 0..5)
         ]}
         before { database.stub(:check_constraints).and_return(check_constraints) }
 
@@ -173,15 +203,16 @@ module Gauge
         end
 
         it "returns an empty collection when the table does not have check constraints" do
-          expect(no_constraints_table.check_constraints).to be_empty
+          expect(empty_table.check_constraints).to be_empty
         end
       end
 
 
       describe '#default_constraints' do
         let(:default_constraints) {[
-          DefaultConstraint.new('df_address_state', table: :addresses, column: :us_state, default_value: 'US'),
-          DefaultConstraint.new('df_reps_is_enabled', table: :primary_reps, column: :is_enabled, default_value: true)
+          DefaultConstraint.new(name: 'df_address_state', table: :addresses, column: :us_state, default_value: 'US'),
+          DefaultConstraint.new(name: 'df_reps_is_enabled', table: :primary_reps, column: :is_enabled,
+            default_value: true)
         ]}
         before { database.stub(:default_constraints).and_return(default_constraints) }
 
@@ -191,15 +222,15 @@ module Gauge
         end
 
         it "returns and empty collection when the table does not have default constraints" do
-          expect(no_constraints_table.default_constraints).to be_empty
+          expect(empty_table.default_constraints).to be_empty
         end
       end
 
 
       describe '#indexes' do
         let(:indexes) {[
-          Index.new('idx_account_number', table: :trades, columns: :account_number, unique: true),
-          Index.new('idx_rep_office_code', table: :primary_reps, columns: [:rep_code, :office_code],
+          Index.new(name: 'idx_account_number', table: :trades, columns: :account_number, unique: true),
+          Index.new(name: 'idx_rep_office_code', table: :primary_reps, columns: [:rep_code, :office_code],
             clustered: true, unique: true)
         ]}
         before { database.stub(:indexes).and_return(indexes) }
@@ -210,23 +241,7 @@ module Gauge
         end
 
         it "returns an empty collection when the table does not have indexes" do
-          expect(no_constraints_table.indexes).to be_empty
-        end
-      end
-
-
-      describe '#to_sym' do
-        it "returns a data table name and schema combination converted to a symbol" do
-          {
-            'PRIMARY_REPS' => :dbo_primary_reps,
-            'master_Accounts' => :dbo_master_accounts,
-            'bnr.tradeS' => :bnr_trades,
-            :dbo_primary_reps => :dbo_primary_reps,
-            :Accounts => :dbo_accounts
-          }
-          .each do |name, expected_symbol|
-            expect(DataTable.new(name, db: database).to_sym).to be expected_symbol
-          end
+          expect(empty_table.indexes).to be_empty
         end
       end
     end
