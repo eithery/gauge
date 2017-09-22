@@ -1,3 +1,6 @@
+# Eithery, 2017
+# Gemfile
+
 source 'https://rubygems.org'
 
 gem 'activesupport'
