@@ -1,5 +1,5 @@
-# Eithery Lab., 2017
-# Gauge application configuration options.
+# Eithery, 2017
+# Gauge app configuration options.
 ---
 # Server name.
 :server: localhost
@@ -10,7 +10,7 @@
 # User password.
 :password: secret
 
-# When true the console output is colored.
+# Determines whether console output is colored.
 :colored: true
 
 # The array of paths with Gauge metadata.
