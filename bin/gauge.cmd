@@ -1,6 +1,6 @@
-# Eithery, 2017
+# Eithery, 2020
 # Command batch file for Windows
-# Runs gauge via ruby interpreter.
+# Runs gauge via ruby
 
 @echo off
 ruby.exe "%~dpn0" %*

@@ -1,18 +1,16 @@
-# Eithery, 2017
-# Gauge app configuration options.
+# Eithery, 2020
+# Gauge app configuration options
 ---
-# Server name.
-:server: localhost
+# Server name
+server: localhost
 
-# User ID to connect to the database.
-:user: admin
+# User DB credentials
+user: admin
+password: secret
 
-# User password.
-:password: secret
+# Determines whether console output is colored
+colored: true
 
-# Determines whether console output is colored.
-:colored: true
-
-# The array of paths with Gauge metadata.
-# Can be relative or absolute.
-:data_path: [db]
+# The array of paths with Gauge metadata
+# Can be relative or absolute
+data_path: [db]

@@ -1,0 +1,9 @@
+AllCops:
+  NewCops: enable
+
+Style/Documentation:
+  Enabled: false
+Style/StringConcatenation:
+  Enabled: false
+Style/SymbolArray:
+  Enabled: false
