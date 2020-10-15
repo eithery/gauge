@@ -1,20 +1,57 @@
-# Ignore bundler config.
-/.bundle
+# Ignore bundler configs
+/.bundle/
+/vendor/bundle
+/lib/bundler/man/
 
-# Ignore the default SQLite database.
+# Ignore gems and pkg
+*.gem
+/pkg/
+
+# Ignore the default SQLite database
 /db/*.sqlite3
 /db/*.sqlite3-journal
 
-# Ignore all logfiles and tempfiles.
+# Ignore logfiles and tempfiles
 /log/*.log
-/tmp
-/data
+/tmp/
+/test/tmp/
+/test/version_tmp/
 
-# Ignore RubyMine files.
+# Ignore RubyMine files
 /.idea
-# Ignore Sublime Text files.
+# Ignore Sublime Text files
 /*.sublime*
-# Ignore Visual Studio Code setting folders.
+# Ignore Visual Studio Code setting folders
 /.vscode
-# Ignore MacOS directory folders.
+# Ignore MacOS directory folders
 .DS_Store
+
+# Used by dotenv library to load environment variables
+.env
+
+# Test reports and coverage
+/spec/reports/
+/spec/examples.txt
+/coverage/
+
+*.rbc
+/.config
+.rvmrc
+/InstalledFiles
+
+# Ignore Byebug command history file
+.byebug_history
+
+## Specific to RubyMotion:
+.dat*
+.repl_history
+build/
+*.bridgesupport
+build-iPhoneOS/
+build-iPhoneSimulator/
+
+# Documentation cache and generated files
+/.yardoc/
+/_yardoc/
+/doc/
+/rdoc/
