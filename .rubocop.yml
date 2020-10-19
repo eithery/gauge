@@ -7,3 +7,11 @@ Style/StringConcatenation:
   Enabled: false
 Style/SymbolArray:
   Enabled: false
+Style/SpecialGlobalVars:
+  Enabled: false
+
+Naming/HeredocDelimiterNaming:
+  Enabled: false
+
+Lint/NonDeterministicRequireOrder:
+  Enabled: false

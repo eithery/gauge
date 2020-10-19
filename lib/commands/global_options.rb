@@ -7,11 +7,11 @@ module Gauge
     config_file = File.join(__dir__, '../../config/gauge.rc.yml')
     defaults = YAML.load_file(config_file)
 
-    desc 'Displays the application version'
-    switch [:v, :version]
-
     desc 'Displays help information'
     switch [:h, :help]
+
+    desc 'Displays the application version'
+    switch [:v, :version]
 
     desc 'Database server name'
     default_value defaults[:server] || 'local'

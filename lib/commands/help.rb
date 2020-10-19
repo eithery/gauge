@@ -5,13 +5,9 @@
 module Gauge
   module CLI
     desc 'Displays help information'
-    command [:k, :kva] do |c|
-      c.action do |global_opts, options, args|
-        puts 'HELP'
-        p global_opts
-        p options
-        p args
-        # Gauge::Shell.new.help global_opts
+    command [:h, :help] do |c|
+      c.action do |global_opts|
+        puts Gauge::Shell.new(global_opts).app_info
       end
     end
   end

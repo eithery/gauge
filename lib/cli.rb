@@ -3,6 +3,7 @@
 # frozen_string_literal: true
 
 require 'gli'
+require_relative 'gauge'
 
 module Gauge
   module CLI
@@ -12,8 +13,7 @@ module Gauge
     subcommand_option_handling :normal
     arguments :strict
 
-    Dir["#{__dir__}/commands/**/*.rb"].sort.each { |f| require f }
-
+    Dir["#{__dir__}/commands/**/*.rb"].each { |f| require f }
     run(ARGV)
   end
 end

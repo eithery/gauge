@@ -1,20 +1,23 @@
-# Eithery Lab, 2017
-# Class Gauge::Shell
-# Executes application commands.
-
-require 'gauge'
+# Eithery, 2020
+# CLI application shell
+# frozen_string_literal: true
 
 module Gauge
   class Shell
-    def initialize
-      Rainbow.enabled = true
+    def initialize(options)
+      @global_options = GlobalOptions.new(options)
+      Rainbow.enabled = true if @global_options.colored?
     end
 
-
-    def help(options)
-      Helper.new(options).application_info
+    def app_info
+      if @global_options.help?
+        AppInfo.help
+      elsif @global_options.version?
+        AppInfo.version
+      else
+        AppInfo.greeting
+      end
     end
-
 
     def check(options, args)
       Inspector.new(options).check args
