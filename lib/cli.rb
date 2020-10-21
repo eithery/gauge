@@ -1,19 +1,6 @@
 # Eithery, 2020
-# Command line interface definitions
+# The application main entry point
 # frozen_string_literal: true
 
-require 'gli'
 require_relative 'gauge'
-
-module Gauge
-  module CLI
-    extend GLI::App
-
-    program_desc 'SQL Server database toolbox'
-    subcommand_option_handling :normal
-    arguments :strict
-
-    Dir["#{__dir__}/commands/**/*.rb"].each { |f| require f }
-    run(ARGV)
-  end
-end
+Dir["#{__dir__}/commands/**/*.rb"].each { |f| require f }

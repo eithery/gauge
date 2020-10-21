@@ -3,12 +3,18 @@
 # frozen_string_literal: true
 
 module Gauge
-  module CLI
-    desc 'Displays help information'
-    command [:h, :help] do |c|
-      c.action do |global_opts|
-        puts Gauge::Shell.new(global_opts).app_info
-      end
+  class CLI < Thor
+    def help(*)
+      args.empty? ? with_greeting { super } : super
+    end
+
+    private
+
+    def with_greeting
+      puts AppInfo::GREETING + $/
+      result = yield
+      puts AppInfo::HELP_COMMAND
+      result
     end
   end
 end

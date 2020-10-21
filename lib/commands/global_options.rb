@@ -3,34 +3,19 @@
 # frozen_string_literal: true
 
 module Gauge
-  module CLI
+  class CLI < Thor
     config_file = File.join(__dir__, '../../config/gauge.rc.yml')
-    defaults = YAML.load_file(config_file)
+    defaults = ::YAML.load_file(config_file)
 
-    desc 'Displays help information'
-    switch [:h, :help]
-
-    desc 'Displays the application version'
-    switch [:v, :version]
-
-    desc 'Database server name'
-    default_value defaults[:server] || 'local'
-    flag [:s, :server]
-
-    desc 'User name used to connect to db server'
-    default_value defaults[:user] || 'admin'
-    flag [:u, :user]
-
-    desc 'Password used to connect to db server'
-    default_value defaults[:password] || 'secret'
-    flag [:p, :password]
-
-    desc 'Path to DB metadata root folder'
-    default_value defaults[:data_path] || ['db']
-    flag [:d, :data]
-
-    desc 'Use colored console formatter to output messages'
-    default_value defaults[:colored] || false
-    switch :colored
+    class_option :server, desc: 'Database server name',
+      aliases: ['-s'], default: defaults[:server] || 'local'
+    class_option :user, desc: 'User name to connect to db server',
+      aliases: ['-u'], default: defaults[:user] || 'sa'
+    class_option :password, desc: 'Password used to connect to db server',
+      aliases: ['-p'], default: defaults[:password]
+    class_option :data, desc: 'Path to DB metadata root directory',
+      aliases: ['-d'], default: defaults[:data_path] || 'db'
+    class_option :colored, desc: 'Use colored console formatter to output messages',
+      type: :boolean, aliases: ['-c'], default: false
   end
 end

@@ -13,5 +13,8 @@ Style/SpecialGlobalVars:
 Naming/HeredocDelimiterNaming:
   Enabled: false
 
+Layout/HashAlignment:
+  Enabled: false
+
 Lint/NonDeterministicRequireOrder:
   Enabled: false

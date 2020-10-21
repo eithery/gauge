@@ -9,16 +9,6 @@ module Gauge
       Rainbow.enabled = true if @global_options.colored?
     end
 
-    def app_info
-      if @global_options.help?
-        AppInfo.help
-      elsif @global_options.version?
-        AppInfo.version
-      else
-        AppInfo.greeting
-      end
-    end
-
     def check(options, args)
       Inspector.new(options).check args
     end

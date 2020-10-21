@@ -4,11 +4,10 @@
 
 require 'active_support/core_ext/string'
 require 'active_support/core_ext/string/inflections'
-require 'rainbow'
-require 'rainbow/ext/string'
+require 'thor'
+require 'yaml'
+# require 'rainbow'
+# require 'rainbow/ext/string'
 
-require_relative 'gauge/shell'
+require_relative 'gauge/version'
 require_relative 'gauge/app_info'
-require_relative 'gauge/global_options'
-
-# Dir["#{__dir__}/gauge/**/*.rb"].each { |f| require f }

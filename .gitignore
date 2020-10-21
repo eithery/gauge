@@ -33,6 +33,7 @@
 /spec/reports/
 /spec/examples.txt
 /coverage/
+.rspec_status
 
 *.rbc
 /.config
