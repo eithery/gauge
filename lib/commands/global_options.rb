@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 
 module Gauge
-  class CLI < Thor
+  class CLI
     config_file = File.join(__dir__, '../../config/gauge.rc.yml')
     defaults = ::YAML.load_file(config_file)
 

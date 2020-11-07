@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 
 module Gauge
-  class CLI < Thor
+  class CLI
     desc 'version', 'Display the application version'
     map %w[-v --version] => :version
 

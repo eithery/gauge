@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 
 module Gauge
-  class CLI < Thor
+  class CLI
     def help(*)
       args.empty? ? with_greeting { super } : super
     end

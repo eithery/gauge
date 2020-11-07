@@ -3,16 +3,11 @@
 # frozen_string_literal: true
 
 module Gauge
-  class CLI < Thor
+  class CLI
     desc 'sync', 'Perform DB synchronization based on the predefined metadata'
-    method_option :help, aliases: '-h', type: :boolean, desc: 'Display usage information'
 
-    def sync
-      if options[:help]
-        invoke :help, ['sync']
-      else
-        puts 'SYNC DATABASE'
-      end
+    command :sync do
+      puts 'SYNC DATABASE'
     end
   end
 end

@@ -11,3 +11,4 @@ require 'yaml'
 
 require_relative 'gauge/version'
 require_relative 'gauge/app_info'
+require_relative 'gauge/command_helper'
