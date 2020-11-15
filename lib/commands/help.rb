@@ -11,10 +11,17 @@ module Gauge
     private
 
     def with_greeting
-      puts AppInfo::GREETING + $/
+      puts GREETING + $/
       result = yield
-      puts AppInfo::HELP_COMMAND
+      puts HELP_COMMAND_MSG
       result
     end
+
+    HELP_COMMAND_MSG = "Run 'gauge help <COMMAND>' for more information about a specific command"
+    GREETING = <<~EOS
+      Gauge. Database toolbox for MS SQL Server. Version #{VERSION}
+
+      usage: gauge [<global options>] <COMMAND> [<args>] [<command options>]
+    EOS
   end
 end

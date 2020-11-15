@@ -4,10 +4,6 @@
 
 module Gauge
   module CommandHelper
-    def help_option
-      method_option :help, aliases: '-h', type: :boolean, desc: 'Display usage information'
-    end
-
     def command(name, *aliases, &block)
       help_option
       define_method(name) do
@@ -17,7 +13,13 @@ module Gauge
           block.call
         end
       end
-      map Array(aliases).map(&:to_s) => name if aliases
+      map Array(aliases).map(&:to_s) => name
+    end
+
+    private
+
+    def help_option
+      method_option :help, aliases: '-h', type: :boolean, desc: 'Display usage information'
     end
   end
 end

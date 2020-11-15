@@ -10,5 +10,4 @@ require 'yaml'
 # require 'rainbow/ext/string'
 
 require_relative 'gauge/version'
-require_relative 'gauge/app_info'
-require_relative 'gauge/command_helper'
+require_relative 'gauge/helpers/command_helper'

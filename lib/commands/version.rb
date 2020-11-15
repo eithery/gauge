@@ -8,7 +8,7 @@ module Gauge
     map %w[-v --version] => :version
 
     def version
-      puts AppInfo.version
+      puts "Gauge version #{VERSION}"
     end
   end
 end
