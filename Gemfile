@@ -4,7 +4,7 @@
 
 source 'https://rubygems.org'
 
-gem 'activesupport', '~> 6.0.3.4'
+gem 'activesupport', '~> 6.1.7.3'
 gem 'rainbow', '~> 3.0.0'
 gem 'thor', '~> 1.0.1'
 gem 'tiny_tds', '~> 2.1.3'
